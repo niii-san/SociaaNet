@@ -1,3 +1,5 @@
+import type { NextFunction, Request, Response } from "express";
+
 class ApiErrorResponse {
     status_code: number = 400;
     success: boolean = false;
@@ -19,6 +21,36 @@ class ApiErrorResponse {
         };
         this.message = message;
     }
+
+    toJSON() {
+        return {
+            status_code: this.status_code,
+            success: this.success,
+            message: this.message,
+            error: this.error
+        };
+    }
 }
 
 export default ApiErrorResponse;
+
+export const errorMiddleware = (
+    err: Error,
+    _: Request,
+    res: Response,
+    next: NextFunction
+) => {
+    if (err instanceof ApiErrorResponse) {
+        res.status(err.status_code).json(err.toJSON());
+    } else {
+        res.status(500).json({
+            status_code: 500,
+            success: false,
+            message: `Server Error :/ ${err.message}`,
+            error: {
+                code: "INTERNAL_ERROR"
+            }
+        });
+    }
+    next();
+};

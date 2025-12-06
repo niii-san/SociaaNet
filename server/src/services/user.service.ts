@@ -1,4 +1,5 @@
 import { User } from "../models";
+import { ApiErrorResponse } from "../utils";
 
 class UserService {
     async createUser(data: {
@@ -6,19 +7,29 @@ class UserService {
         emailAddress: string;
         password: string;
     }) {
-        try {
-            // TODO: hash password
-            // TODO: filter sensitive fields
-            const user = await User.create({
-                full_name: data.fullName,
-                email_address: data.emailAddress,
-                password: data.password
-            });
+        // TODO: create random username
+        // TODO: hash password
+        // TODO: filter sensitive fields
 
-            return user;
-        } catch (error: any) {
-            throw Error("UserService.createUser Error");
+        const alreadyExists = await User.findOne({
+            email_address: data.emailAddress
+        });
+
+        if (alreadyExists) {
+            throw new ApiErrorResponse(
+                400,
+                false,
+                "ALR_EXIST",
+                "Email is linked with another account"
+            );
         }
+        const user = await User.create({
+            full_name: data.fullName,
+            email_address: data.emailAddress,
+            password: data.password
+        });
+
+        return user;
     }
 }
 

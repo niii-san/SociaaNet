@@ -18,4 +18,11 @@ app.get("/", (_: Request, res: Response) => {
 import { authRouter } from "./routes";
 app.use("/api/v1/auth", authRouter);
 
+
+
+// Error handling middleware
+import { errorMiddleware } from "./utils";
+app.use(errorMiddleware)
+
+
 export default app;
