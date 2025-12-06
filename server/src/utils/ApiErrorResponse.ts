@@ -9,15 +9,15 @@ class ApiErrorResponse {
     constructor(
         status_code: number,
         success: boolean,
-        message: string,
-        code: string
+        code: string,
+        message: string
     ) {
         this.status_code = status_code;
         this.success = success;
-        this.message = message;
         this.error = {
             code
         };
+        this.message = message;
     }
 }
 
