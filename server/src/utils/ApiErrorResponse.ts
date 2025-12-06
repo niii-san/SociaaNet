@@ -20,3 +20,5 @@ class ApiErrorResponse {
         };
     }
 }
+
+export default ApiErrorResponse;

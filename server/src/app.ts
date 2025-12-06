@@ -1,17 +1,21 @@
 import express, { Request, Response } from "express";
 import cookieParser from "cookie-parser";
+import { ApiSuccessResponse } from "./utils";
 
 const app = express();
-// Basic config
+// config
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
-app.get("/", (req: Request, res: Response) => {
-    return res.json({
-        success: true,
-        server_health: 100
-    });
+app.get("/", (_: Request, res: Response) => {
+    return res
+        .status(200)
+        .json(new ApiSuccessResponse(true, 200, "SociaaNet server", null));
 });
+
+// Routes
+import { authRouter } from "./routes";
+app.use("/api/v1/auth", authRouter);
 
 export default app;

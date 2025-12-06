@@ -16,3 +16,5 @@ class ApiSuccessResponse {
         this.data = data;
     }
 }
+
+export default ApiSuccessResponse;
