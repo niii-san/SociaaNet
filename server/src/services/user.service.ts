@@ -1,13 +1,16 @@
+import { genSalt, hash } from "bcryptjs";
 import { CreateUserDto } from "../dtos";
 import { User } from "../models";
-import { ApiErrorResponse } from "../utils";
+import { ApiErrorResponse, generateUniqueUsername } from "../utils";
 
 class UserService {
-  async createUser(data: CreateUserDto) {
-    // TODO: hash password
+  async createUser(dto: CreateUserDto) {
+    const fullName = dto.fullName.trim();
+    const emailAddress = dto.emailAddress.trim();
+    const _password = dto.password;
 
     const alreadyExists = await User.findOne({
-      email_address: data.emailAddress
+      email_address: emailAddress
     });
 
     if (alreadyExists) {
@@ -20,15 +23,17 @@ class UserService {
     }
 
     // TODO: create unique username
-    const uniqueUsername = data.fullName;
+    const uniqueUsername = await generateUniqueUsername(fullName);
+
+    const salt = await genSalt(5);
+    const hashedPassword = await hash(_password, salt);
 
     const user = await User.create({
-      full_name: data.fullName,
+      full_name: fullName,
       username: uniqueUsername,
-      email_address: data.emailAddress,
-      password: data.password
+      email_address: emailAddress,
+      password: hashedPassword
     });
-
     const { password, __v, updated_at, ...filteredUser } = user.toObject();
 
     return filteredUser;
