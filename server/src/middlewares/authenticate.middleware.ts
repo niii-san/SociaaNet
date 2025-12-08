@@ -2,7 +2,7 @@ import { NextFunction, Response } from "express";
 import { ApiErrorResponse, asyncHandler } from "../utils";
 import { Session } from "../models";
 import { RequestWithUserContext } from "../types";
-
+import {  IUserSafe } from "../types";
 const authenticate = asyncHandler(
   async (req: RequestWithUserContext, _: Response, next: NextFunction) => {
     const cookie =
@@ -31,12 +31,22 @@ const authenticate = asyncHandler(
         "Session is invalid or has expired"
       );
     }
+
     if (session.is_expired) {
       throw new ApiErrorResponse(
         401,
         false,
         "INVALID_SESSION",
         "Session is invalid or has expired"
+      );
+    }
+    const user = session.user_id as unknown as IUserSafe;
+    if (user.is_disabled) {
+      throw new ApiErrorResponse(
+        403,
+        false,
+        "USER_DISABLED",
+        "User account is disabled"
       );
     }
 
@@ -55,7 +65,7 @@ const authenticate = asyncHandler(
       );
     }
 
-    req.user = session.user_id as any;
+    req.user = user;
     next();
   }
 );
