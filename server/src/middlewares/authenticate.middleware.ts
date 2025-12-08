@@ -2,7 +2,7 @@ import { NextFunction, Response } from "express";
 import { ApiErrorResponse, asyncHandler } from "../utils";
 import { Session } from "../models";
 import { RequestWithUserContext } from "../types";
-import {  IUserSafe } from "../types";
+import { IUserSafe } from "../types";
 const authenticate = asyncHandler(
   async (req: RequestWithUserContext, _: Response, next: NextFunction) => {
     const cookie =
