@@ -13,6 +13,11 @@ const sessionSchema = new mongoose.Schema<ISession>(
       ref: "User",
       required: true
     },
+    is_expired: {
+      type: Boolean,
+      required: true,
+      default: false
+    },
     expires_at: {
       type: Date,
       required: true
