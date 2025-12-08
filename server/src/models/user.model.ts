@@ -13,6 +13,10 @@ const userSchema = new mongoose.Schema<IUser>(
       type: String,
       required: true
     },
+    is_disabled: {
+      type: Boolean,
+      default: false
+    },
     password: {
       type: String,
       required: true
