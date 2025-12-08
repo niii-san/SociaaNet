@@ -34,7 +34,8 @@ class UserService {
       email_address: emailAddress,
       password: hashedPassword
     });
-    const { password, __v, updated_at, ...filteredUser } = user.toObject();
+    const { password, __v, updated_at, is_disabled, ...filteredUser } =
+      user.toObject();
 
     return filteredUser;
   }
