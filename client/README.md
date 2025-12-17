@@ -1,1 +1,1 @@
-# SociaaNet Client (web)
+# SociaaNet Client
