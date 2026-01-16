@@ -26,6 +26,5 @@ const sessionSchema = new mongoose.Schema<ISession>(
   { timestamps: { createdAt: "created_at", updatedAt: false } }
 );
 
-const Session = mongoose.model("Session", sessionSchema);
+export const Session = mongoose.model("Session", sessionSchema);
 
-export default Session;
