@@ -1,5 +1,5 @@
 import { Request } from "express";
-import { IUserSafe } from "./user.type";
+import { ISafeUser } from "./user.type";
 export interface RequestWithUserContext extends Request {
-  user: IUserSafe;
+    user: ISafeUser;
 }
