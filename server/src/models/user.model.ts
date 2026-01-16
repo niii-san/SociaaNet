@@ -1,30 +1,32 @@
 import mongoose from "mongoose";
 
-import { IUser } from "../types";
+import { UserSchema } from "../types";
 
-const userSchema = new mongoose.Schema<IUser>(
-  {
-    email_address: {
-      type: String,
-      required: true
+const userSchema = new mongoose.Schema<UserSchema>(
+    {
+        email_address: {
+            type: String,
+            required: true
+        },
+        full_name: String,
+        username: {
+            type: String,
+            required: true
+        },
+        is_disabled: {
+            type: Boolean,
+            default: false
+        },
+        password: {
+            type: String,
+            required: true
+        }
     },
-    full_name: String,
-    username: {
-      type: String,
-      required: true
-    },
-    is_disabled: {
-      type: Boolean,
-      default: false
-    },
-    password: {
-      type: String,
-      required: true
-    }
-  },
-  { timestamps: { createdAt: "created_at", updatedAt: "updated_at" } }
+    { timestamps: { createdAt: "created_at", updatedAt: "updated_at" } }
 );
 
-const User = mongoose.model("User", userSchema);
+export const User = mongoose.model("User", userSchema);
 
-export default User;
+export interface IUser extends UserSchema, mongoose.Document {
+    _id: mongoose.Types.ObjectId;
+}

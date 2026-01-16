@@ -1,5 +1,5 @@
-import { IUser, IUserSafe } from "./user.type";
-
-import { RequestWithUserContext } from "./RequestWithUserContext";
+import { UserSchema, ISafeUser } from "./user.type";
 import { ISession } from "./session.type";
-export { IUser, IUserSafe, ISession, RequestWithUserContext };
+import { RequestWithUserContext } from "./RequestWithUserContext";
+
+export { UserSchema, ISafeUser, ISession, RequestWithUserContext };
