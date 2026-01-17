@@ -1,4 +1,4 @@
-import { Session } from "./session.model";
+import { Session, ISession } from "./session.model";
 import { User, IUser } from "./user.model";
 
-export { User, IUser, Session };
+export { User, IUser, Session, ISession };

@@ -1,4 +1,3 @@
-import { ISafeUser } from "../types";
 import { IUser, User } from "../models";
 
 interface IUserRepository {
@@ -6,7 +5,7 @@ interface IUserRepository {
     getUserByEmail(email: string): Promise<IUser | null>;
     getUserById(userId: string): Promise<IUser | null>;
     getUserByUsername(username: string): Promise<IUser | null>;
-    getAllUsers(): Promise<ISafeUser[]>;
+    getAllUsers(): Promise<IUser[]>;
 }
 
 export class UserRepository implements IUserRepository {
@@ -30,7 +29,7 @@ export class UserRepository implements IUserRepository {
         return user;
     }
 
-    async getAllUsers(): Promise<ISafeUser[]> {
+    async getAllUsers(): Promise<IUser[]> {
         const users = await User.find(
             {},
             { password: 0, is_disabled: 0, __v: 0 }
