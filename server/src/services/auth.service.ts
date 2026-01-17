@@ -1,46 +1,76 @@
 import { LoginDto } from "../dtos";
 import bcrypt from "bcryptjs";
-import { Session, User } from "../models";
 import { ApiErrorResponse } from "../utils";
+import { UserRepository } from "../repositories/user.repository";
+import { AuthRepository } from "../repositories/auth.repository";
+
+const userRepo = new UserRepository();
+const authRepo = new AuthRepository();
 
 class AuthService {
-  async login(dto: LoginDto) {
-    const emailAddress = dto.emailAddress.trim();
-    const password = dto.password;
+    async login(dto: LoginDto) {
+        const emailAddress = (dto.emailAddress ?? "").trim();
+        const password: string | undefined = dto.password;
 
-    const user = await User.findOne({
-      email_address: emailAddress
-    }).select("+password");
+        if (!emailAddress) {
+            throw new ApiErrorResponse(
+                400,
+                false,
+                "NO_EMAIL",
+                "Email address is required"
+            );
+        }
 
-    if (!user) {
-      throw new ApiErrorResponse(
-        400,
-        false,
-        "AUTH_ERROR",
-        "Invalid email or password"
-      );
+        if (!password) {
+            throw new ApiErrorResponse(
+                400,
+                false,
+                "NO_PASSWORD",
+                "Password is required"
+            );
+        }
+
+        if (password.length < 8 || password.length > 24) {
+            throw new ApiErrorResponse(
+                400,
+                false,
+                "PW_LEN_ERROR",
+                "Invalid password"
+            );
+        }
+
+        const user = await userRepo.getUserByEmail(emailAddress);
+
+        if (!user) {
+            throw new ApiErrorResponse(
+                400,
+                false,
+                "AUTH_ERROR",
+                "Invalid email or password"
+            );
+        }
+        const hash = user.password;
+        const isPasswordCorrect = await bcrypt.compare(password, hash);
+
+        if (!isPasswordCorrect) {
+            throw new ApiErrorResponse(
+                400,
+                false,
+                "AUTH_ERROR_",
+                "Invalid email or password"
+            );
+        }
+        const sessionId = crypto.randomUUID();
+        const sessionExpiryTime = new Date(Date.now() + 1000 * 60 * 60); // 1 hour
+
+        const session = await authRepo.createSession({
+            session_id: sessionId,
+            user_id: user._id,
+            expires_at: sessionExpiryTime
+        });
+
+        return session;
     }
-    const hash = user.password;
-    const isPasswordCorrect = await bcrypt.compare(password, hash);
-
-    if (!isPasswordCorrect) {
-      throw new ApiErrorResponse(
-        400,
-        false,
-        "AUTH_ERROR_",
-        "Invalid email or password"
-      );
-    }
-    const sessionId = crypto.randomUUID();
-
-    const session = await Session.create({
-      session_id: sessionId,
-      user_id: user._id,
-      expires_at: new Date(Date.now() + 1000 * 60 * 60) // 1 hour
-    });
-
-    return session;
-  }
 }
 
 export default new AuthService();

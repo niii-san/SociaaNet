@@ -1,10 +1,6 @@
 import { CreateUserDto } from "../../dtos";
 import { UserService } from "../../services";
-import {
-    ApiErrorResponse,
-    ApiSuccessResponse,
-    asyncHandler
-} from "../../utils";
+import { ApiSuccessResponse, asyncHandler } from "../../utils";
 import type { Request, Response } from "express";
 
 const signupController = asyncHandler(async (req: Request, res: Response) => {

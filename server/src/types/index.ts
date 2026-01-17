@@ -1,5 +1,5 @@
-import { UserSchema, ISafeUser } from "./user.type";
-import { ISession } from "./session.type";
+import { UserSchema } from "./user.type";
+import { SessionSchema } from "./session.type";
 import { RequestWithUserContext } from "./RequestWithUserContext";
 
-export { UserSchema, ISafeUser, ISession, RequestWithUserContext };
+export { UserSchema, SessionSchema, RequestWithUserContext };

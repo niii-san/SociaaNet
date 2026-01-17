@@ -1,8 +1,12 @@
 import { NextFunction, Response } from "express";
 import { ApiErrorResponse, asyncHandler } from "../utils";
-import { Session } from "../models";
 import { RequestWithUserContext } from "../types";
-import { ISafeUser } from "../types";
+import { AuthRepository } from "../repositories/auth.repository";
+import { UserRepository } from "../repositories/user.repository";
+
+const authRepo = new AuthRepository();
+const userRepo = new UserRepository();
+
 const authenticate = asyncHandler(
     async (req: RequestWithUserContext, _: Response, next: NextFunction) => {
         const cookie =
@@ -18,10 +22,7 @@ const authenticate = asyncHandler(
             );
         }
 
-        const session = await Session.findOne({ session_id: cookie }).populate(
-            "user_id",
-            "-password"
-        );
+        const session = await authRepo.getSessionById(cookie);
 
         if (!session) {
             throw new ApiErrorResponse(
@@ -40,9 +41,20 @@ const authenticate = asyncHandler(
                 "Session is invalid or has expired"
             );
         }
-        const user = session.user_id as unknown as ISafeUser & {
-            is_disabled: boolean;
-        };
+
+        const user = await userRepo.getUserById(
+            session.user_id as unknown as string
+        );
+
+        if (!user) {
+            throw new ApiErrorResponse(
+                401,
+                false,
+                "INVALID_SESSION",
+                "Session is invalid or has expired"
+            );
+        }
+
         if (user.is_disabled) {
             throw new ApiErrorResponse(
                 403,
