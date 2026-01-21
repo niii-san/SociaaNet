@@ -11,10 +11,12 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // cors settings
-const corsOption = {
-    origin: "http://localhost:3000"
-};
-app.use(cors(corsOption));
+app.use(
+    cors({
+        origin: "http://localhost:3000",
+        credentials: true
+    })
+);
 
 app.get("/", (_: Request, res: Response) => {
     return res
