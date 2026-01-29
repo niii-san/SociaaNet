@@ -1,8 +1,7 @@
 import { Request, Response } from "express";
-import { asyncHandler } from "../../utils";
+import { asyncHandler, HttpError, HttpSuccess } from "../../utils";
 import path from "path";
 import fs from "fs";
-import env from "../../config/env";
 import uuid from "uuid";
 import sharp from "sharp";
 
@@ -14,19 +13,13 @@ export const uploadSingleImageController = asyncHandler(
             fs.mkdirSync(IMAGE_DIR, { recursive: true });
         }
 
-        //OPTIM: use middleware
-        if (req.headers["x-internal-api-key"] !== env.internalApiKey) {
-            return res.status(403).json({
-                message: "Forbidden",
-                status: "error"
-            });
-        }
-
         if (!req.file || !req.file.mimetype.startsWith("image/")) {
-            return res.status(400).json({
-                message: "Invalid image file",
-                status: "error"
-            });
+            throw new HttpError(
+                400,
+                false,
+                "INVALID_FILE",
+                "Invalid image type"
+            );
         }
 
         const filename = `${uuid.v4()}.jpg`;
@@ -34,8 +27,10 @@ export const uploadSingleImageController = asyncHandler(
 
         await sharp(req.file.buffer).jpeg({ quality: 100 }).toFile(filepath);
 
-        res.json({
-            imageKey: filename
-        });
+        return res.status(201).json(
+            new HttpSuccess(true, 201, "Image uploaded", {
+                image_key: filename
+            })
+        );
     }
 );
