@@ -1,0 +1,35 @@
+{
+    "name": "server",
+    "version": "1.0.0",
+    "description": "",
+    "main": "server.js",
+    "scripts": {
+        "build": "tsc",
+        "start": "node dist/server.js",
+        "dev": "nodemon --watch 'src/**/*.ts' --exec 'ts-node' src/server.ts",
+        "lint": "eslint 'src/**/*.ts'"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+        "@types/bcryptjs": "^2.4.6",
+        "@types/express": "^5.0.5",
+        "@types/node": "^24.10.1",
+        "@types/sharp": "^0.31.1",
+        "eslint": "^9.39.1",
+        "nodemon": "^3.1.11",
+        "prettier": "^3.6.2",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.9.3"
+    },
+    "dependencies": {
+        "@types/multer": "^2.0.0",
+        "dotenv": "^17.2.3",
+        "express": "^5.1.0",
+        "mongoose": "^9.0.1",
+        "multer": "^2.0.2",
+        "sharp": "^0.34.5",
+        "uuid": "^13.0.0"
+    }
+}
