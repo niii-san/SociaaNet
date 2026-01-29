@@ -1,2 +1,2 @@
-import { uploadSingleImageController } from "./images/upload-image-single.controller";
+import { uploadSingleImageController } from "./images/upload-single-image.controller";
 export { uploadSingleImageController };
