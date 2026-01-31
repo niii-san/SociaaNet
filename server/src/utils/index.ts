@@ -1,5 +1,6 @@
 import { asyncHandler } from "./async-handler";
 import { connectMongoDB } from "./connect-mongodb";
+import { convertImageKeyToImageUrl } from "./convert-imagekey-imageurl";
 import { generateUniqueUsername } from "./generate-unique-username";
 import { errorMiddleware, HttpError } from "./HttpError";
 import { HttpSuccess } from "./HttpSuccess";
@@ -12,5 +13,6 @@ export {
     connectMongoDB,
     errorMiddleware,
     generateUniqueUsername,
+    convertImageKeyToImageUrl,
     logger
 };

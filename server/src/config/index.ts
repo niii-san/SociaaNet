@@ -1,2 +1,2 @@
-import {env}from "./env";
-export {env}
+import { env } from "./env";
+export { env };

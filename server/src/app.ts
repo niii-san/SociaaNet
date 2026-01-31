@@ -30,8 +30,12 @@ app.get("/", (_: Request, res: Response) => {
 
 // Routes
 // Auth Routes
-import { authRouter, usersRouter } from "./routes";
+import { authRouter, usersRouter, filesRouter } from "./routes";
+// Auth Routes
 app.use("/api/v1/auth", authRouter);
+
+// Files Routes
+app.use("/api/v1/files", filesRouter);
 
 // Users Routes
 app.use("/api/v1/users", usersRouter);

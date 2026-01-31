@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { asyncHandler, HttpError, HttpSuccess } from "../../utils";
 import path from "path";
 import fs from "fs";
-import {v4 as uuid} from "uuid";
+import { v4 as uuid } from "uuid";
 import sharp from "sharp";
 
 export const uploadSingleImageController = asyncHandler(
@@ -22,7 +22,7 @@ export const uploadSingleImageController = asyncHandler(
             );
         }
 
-        const fileId = uuid()
+        const fileId = uuid();
         const filename = `${fileId}.jpg`;
         const filepath = path.join(IMAGE_DIR, filename);
 
@@ -31,7 +31,7 @@ export const uploadSingleImageController = asyncHandler(
         return res.status(201).json(
             new HttpSuccess(true, 201, "Image uploaded", {
                 image_key: filename,
-                image_id:fileId
+                image_id: fileId
             })
         );
     }

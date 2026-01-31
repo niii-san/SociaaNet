@@ -1,6 +1,10 @@
 import { genSalt, hash } from "bcryptjs";
 import { CreateUserDto, GetUserByIdDto, UploadAvatarDto } from "../dtos";
-import { HttpError, generateUniqueUsername } from "../utils";
+import {
+    HttpError,
+    convertImageKeyToImageUrl,
+    generateUniqueUsername
+} from "../utils";
 import { userRepo } from "../repositories";
 import { fileServiceClient } from "../clients";
 import { Types } from "mongoose";
@@ -94,14 +98,16 @@ class UsersService {
             throw new HttpError(404, false, "USER_NOT_FOUND", "User not found");
         }
 
-        // TODO: make process avatar URL and send instead of sending avatar key
-        // const avatar_url =
+        const avatar_url =
+            user.avatar_key != null
+                ? convertImageKeyToImageUrl(user.avatar_key)
+                : null;
         return {
             _id: user._id,
             full_name: user.full_name,
             username: user.username,
             email_address: user.email_address,
-            avatar_url: user.avatar_key,
+            avatar_url: avatar_url,
             created_at: user.created_at
         };
     }
