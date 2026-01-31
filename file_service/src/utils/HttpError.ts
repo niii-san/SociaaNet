@@ -43,6 +43,7 @@ export const errorMiddleware = (
     if (err instanceof HttpError) {
         res.status(err.status_code).json(err.toJSON());
     } else {
+        console.log(err)
         res.status(500).json({
             status_code: 500,
             success: false,

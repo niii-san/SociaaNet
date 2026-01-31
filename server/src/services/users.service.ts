@@ -120,11 +120,15 @@ class UsersService {
 
         await userRepo.uploadAvatar({
             uploader_id: dto.user_id as unknown as Types.ObjectId,
-            image_key: res.image_key,
-            image_id: res.image_id,
+            image_key: res.data.image_key,
+            image_id: res.data.image_id,
             chat_id: null,
             visibility: "public"
         });
+
+        return {
+            avatar_url: res.data.image_key
+        };
     }
 }
 
