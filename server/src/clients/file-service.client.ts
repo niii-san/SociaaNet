@@ -1,10 +1,22 @@
-import axios from "axios";
+import axios, { AxiosInstance } from "axios";
 import FormData from "form-data";
 import { env } from "../config";
 
 class FileServiceClient {
     private baseUrl = env.file_service_url;
     private internalApiKey = env.file_service_internal_api_key;
+
+    private client: AxiosInstance;
+
+    constructor() {
+        this.client = axios.create({
+            baseURL: this.baseUrl,
+            timeout: 10_000,
+            headers: {
+                "x-internal-api-key": this.internalApiKey
+            }
+        });
+    }
 
     async uploadSingleImage(
         buffer: Buffer
@@ -17,8 +29,8 @@ class FileServiceClient {
         });
 
         try {
-            const res = await axios.post(
-                `${this.baseUrl}/images/upload-single-image`,
+            const res = await this.client.post(
+                "/images/upload-single-image",
                 form,
                 {
                     headers: {
@@ -34,6 +46,12 @@ class FileServiceClient {
                 "Failed to upload image to file service: " + error.message
             );
         }
+    }
+
+    getImageStream(imageKey: string) {
+        return this.client.get(`/images/${imageKey}`, {
+            responseType: "stream"
+        });
     }
 }
 

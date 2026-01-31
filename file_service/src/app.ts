@@ -1,5 +1,5 @@
 import express from "express";
-import { uploadImageRoute } from "./routes";
+import { imagesRouter } from "./routes";
 import { errorMiddleware } from "./utils";
 import { requestLogger } from "./middlewares/request-logger";
 
@@ -15,7 +15,7 @@ app.get("/", (_, res) => {
     });
 });
 
-app.use("/images", uploadImageRoute);
+app.use("/images", imagesRouter);
 
 // Error handling middleware
 app.use(errorMiddleware);

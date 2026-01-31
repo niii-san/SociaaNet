@@ -1,2 +1,2 @@
-import uploadImageRoute from "./images/upload-image.route";
-export { uploadImageRoute };
+import { imagesRouter } from "./images.route";
+export { imagesRouter };
