@@ -1,7 +1,7 @@
 import dotenv from "dotenv";
 dotenv.config({ quiet: true });
 
-interface Config {
+interface Env {
     port: number;
     nodeEnv: string;
     file_service_url: string;
@@ -9,7 +9,7 @@ interface Config {
     log_level?: string;
 }
 
-const config: Config = {
+export const env: Env = {
     port: Number(process.env.PORT) || 8000,
     nodeEnv: process.env.NODE_ENV || "development",
     file_service_url: process.env.FILE_SERVICE_URL || "http://localhost:8001",
@@ -17,5 +17,3 @@ const config: Config = {
         process.env.FILE_SERVICE_INTERNAL_API_KEY || "xxxx",
     log_level: process.env.LOG_LEVEL || "info"
 };
-
-export default config;

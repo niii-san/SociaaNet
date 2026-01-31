@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
 
-import { SessionSchema } from "../types";
+import { SessionEntity } from "../types";
 
-const sessionSchema = new mongoose.Schema<SessionSchema>(
+const sessionSchema = new mongoose.Schema<SessionEntity>(
     {
         session_id: {
             type: String,
@@ -27,6 +27,4 @@ const sessionSchema = new mongoose.Schema<SessionSchema>(
 );
 
 export const Session = mongoose.model("Session", sessionSchema);
-export interface ISession extends SessionSchema, mongoose.Document {
-    _id: mongoose.Types.ObjectId;
-}
+export type SessionDocument = mongoose.HydratedDocument<SessionEntity>;

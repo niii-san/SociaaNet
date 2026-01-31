@@ -1,21 +1,18 @@
 import { genSalt, hash } from "bcryptjs";
 import { CreateUserDto, UploadAvatarDto } from "../dtos";
-import { ApiErrorResponse, generateUniqueUsername } from "../utils";
-import { UserRepository } from "../repositories";
-import config from "../config/env";
+import { HttpError, generateUniqueUsername } from "../utils";
+import { userRepo } from "../repositories";
 import { fileServiceClient } from "../clients";
-import { ObjectId, Types } from "mongoose";
+import { Types } from "mongoose";
 
-const UserRepo = new UserRepository();
-
-class UserService {
+class UsersService {
     async createUser(dto: CreateUserDto) {
         const fullName = (dto.fullName ?? "").trim();
         const emailAddress = (dto.emailAddress ?? "").trim();
         const password = dto.password;
 
         if (!fullName) {
-            throw new ApiErrorResponse(
+            throw new HttpError(
                 400,
                 false,
                 "NO_FULLNAME",
@@ -23,7 +20,7 @@ class UserService {
             );
         }
         if (!emailAddress) {
-            throw new ApiErrorResponse(
+            throw new HttpError(
                 400,
                 false,
                 "NO_EMAIL",
@@ -31,7 +28,7 @@ class UserService {
             );
         }
         if (!password) {
-            throw new ApiErrorResponse(
+            throw new HttpError(
                 400,
                 false,
                 "NO_PASSWORD",
@@ -40,7 +37,7 @@ class UserService {
         }
 
         if (password.length < 8) {
-            throw new ApiErrorResponse(
+            throw new HttpError(
                 400,
                 false,
                 "PW_LEN_ERROR",
@@ -49,7 +46,7 @@ class UserService {
         }
 
         if (password.length > 24) {
-            throw new ApiErrorResponse(
+            throw new HttpError(
                 400,
                 false,
                 "PW_LEN_ERROR",
@@ -58,10 +55,10 @@ class UserService {
         }
 
         // Checking if the email is already used for another account
-        const alreadyExists = await UserRepo.getUserByEmail(emailAddress);
+        const alreadyExists = await userRepo.getUserByEmail(emailAddress);
 
         if (alreadyExists) {
-            throw new ApiErrorResponse(
+            throw new HttpError(
                 400,
                 false,
                 "ALR_EXIST",
@@ -75,7 +72,7 @@ class UserService {
         const salt = await genSalt(5);
         const hashedPassword = await hash(password, salt);
 
-        const user = await UserRepo.createUser({
+        const user = await userRepo.createUser({
             full_name: fullName,
             username: uniqueUsername,
             email_address: emailAddress,
@@ -92,7 +89,7 @@ class UserService {
 
     async uploadAvatar(dto: UploadAvatarDto, file: Express.Multer.File | null) {
         if (!file) {
-            throw new ApiErrorResponse(
+            throw new HttpError(
                 400,
                 false,
                 "NO_FILE",
@@ -102,7 +99,7 @@ class UserService {
 
         const res = await fileServiceClient.uploadSingleImage(file.buffer);
 
-        await UserRepo.uploadAvatar({
+        await userRepo.uploadAvatar({
             uploader_id: dto.user_id as unknown as Types.ObjectId,
             image_key: res.image_key,
             image_id: res.image_id,
@@ -112,4 +109,4 @@ class UserService {
     }
 }
 
-export default new UserService();
+export const usersService = new UsersService();

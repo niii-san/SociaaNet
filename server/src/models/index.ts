@@ -1,5 +1,6 @@
-import { Session, ISession } from "./session.model";
-import { User, IUser } from "./user.model";
+import { Session, SessionDocument} from "./session.model";
+import { User, UserDocument } from "./user.model";
 import { ImageDocument,Image } from "./image.model";
 
-export { User, IUser, Session, ISession,ImageDocument,Image };
+export { User, UserDocument, Session, SessionDocument, Image, ImageDocument };
+

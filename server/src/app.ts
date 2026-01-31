@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import cookieParser from "cookie-parser";
-import { ApiSuccessResponse } from "./utils";
+import { HttpSuccess } from "./utils";
 import cors from "cors";
 import { requestLogger } from "./middlewares";
 
@@ -25,7 +25,7 @@ app.use(requestLogger);
 app.get("/", (_: Request, res: Response) => {
     return res
         .status(200)
-        .json(new ApiSuccessResponse(true, 200, "SociaaNet server", null));
+        .json(new HttpSuccess(true, 200, "SociaaNet server", null));
 });
 
 // Routes

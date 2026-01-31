@@ -1,4 +1,4 @@
-class ApiSuccessResponse {
+export class HttpSuccess {
     status_code: number = 200;
     success: boolean = true;
     message: string = "Fetched successfully!";
@@ -17,4 +17,3 @@ class ApiSuccessResponse {
     }
 }
 
-export default ApiSuccessResponse;
