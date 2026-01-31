@@ -3,6 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/contexts";
+import { AppSidebar } from "@/components/app-sidebar";
 import {
     MessageCircle,
     Home,
@@ -145,96 +146,7 @@ export function AuthHome() {
         <div className="min-h-screen bg-background">
             {/* Main Container */}
             <div className="max-w-7xl mx-auto flex">
-                {/* Left Sidebar */}
-                <aside className="hidden lg:flex flex-col w-64 h-screen sticky top-0 p-4 border-r border-border">
-                    {/* Logo */}
-                    <Link
-                        href="/"
-                        className="flex items-center gap-2 px-3 py-2 mb-4"
-                    >
-                        <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
-                            <MessageCircle className="w-5 h-5 text-primary-foreground" />
-                        </div>
-                        <span className="text-xl font-bold">SociaaNet</span>
-                    </Link>
-
-                    {/* Navigation */}
-                    <nav className="flex-1 space-y-1">
-                        <Link
-                            href="/home"
-                            className="flex items-center gap-3 px-3 py-3 rounded-xl bg-primary/10 text-primary font-medium"
-                        >
-                            <Home className="w-5 h-5" />
-                            <span>Home</span>
-                        </Link>
-                        <Link
-                            href="/explore"
-                            className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-muted transition-colors"
-                        >
-                            <Search className="w-5 h-5" />
-                            <span>Explore</span>
-                        </Link>
-                        <Link
-                            href="/notifications"
-                            className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-muted transition-colors relative"
-                        >
-                            <Bell className="w-5 h-5" />
-                            <span>Notifications</span>
-                            <span className="absolute left-7 top-2 w-2 h-2 bg-accent rounded-full" />
-                        </Link>
-                        <Link
-                            href="/messages"
-                            className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-muted transition-colors"
-                        >
-                            <Mail className="w-5 h-5" />
-                            <span>Messages</span>
-                        </Link>
-                        <Link
-                            href="/bookmarks"
-                            className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-muted transition-colors"
-                        >
-                            <Bookmark className="w-5 h-5" />
-                            <span>Bookmarks</span>
-                        </Link>
-                        <Link
-                            href={`/u/${authContext.data?._id}`}
-                            className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-muted transition-colors"
-                        >
-                            <User className="w-5 h-5" />
-                            <span>Profile</span>
-                        </Link>
-                        <Link
-                            href="/settings"
-                            className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-muted transition-colors"
-                        >
-                            <Settings className="w-5 h-5" />
-                            <span>Settings</span>
-                        </Link>
-                    </nav>
-
-                    {/* Post Button */}
-                    <Button className="w-full h-12 rounded-xl text-base font-semibold mb-4">
-                        Post
-                    </Button>
-
-                    {/* User Profile */}
-                    <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted transition-colors cursor-pointer">
-                        <img
-                            src={currentUser.avatar}
-                            alt={currentUser.name}
-                            className="w-10 h-10 rounded-full bg-muted"
-                        />
-                        <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-sm truncate">
-                                {currentUser.name}
-                            </p>
-                            <p className="text-xs text-muted-foreground truncate">
-                                @{currentUser.username}
-                            </p>
-                        </div>
-                        <MoreHorizontal className="w-5 h-5 text-muted-foreground" />
-                    </div>
-                </aside>
+                <AppSidebar />
 
                 {/* Main Content */}
                 <main className="flex-1 min-h-screen border-r border-border max-w-2xl">

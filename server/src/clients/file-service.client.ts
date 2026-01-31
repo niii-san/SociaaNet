@@ -6,9 +6,15 @@ class FileServiceClient {
     private baseUrl = env.file_service_url;
     private internalApiKey = env.file_service_internal_api_key;
 
-    async uploadSingleImage(buffer: Buffer): Promise<{ image_key: string,image_id:string }> {
+    async uploadSingleImage(
+        buffer: Buffer
+    ): Promise<{ data: { image_key: string; image_id: string } }> {
         const form = new FormData();
-        form.append("file", buffer, "upload");
+
+        form.append("image", buffer, {
+            filename: "upload.png",
+            contentType: "image/png"
+        });
 
         try {
             const res = await axios.post(
@@ -22,7 +28,6 @@ class FileServiceClient {
                 }
             );
 
-            console.log(res);
             return res.data;
         } catch (error: any) {
             throw new Error(
