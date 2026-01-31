@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import { api } from "@/lib/core/axios-instance";
+import { api } from "@/lib/axios-instance";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
@@ -62,7 +62,7 @@ export default function LoginPage() {
         try {
             await api.post("/auth/login", reqData);
             toast.success("Login successful!");
-            router.push("/home");
+            router.push("/");
         } catch (error: any) {
             console.error("Login error:", error);
             setResError(

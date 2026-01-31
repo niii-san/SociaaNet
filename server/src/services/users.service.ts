@@ -101,7 +101,7 @@ class UsersService {
             full_name: user.full_name,
             username: user.username,
             email_address: user.email_address,
-            avatar: user.avatar_key,
+            avatar_url: user.avatar_key,
             created_at: user.created_at
         };
     }

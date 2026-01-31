@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useAuth } from "@/contexts";
 import {
     MessageCircle,
     Home,
@@ -19,9 +20,7 @@ import {
     Smile,
     MapPin,
     TrendingUp,
-    Users,
-    Bookmark,
-    LogOut
+    Bookmark
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -43,7 +42,8 @@ const posts = [
             avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah",
             verified: true
         },
-        content: "Just launched my new portfolio website! 🚀 So excited to share my work with the world. Check it out and let me know what you think!",
+        content:
+            "Just launched my new portfolio website! 🚀 So excited to share my work with the world. Check it out and let me know what you think!",
         image: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&h=400&fit=crop",
         likes: 234,
         comments: 45,
@@ -58,7 +58,8 @@ const posts = [
             avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alex",
             verified: false
         },
-        content: "The sunrise this morning was absolutely breathtaking. Sometimes you just need to stop and appreciate the little things in life. 🌅",
+        content:
+            "The sunrise this morning was absolutely breathtaking. Sometimes you just need to stop and appreciate the little things in life. 🌅",
         image: "https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=600&h=400&fit=crop",
         likes: 892,
         comments: 67,
@@ -73,7 +74,8 @@ const posts = [
             avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Emily",
             verified: true
         },
-        content: "Just finished reading 'Atomic Habits' by James Clear. Highly recommend it to anyone looking to build better habits and break bad ones. What's your favorite productivity book? 📚",
+        content:
+            "Just finished reading 'Atomic Habits' by James Clear. Highly recommend it to anyone looking to build better habits and break bad ones. What's your favorite productivity book? 📚",
         likes: 456,
         comments: 89,
         reposts: 23,
@@ -87,7 +89,8 @@ const posts = [
             avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Marcus",
             verified: false
         },
-        content: "Working on a new open-source project that I think will help a lot of developers. Stay tuned for the announcement! 💻✨",
+        content:
+            "Working on a new open-source project that I think will help a lot of developers. Stay tuned for the announcement! 💻✨",
         likes: 178,
         comments: 23,
         reposts: 8,
@@ -124,9 +127,11 @@ const suggestedUsers = [
     }
 ];
 
-export default function HomePage() {
+export function AuthHome() {
     const [postContent, setPostContent] = useState("");
     const [likedPosts, setLikedPosts] = useState<number[]>([]);
+    const authContext = useAuth();
+    console.log(authContext);
 
     const toggleLike = (postId: number) => {
         setLikedPosts((prev) =>
@@ -143,7 +148,10 @@ export default function HomePage() {
                 {/* Left Sidebar */}
                 <aside className="hidden lg:flex flex-col w-64 h-screen sticky top-0 p-4 border-r border-border">
                     {/* Logo */}
-                    <Link href="/" className="flex items-center gap-2 px-3 py-2 mb-4">
+                    <Link
+                        href="/"
+                        className="flex items-center gap-2 px-3 py-2 mb-4"
+                    >
                         <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
                             <MessageCircle className="w-5 h-5 text-primary-foreground" />
                         </div>
@@ -189,7 +197,7 @@ export default function HomePage() {
                             <span>Bookmarks</span>
                         </Link>
                         <Link
-                            href="/profile"
+                            href={`/u/${authContext.data?._id}`}
                             className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-muted transition-colors"
                         >
                             <User className="w-5 h-5" />
@@ -217,8 +225,12 @@ export default function HomePage() {
                             className="w-10 h-10 rounded-full bg-muted"
                         />
                         <div className="flex-1 min-w-0">
-                            <p className="font-semibold text-sm truncate">{currentUser.name}</p>
-                            <p className="text-xs text-muted-foreground truncate">@{currentUser.username}</p>
+                            <p className="font-semibold text-sm truncate">
+                                {currentUser.name}
+                            </p>
+                            <p className="text-xs text-muted-foreground truncate">
+                                @{currentUser.username}
+                            </p>
                         </div>
                         <MoreHorizontal className="w-5 h-5 text-muted-foreground" />
                     </div>
@@ -243,7 +255,9 @@ export default function HomePage() {
                                 <textarea
                                     placeholder="What's happening?"
                                     value={postContent}
-                                    onChange={(e) => setPostContent(e.target.value)}
+                                    onChange={(e) =>
+                                        setPostContent(e.target.value)
+                                    }
                                     className="w-full bg-transparent border-none outline-none resize-none text-lg placeholder:text-muted-foreground min-h-[80px]"
                                 />
                                 <div className="flex items-center justify-between pt-3 border-t border-border">
@@ -272,7 +286,10 @@ export default function HomePage() {
                     {/* Feed */}
                     <div className="divide-y divide-border">
                         {posts.map((post) => (
-                            <article key={post.id} className="p-4 hover:bg-muted/50 transition-colors">
+                            <article
+                                key={post.id}
+                                className="p-4 hover:bg-muted/50 transition-colors"
+                            >
                                 <div className="flex gap-3">
                                     <img
                                         src={post.user.avatar}
@@ -286,20 +303,32 @@ export default function HomePage() {
                                                 {post.user.name}
                                             </span>
                                             {post.user.verified && (
-                                                <svg className="w-4 h-4 text-primary" viewBox="0 0 24 24" fill="currentColor">
+                                                <svg
+                                                    className="w-4 h-4 text-primary"
+                                                    viewBox="0 0 24 24"
+                                                    fill="currentColor"
+                                                >
                                                     <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
                                                 </svg>
                                             )}
-                                            <span className="text-muted-foreground">@{post.user.username}</span>
-                                            <span className="text-muted-foreground">·</span>
-                                            <span className="text-muted-foreground hover:underline cursor-pointer">{post.time}</span>
+                                            <span className="text-muted-foreground">
+                                                @{post.user.username}
+                                            </span>
+                                            <span className="text-muted-foreground">
+                                                ·
+                                            </span>
+                                            <span className="text-muted-foreground hover:underline cursor-pointer">
+                                                {post.time}
+                                            </span>
                                             <button className="ml-auto p-1 rounded-full hover:bg-muted transition-colors">
                                                 <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
                                             </button>
                                         </div>
 
                                         {/* Post Content */}
-                                        <p className="mt-1 whitespace-pre-wrap">{post.content}</p>
+                                        <p className="mt-1 whitespace-pre-wrap">
+                                            {post.content}
+                                        </p>
 
                                         {/* Post Image */}
                                         {post.image && (
@@ -318,31 +347,43 @@ export default function HomePage() {
                                                 <div className="p-2 rounded-full group-hover:bg-primary/10 transition-colors">
                                                     <MessageSquare className="w-4 h-4" />
                                                 </div>
-                                                <span className="text-sm">{post.comments}</span>
+                                                <span className="text-sm">
+                                                    {post.comments}
+                                                </span>
                                             </button>
                                             <button className="flex items-center gap-2 text-muted-foreground hover:text-green-500 transition-colors group">
                                                 <div className="p-2 rounded-full group-hover:bg-green-500/10 transition-colors">
                                                     <Repeat2 className="w-4 h-4" />
                                                 </div>
-                                                <span className="text-sm">{post.reposts}</span>
+                                                <span className="text-sm">
+                                                    {post.reposts}
+                                                </span>
                                             </button>
                                             <button
-                                                onClick={() => toggleLike(post.id)}
-                                                className={`flex items-center gap-2 transition-colors group ${
-                                                    likedPosts.includes(post.id)
+                                                onClick={() =>
+                                                    toggleLike(post.id)
+                                                }
+                                                className={`flex items-center gap-2 transition-colors group ${likedPosts.includes(post.id)
                                                         ? "text-red-500"
                                                         : "text-muted-foreground hover:text-red-500"
-                                                }`}
+                                                    }`}
                                             >
                                                 <div className="p-2 rounded-full group-hover:bg-red-500/10 transition-colors">
                                                     <Heart
-                                                        className={`w-4 h-4 ${
-                                                            likedPosts.includes(post.id) ? "fill-current" : ""
-                                                        }`}
+                                                        className={`w-4 h-4 ${likedPosts.includes(
+                                                            post.id
+                                                        )
+                                                                ? "fill-current"
+                                                                : ""
+                                                            }`}
                                                     />
                                                 </div>
                                                 <span className="text-sm">
-                                                    {likedPosts.includes(post.id) ? post.likes + 1 : post.likes}
+                                                    {likedPosts.includes(
+                                                        post.id
+                                                    )
+                                                        ? post.likes + 1
+                                                        : post.likes}
                                                 </span>
                                             </button>
                                             <button className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors group">
@@ -371,17 +412,26 @@ export default function HomePage() {
 
                     {/* Trends */}
                     <div className="bg-muted/50 rounded-2xl p-4 mb-4">
-                        <h2 className="text-lg font-bold mb-4">Trends for you</h2>
+                        <h2 className="text-lg font-bold mb-4">
+                            Trends for you
+                        </h2>
                         <div className="space-y-4">
                             {trends.map((trend, index) => (
-                                <div key={index} className="group cursor-pointer">
+                                <div
+                                    key={index}
+                                    className="group cursor-pointer"
+                                >
                                     <div className="flex items-center justify-between">
                                         <div>
-                                            <p className="text-xs text-muted-foreground">Trending</p>
+                                            <p className="text-xs text-muted-foreground">
+                                                Trending
+                                            </p>
                                             <p className="font-semibold group-hover:text-primary transition-colors">
                                                 #{trend.tag}
                                             </p>
-                                            <p className="text-xs text-muted-foreground">{trend.posts} posts</p>
+                                            <p className="text-xs text-muted-foreground">
+                                                {trend.posts} posts
+                                            </p>
                                         </div>
                                         <TrendingUp className="w-4 h-4 text-muted-foreground" />
                                     </div>
@@ -395,10 +445,15 @@ export default function HomePage() {
 
                     {/* Who to Follow */}
                     <div className="bg-muted/50 rounded-2xl p-4">
-                        <h2 className="text-lg font-bold mb-4">Who to follow</h2>
+                        <h2 className="text-lg font-bold mb-4">
+                            Who to follow
+                        </h2>
                         <div className="space-y-4">
                             {suggestedUsers.map((user, index) => (
-                                <div key={index} className="flex items-center gap-3">
+                                <div
+                                    key={index}
+                                    className="flex items-center gap-3"
+                                >
                                     <img
                                         src={user.avatar}
                                         alt={user.name}
@@ -426,11 +481,24 @@ export default function HomePage() {
                     {/* Footer Links */}
                     <div className="mt-4 px-2">
                         <div className="flex flex-wrap gap-x-2 gap-y-1 text-xs text-muted-foreground">
-                            <Link href="/terms" className="hover:underline">Terms of Service</Link>
-                            <Link href="/privacy" className="hover:underline">Privacy Policy</Link>
-                            <Link href="/cookies" className="hover:underline">Cookie Policy</Link>
-                            <Link href="/accessibility" className="hover:underline">Accessibility</Link>
-                            <Link href="/ads" className="hover:underline">Ads info</Link>
+                            <Link href="/terms" className="hover:underline">
+                                Terms of Service
+                            </Link>
+                            <Link href="/privacy" className="hover:underline">
+                                Privacy Policy
+                            </Link>
+                            <Link href="/cookies" className="hover:underline">
+                                Cookie Policy
+                            </Link>
+                            <Link
+                                href="/accessibility"
+                                className="hover:underline"
+                            >
+                                Accessibility
+                            </Link>
+                            <Link href="/ads" className="hover:underline">
+                                Ads info
+                            </Link>
                             <span>© 2025 SociaaNet</span>
                         </div>
                     </div>
@@ -442,14 +510,23 @@ export default function HomePage() {
                 <Link href="/home" className="p-3 text-primary">
                     <Home className="w-6 h-6" />
                 </Link>
-                <Link href="/explore" className="p-3 text-muted-foreground hover:text-foreground transition-colors">
+                <Link
+                    href="/explore"
+                    className="p-3 text-muted-foreground hover:text-foreground transition-colors"
+                >
                     <Search className="w-6 h-6" />
                 </Link>
-                <Link href="/notifications" className="p-3 text-muted-foreground hover:text-foreground transition-colors relative">
+                <Link
+                    href="/notifications"
+                    className="p-3 text-muted-foreground hover:text-foreground transition-colors relative"
+                >
                     <Bell className="w-6 h-6" />
                     <span className="absolute top-2 right-2 w-2 h-2 bg-accent rounded-full" />
                 </Link>
-                <Link href="/messages" className="p-3 text-muted-foreground hover:text-foreground transition-colors">
+                <Link
+                    href="/messages"
+                    className="p-3 text-muted-foreground hover:text-foreground transition-colors"
+                >
                     <Mail className="w-6 h-6" />
                 </Link>
             </nav>
