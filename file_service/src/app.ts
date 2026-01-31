@@ -1,9 +1,12 @@
 import express from "express";
 import { uploadImageRoute } from "./routes";
 import { errorMiddleware } from "./utils";
+import { requestLogger } from "./middlewares/request-logger";
 
 export const app = express();
 app.use(express.json());
+
+app.use(requestLogger);
 
 app.get("/", (_, res) => {
     res.status(200).json({
