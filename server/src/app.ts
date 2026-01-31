@@ -2,6 +2,7 @@ import express, { Request, Response } from "express";
 import cookieParser from "cookie-parser";
 import { ApiSuccessResponse } from "./utils";
 import cors from "cors";
+import { requestLogger } from "./middlewares";
 
 const app = express();
 // config
@@ -17,6 +18,9 @@ app.use(
         credentials: true
     })
 );
+
+// Logger
+app.use(requestLogger);
 
 app.get("/", (_: Request, res: Response) => {
     return res
