@@ -39,6 +39,9 @@ class UserRepository implements UserDocumentRepository {
     }
     async uploadAvatar(data: Partial<ImageDocument>): Promise<ImageDocument> {
         const image = await Image.create(data);
+        await User.findByIdAndUpdate(data.uploader_id, {
+            avatar_key: data.image_key
+        });
         return image;
     }
 }
