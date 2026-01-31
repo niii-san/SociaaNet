@@ -1,5 +1,5 @@
 import { genSalt, hash } from "bcryptjs";
-import { CreateUserDto, UploadAvatarDto } from "../dtos";
+import { CreateUserDto, GetUserByIdDto, UploadAvatarDto } from "../dtos";
 import { HttpError, generateUniqueUsername } from "../utils";
 import { userRepo } from "../repositories";
 import { fileServiceClient } from "../clients";
@@ -83,6 +83,25 @@ class UsersService {
             _id: user._id,
             full_name: user.full_name,
             username: user.username,
+            created_at: user.created_at
+        };
+    }
+
+    async getUserById(dto: GetUserByIdDto) {
+        const user = await userRepo.getUserById(dto.user_id);
+
+        if (!user) {
+            throw new HttpError(404, false, "USER_NOT_FOUND", "User not found");
+        }
+
+        // TODO: make process avatar URL and send instead of sending avatar key
+        // const avatar_url =
+        return {
+            _id: user._id,
+            full_name: user.full_name,
+            username: user.username,
+            email_address: user.email_address,
+            avatar: user.avatar_key,
             created_at: user.created_at
         };
     }
