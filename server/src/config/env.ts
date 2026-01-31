@@ -1,0 +1,19 @@
+import dotenv from "dotenv";
+dotenv.config({ quiet: true });
+
+interface Config {
+    port: number;
+    nodeEnv: string;
+    file_service_url: string;
+    file_service_internal_api_key: string;
+}
+
+const config: Config = {
+    port: Number(process.env.PORT) || 8000,
+    nodeEnv: process.env.NODE_ENV || "development",
+    file_service_url: process.env.FILE_SERVICE_URL || "http://localhost:8001",
+    file_service_internal_api_key:
+        process.env.FILE_SERVICE_INTERNAL_API_KEY || "xxxx"
+};
+
+export default config;

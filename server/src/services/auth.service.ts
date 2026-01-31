@@ -1,8 +1,7 @@
 import { LoginDto } from "../dtos";
 import bcrypt from "bcryptjs";
 import { ApiErrorResponse } from "../utils";
-import { UserRepository } from "../repositories/user.repository";
-import { AuthRepository } from "../repositories/auth.repository";
+import { UserRepository,AuthRepository } from "../repositories";
 
 const userRepo = new UserRepository();
 const authRepo = new AuthRepository();

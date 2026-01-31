@@ -1,8 +1,7 @@
 import { NextFunction, Response } from "express";
 import { ApiErrorResponse, asyncHandler } from "../utils";
 import { RequestWithUserContext } from "../types";
-import { AuthRepository } from "../repositories/auth.repository";
-import { UserRepository } from "../repositories/user.repository";
+import { AuthRepository,UserRepository } from "../repositories";
 
 const authRepo = new AuthRepository();
 const userRepo = new UserRepository();

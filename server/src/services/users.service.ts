@@ -1,7 +1,10 @@
 import { genSalt, hash } from "bcryptjs";
-import { CreateUserDto } from "../dtos";
+import { CreateUserDto, UploadAvatarDto } from "../dtos";
 import { ApiErrorResponse, generateUniqueUsername } from "../utils";
-import { UserRepository } from "../repositories/user.repository";
+import { UserRepository } from "../repositories";
+import config from "../config/env";
+import { fileServiceClient } from "../clients";
+import { ObjectId, Types } from "mongoose";
 
 const UserRepo = new UserRepository();
 
@@ -85,6 +88,27 @@ class UserService {
             username: user.username,
             created_at: user.created_at
         };
+    }
+
+    async uploadAvatar(dto: UploadAvatarDto, file: Express.Multer.File | null) {
+        if (!file) {
+            throw new ApiErrorResponse(
+                400,
+                false,
+                "NO_FILE",
+                "Avatar image is required"
+            );
+        }
+
+        const res = await fileServiceClient.uploadSingleImage(file.buffer);
+
+        await UserRepo.uploadAvatar({
+            uploader_id: dto.user_id as unknown as Types.ObjectId,
+            image_key: res.image_key,
+            image_id: res.image_id,
+            chat_id: null,
+            visibility: "public"
+        });
     }
 }
 

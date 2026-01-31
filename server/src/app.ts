@@ -25,8 +25,12 @@ app.get("/", (_: Request, res: Response) => {
 });
 
 // Routes
-import { authRouter } from "./routes";
+// Auth Routes
+import { authRouter, usersRouter } from "./routes";
 app.use("/api/v1/auth", authRouter);
+
+// Users Routes
+app.use("/api/v1/users", usersRouter);
 
 // Error handling middleware
 import { errorMiddleware } from "./utils";

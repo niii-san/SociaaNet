@@ -20,6 +20,9 @@ const userSchema = new mongoose.Schema<UserSchema>(
         password: {
             type: String,
             required: true
+        },
+        avatar_key: {
+            type: String
         }
     },
     { timestamps: { createdAt: "created_at", updatedAt: "updated_at" } }
