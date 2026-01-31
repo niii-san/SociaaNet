@@ -1,12 +1,12 @@
 import app from "./app";
-import config from "./config/config";
+import { env } from "./config";
 import { connectMongoDB } from "./utils";
 
 connectMongoDB()
     .then(() => {
-        app.listen(config.port, () => {
+        app.listen(env.port, () => {
             console.log(
-                `SERVER RUNNING ON PORT: ${config.port}\nENVIRONMENT: ${config.nodeEnv}`
+                `SERVER RUNNING ON PORT: ${env.port}\nENVIRONMENT: ${env.nodeEnv}`
             );
         });
     })

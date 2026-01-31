@@ -1,0 +1,102 @@
+"use client";
+
+import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts";
+import {
+    Bookmark,
+    Home,
+    Search,
+    Bell,
+    Mail,
+    User,
+    Settings,
+    MessageCircle,
+    MoreHorizontal,
+    Clapperboard
+} from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
+
+export function AppSidebar() {
+    const { data: user } = useAuth();
+    const pathname = usePathname();
+
+    const navItems = [
+        { icon: Home, label: "Home", href: "/home", active: pathname === "/" || pathname === "/home" },
+        { icon: Search, label: "Explore", href: "/explore", active: pathname === "/explore" },
+        { icon: Bell, label: "Notifications", href: "/notifications", active: pathname === "/notifications" },
+        { icon: Mail, label: "Messages", href: "/messages", active: pathname === "/messages" },
+        { icon: Clapperboard, label: "Reels", href: "/reels", active: pathname === "/reels" }, // Replaced Bookmarks with Reels
+        { icon: User, label: "Profile", href: `/u/${user?._id}`, active: pathname === `/u/${user?._id}` },
+        { icon: Settings, label: "Settings", href: "/settings", active: pathname === "/settings" },
+    ];
+
+    return (
+        <aside className="hidden lg:flex flex-col w-64 h-screen sticky top-0 p-4 border-r border-border bg-background">
+            {/* Logo */}
+            <Link
+                href="/"
+                className="flex items-center gap-2 px-3 py-2 mb-4"
+            >
+                <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
+                    <MessageCircle className="w-5 h-5 text-primary-foreground" />
+                </div>
+                <span className="text-xl font-bold">SociaaNet</span>
+            </Link>
+
+            {/* Navigation */}
+            <nav className="flex-1 space-y-1">
+                {navItems.map((item) => (
+                    <Link
+                        key={item.label}
+                        href={item.href}
+                        className={cn(
+                            "flex items-center gap-3 px-3 py-3 rounded-xl transition-colors relative",
+                            item.active 
+                                ? "bg-primary/10 text-primary font-medium" 
+                                : "hover:bg-muted text-muted-foreground hover:text-foreground"
+                        )}
+                    >
+                        <item.icon className={cn("w-5 h-5", item.active && "text-primary")} />
+                        <span>{item.label}</span>
+                        {item.label === "Notifications" && (
+                            <span className="absolute left-7 top-2 w-2 h-2 bg-accent rounded-full" />
+                        )}
+                    </Link>
+                ))}
+            </nav>
+
+            {/* Post Button */}
+            <Button className="w-full h-12 rounded-xl text-base font-semibold mb-4 shadow-lg shadow-primary/20">
+                Post
+            </Button>
+
+            {/* User Profile */}
+            {user && (
+                <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted transition-colors cursor-pointer mt-auto border border-transparent hover:border-border">
+                    <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
+                        {user.avatar_url ? (
+                            <img
+                                src={user.avatar_url}
+                                alt={user.full_name}
+                                className="w-full h-full object-cover"
+                            />
+                        ) : (
+                            <User className="w-5 h-5 text-primary" />
+                        )}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-sm truncate">
+                            {user.full_name}
+                        </p>
+                        <p className="text-xs text-muted-foreground truncate">
+                            @{user.username}
+                        </p>
+                    </div>
+                    <MoreHorizontal className="w-5 h-5 text-muted-foreground" />
+                </div>
+            )}
+        </aside>
+    );
+}

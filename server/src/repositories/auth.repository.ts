@@ -1,12 +1,16 @@
-import { Session, ISession } from "../models";
+import { Session, SessionDocument } from "../models";
 
 interface IAuthRepository {
-    createSession(sessionData: Partial<ISession>): Promise<ISession>;
-    getSessionById(sessionId: string): Promise<ISession | null>;
+    createSession(
+        sessionData: Partial<SessionDocument>
+    ): Promise<SessionDocument>;
+    getSessionById(sessionId: string): Promise<SessionDocument | null>;
 }
 
-export class AuthRepository implements IAuthRepository {
-    async createSession(sessionData: Partial<ISession>): Promise<ISession> {
+class AuthRepository implements IAuthRepository {
+    async createSession(
+        sessionData: Partial<SessionDocument>
+    ): Promise<SessionDocument> {
         const session = await Session.create(sessionData);
 
         return session;
@@ -18,3 +22,5 @@ export class AuthRepository implements IAuthRepository {
         return session;
     }
 }
+
+export const authRepo = new AuthRepository();

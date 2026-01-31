@@ -1,2 +1,3 @@
-import authenticate from "./authenticate.middleware";
-export { authenticate };
+import {authenticate} from "./authenticate.middleware";
+import { requestLogger } from "./request-logger";
+export { authenticate, requestLogger };

@@ -36,8 +36,12 @@ export function GuestNavbar() {
                         </a>
                     </div>
                     <div className="flex items-center gap-3">
+                        <Link href={"/login"}>
                         <Button variant="ghost">Sign In</Button>
+                        </Link>
+                        <Link href={"/register"}>
                         <Button>Get Started</Button>
+                        </Link>
                     </div>
                 </div>
             </div>

@@ -1,11 +1,7 @@
 import { LoginDto } from "../dtos";
 import bcrypt from "bcryptjs";
-import { ApiErrorResponse } from "../utils";
-import { UserRepository } from "../repositories/user.repository";
-import { AuthRepository } from "../repositories/auth.repository";
-
-const userRepo = new UserRepository();
-const authRepo = new AuthRepository();
+import { HttpError } from "../utils";
+import { authRepo, userRepo } from "../repositories";
 
 class AuthService {
     async login(dto: LoginDto) {
@@ -13,7 +9,7 @@ class AuthService {
         const password: string | undefined = dto.password;
 
         if (!emailAddress) {
-            throw new ApiErrorResponse(
+            throw new HttpError(
                 400,
                 false,
                 "NO_EMAIL",
@@ -22,7 +18,7 @@ class AuthService {
         }
 
         if (!password) {
-            throw new ApiErrorResponse(
+            throw new HttpError(
                 400,
                 false,
                 "NO_PASSWORD",
@@ -31,18 +27,13 @@ class AuthService {
         }
 
         if (password.length < 8 || password.length > 24) {
-            throw new ApiErrorResponse(
-                400,
-                false,
-                "PW_LEN_ERROR",
-                "Invalid password"
-            );
+            throw new HttpError(400, false, "PW_LEN_ERROR", "Invalid password");
         }
 
         const user = await userRepo.getUserByEmail(emailAddress);
 
         if (!user) {
-            throw new ApiErrorResponse(
+            throw new HttpError(
                 400,
                 false,
                 "AUTH_ERROR",
@@ -53,7 +44,7 @@ class AuthService {
         const isPasswordCorrect = await bcrypt.compare(password, hash);
 
         if (!isPasswordCorrect) {
-            throw new ApiErrorResponse(
+            throw new HttpError(
                 400,
                 false,
                 "AUTH_ERROR_",
@@ -73,4 +64,4 @@ class AuthService {
     }
 }
 
-export default new AuthService();
+export const authService = new AuthService();

@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
 
-import { UserSchema } from "../types";
+import { UserEntity } from "../types";
 
-const userSchema = new mongoose.Schema<UserSchema>(
+const userSchema = new mongoose.Schema<UserEntity>(
     {
         email_address: {
             type: String,
@@ -20,13 +20,14 @@ const userSchema = new mongoose.Schema<UserSchema>(
         password: {
             type: String,
             required: true
+        },
+        avatar_key: {
+            type: String,
+            default: null
         }
     },
     { timestamps: { createdAt: "created_at", updatedAt: "updated_at" } }
 );
 
 export const User = mongoose.model("User", userSchema);
-
-export interface IUser extends UserSchema, mongoose.Document {
-    _id: mongoose.Types.ObjectId;
-}
+export type UserDocument = mongoose.HydratedDocument<UserEntity>;
