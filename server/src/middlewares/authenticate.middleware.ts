@@ -1,19 +1,17 @@
 import { NextFunction, Response } from "express";
-import { ApiErrorResponse, asyncHandler } from "../utils";
+import { HttpError, asyncHandler } from "../utils";
 import { RequestWithUserContext } from "../types";
-import { AuthRepository,UserRepository } from "../repositories";
+import { authRepo, userRepo } from "../repositories";
 
-const authRepo = new AuthRepository();
-const userRepo = new UserRepository();
 
-const authenticate = asyncHandler(
+export const authenticate = asyncHandler(
     async (req: RequestWithUserContext, _: Response, next: NextFunction) => {
         const cookie =
             req.cookies["session_id"] ||
             req.header("Authorization")?.replace("Bearer ", "").trim();
 
         if (!cookie) {
-            throw new ApiErrorResponse(
+            throw new HttpError(
                 401,
                 false,
                 "NO_COOKIE",
@@ -24,7 +22,7 @@ const authenticate = asyncHandler(
         const session = await authRepo.getSessionById(cookie);
 
         if (!session) {
-            throw new ApiErrorResponse(
+            throw new HttpError(
                 401,
                 false,
                 "INVALID_SESSION",
@@ -33,7 +31,7 @@ const authenticate = asyncHandler(
         }
 
         if (session.is_expired) {
-            throw new ApiErrorResponse(
+            throw new HttpError(
                 401,
                 false,
                 "INVALID_SESSION",
@@ -46,7 +44,7 @@ const authenticate = asyncHandler(
         );
 
         if (!user) {
-            throw new ApiErrorResponse(
+            throw new HttpError(
                 401,
                 false,
                 "INVALID_SESSION",
@@ -55,7 +53,7 @@ const authenticate = asyncHandler(
         }
 
         if (user.is_disabled) {
-            throw new ApiErrorResponse(
+            throw new HttpError(
                 403,
                 false,
                 "USER_DISABLED",
@@ -70,7 +68,7 @@ const authenticate = asyncHandler(
             session.is_expired = true;
             await session.save();
 
-            throw new ApiErrorResponse(
+            throw new HttpError(
                 401,
                 false,
                 "SESSION_EXPIRED",
@@ -82,4 +80,3 @@ const authenticate = asyncHandler(
         next();
     }
 );
-export default authenticate;

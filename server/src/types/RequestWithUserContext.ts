@@ -1,6 +1,6 @@
 import { Request } from "express";
-import { IUser } from "../models";
+import { UserDocument } from "../models";
 
 export interface RequestWithUserContext extends Request {
-    user: IUser;
+    user: UserDocument;
 }

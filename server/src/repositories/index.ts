@@ -1,3 +1,3 @@
-import { AuthRepository } from "./auth.repository";
-import { UserRepository } from "./users.repository";
-export { UserRepository, AuthRepository };
+import { authRepo } from "./auth.repository";
+import { userRepo } from "./users.repository";
+export { authRepo, userRepo };

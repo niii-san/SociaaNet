@@ -1,10 +1,10 @@
 import axios from "axios";
 import FormData from "form-data";
-import config from "../config/env";
+import { env } from "../config";
 
 class FileServiceClient {
-    private baseUrl = config.file_service_url;
-    private internalApiKey = config.file_service_internal_api_key;
+    private baseUrl = env.file_service_url;
+    private internalApiKey = env.file_service_internal_api_key;
 
     async uploadSingleImage(buffer: Buffer): Promise<{ image_key: string,image_id:string }> {
         const form = new FormData();

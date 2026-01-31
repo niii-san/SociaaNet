@@ -1,8 +1,8 @@
 import { Router } from "express";
 import {
-  loginController,
-  signupController,
-  validateSessionController
+    loginController,
+    signupController,
+    validateSessionController
 } from "../controllers";
 import { authenticate } from "../middlewares";
 

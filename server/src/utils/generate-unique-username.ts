@@ -1,6 +1,6 @@
 // TODO: make more random. add numbers
 // TODO: check if the username already exists
-export default async function generateUniqueUsername(fullName: string) {
+export async function generateUniqueUsername(fullName: string) {
   const name = combineUsernameRandomly(fullName.split(" ")).toLowerCase();
 
   return name;
