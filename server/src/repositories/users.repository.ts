@@ -1,4 +1,4 @@
-import { IUser, User } from "../models";
+import { Image, ImageDocument, IUser, User } from "../models";
 
 interface IUserRepository {
     createUser(userData: Partial<IUser>): Promise<IUser>;
@@ -6,6 +6,7 @@ interface IUserRepository {
     getUserById(userId: string): Promise<IUser | null>;
     getUserByUsername(username: string): Promise<IUser | null>;
     getAllUsers(): Promise<IUser[]>;
+    uploadAvatar(data: Partial<ImageDocument>): Promise<ImageDocument>;
 }
 
 export class UserRepository implements IUserRepository {
@@ -35,5 +36,9 @@ export class UserRepository implements IUserRepository {
             { password: 0, is_disabled: 0, __v: 0 }
         );
         return users;
+    }
+    async uploadAvatar(data: Partial<ImageDocument>): Promise<ImageDocument> {
+        const image = await Image.create(data);
+        return image;
     }
 }
