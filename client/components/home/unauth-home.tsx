@@ -13,7 +13,7 @@ import {
     MessageCircle
 } from "lucide-react";
 
-export default function Home() {
+export function UnAuthHome() {
     return (
         <div className="min-h-screen bg-background text-foreground">
             {/* Hero Section */}

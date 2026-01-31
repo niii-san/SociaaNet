@@ -22,7 +22,8 @@ const userSchema = new mongoose.Schema<UserEntity>(
             required: true
         },
         avatar_key: {
-            type: String
+            type: String,
+            default: null
         }
     },
     { timestamps: { createdAt: "created_at", updatedAt: "updated_at" } }
