@@ -3,6 +3,7 @@ dotenv.config({ quiet: true });
 
 interface Env {
     port: number;
+    sessionExpiryInHours:number
     nodeEnv: string;
     file_service_url: string;
     file_service_internal_api_key: string;
@@ -12,6 +13,7 @@ interface Env {
 
 export const env: Env = {
     port: Number(process.env.PORT) || 8000,
+    sessionExpiryInHours: Number(process.env.SESSION_EXPIRY_IN_HOURS) || 24,
     nodeEnv: process.env.NODE_ENV || "development",
     file_service_url: process.env.FILE_SERVICE_URL || "http://localhost:8001",
     file_service_internal_api_key:

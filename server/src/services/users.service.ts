@@ -1,5 +1,10 @@
 import { genSalt, hash } from "bcryptjs";
-import { CreateUserDto, GetUserByIdDto, UploadAvatarDto } from "../dtos";
+import {
+    CreateUserDto,
+    GetUserByIdDto,
+    GetUserByUsernameDto,
+    UploadAvatarDto
+} from "../dtos";
 import {
     HttpError,
     convertImageKeyToImageUrl,
@@ -109,6 +114,28 @@ class UsersService {
             email_address: user.email_address,
             avatar_url: avatar_url,
             created_at: user.created_at
+        };
+    }
+
+    async getUserProfileByUsername(dto: GetUserByUsernameDto) {
+        const user = await userRepo.getUserByUsername(dto.username);
+
+        if (!user) {
+            throw new HttpError(404, false, "NOT_FOUND", "User not found");
+        }
+
+        const avatar_url =
+            user.avatar_key != null
+                ? convertImageKeyToImageUrl(user.avatar_key)
+                : null;
+
+        return {
+            _id:user._id,
+            full_name:user.full_name,
+            username:user.username,
+            email_address:user.email_address,
+            avatar_url:avatar_url,
+            created_at:user.created_at
         };
     }
 
