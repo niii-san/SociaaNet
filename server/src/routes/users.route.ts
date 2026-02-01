@@ -1,6 +1,9 @@
 import { Router } from "express";
 import { authenticate } from "../middlewares";
-import { uploadAvatarController } from "../controllers";
+import {
+    getProfileByUsernameController,
+    uploadAvatarController
+} from "../controllers";
 import multer from "multer";
 import { getCurrentUserController } from "../controllers/users/get-current-user.controller";
 
@@ -14,6 +17,7 @@ const upload = multer({
 });
 
 // Unprotected Routes
+usersRouter.get("/profile/:username", getProfileByUsernameController);
 
 // Protected Routes
 usersRouter.use(authenticate);
