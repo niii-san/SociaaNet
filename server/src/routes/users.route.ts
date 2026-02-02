@@ -2,6 +2,7 @@ import { Router } from "express";
 import { authenticate } from "../middlewares";
 import {
     getProfileByUsernameController,
+    getUserSettingsController,
     uploadAvatarController
 } from "../controllers";
 import multer from "multer";
@@ -29,6 +30,9 @@ usersRouter.post(
     upload.single("avatar"),
     uploadAvatarController
 );
+
+// Get settings of current user
+usersRouter.get("/me/settings", getUserSettingsController);
 
 // Get current user via cookie
 usersRouter.get("/me", getCurrentUserController);

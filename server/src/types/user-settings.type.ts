@@ -1,6 +1,14 @@
 import { Types } from "mongoose";
 
 type PrivacyVisibility = "everyone" | "followers_only" | "private";
+
+type BlockedUser = {
+    user_id: string;
+    username: string;
+    full_name: string;
+    avatar_url: string;
+};
+
 interface PrivacySettings {
     private_account: boolean;
     allow_messages_from: PrivacyVisibility;
@@ -8,7 +16,7 @@ interface PrivacySettings {
     allow_mentions_from: PrivacyVisibility;
     show_online_status: boolean;
     show_last_seen: boolean;
-    blocked_users: string[];
+    blocked_users: BlockedUser[];
 }
 
 interface NotificationSettings {
