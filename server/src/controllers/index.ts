@@ -4,6 +4,7 @@ import { validateSessionController } from "./auth/validate_session.controller";
 import { uploadAvatarController } from "./users/upload-avatar.controller";
 import { getImageController } from "./files/get-image.controller";
 import { getProfileByUsernameController } from "./users/get-profile-by-username.controller";
+import { getUserSettingsController } from "./users/get-user-settings.controller";
 
 export {
     signupController,
@@ -11,5 +12,6 @@ export {
     validateSessionController,
     uploadAvatarController,
     getImageController,
-    getProfileByUsernameController
+    getProfileByUsernameController,
+    getUserSettingsController
 };

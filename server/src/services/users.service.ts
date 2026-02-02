@@ -3,6 +3,7 @@ import {
     CreateUserDto,
     GetUserByIdDto,
     GetUserByUsernameDto,
+    GetUserSettingsByUserIdDto,
     UploadAvatarDto
 } from "../dtos";
 import {
@@ -130,12 +131,12 @@ class UsersService {
                 : null;
 
         return {
-            _id:user._id,
-            full_name:user.full_name,
-            username:user.username,
-            email_address:user.email_address,
-            avatar_url:avatar_url,
-            created_at:user.created_at
+            _id: user._id,
+            full_name: user.full_name,
+            username: user.username,
+            email_address: user.email_address,
+            avatar_url: avatar_url,
+            created_at: user.created_at
         };
     }
 
@@ -161,6 +162,27 @@ class UsersService {
 
         return {
             avatar_url: res.data.image_key
+        };
+    }
+
+    async getUserSettingsByUserId(dto: GetUserSettingsByUserIdDto) {
+        const userSettings = await userRepo.getUserSettingsByUserId(dto.userId);
+
+        if (!userSettings)
+            throw new HttpError(
+                404,
+                false,
+                "NOT_FOUND",
+                "User settings not found"
+            );
+
+        return {
+            user_id: userSettings.user_id,
+            privacy: userSettings.privacy,
+            notifications: userSettings.notifications,
+            appearance: userSettings.appearance,
+            feed: userSettings.feed,
+            security: userSettings.security
         };
     }
 }

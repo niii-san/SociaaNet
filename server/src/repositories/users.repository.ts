@@ -37,6 +37,16 @@ class UserRepository implements UserDocumentRepository {
         return user;
     }
 
+    async getUserSettingsByUserId(userId: string) {
+        const settings = await UserSettings.findOne({ user_id: userId });
+        return settings;
+    }
+
+    async getUserSettingsBySettingsId(settingsId: string) {
+        const settings = await UserSettings.findById(settingsId);
+        return settings;
+    }
+
     async getAllUsers(): Promise<UserDocument[]> {
         const users = await User.find(
             {},
