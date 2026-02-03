@@ -1,7 +1,6 @@
-
 import { AppSidebar } from "@/components/app-sidebar";
 
-export default function Layout({children}: {children: React.ReactNode}) {
+export default function Layout({ children }: { children: React.ReactNode }) {
     return (
         <div className="min-h-screen bg-background">
             <div className="max-w-7xl mx-auto flex">

@@ -2,17 +2,21 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { AuthProvider, UIProvider } from "@/contexts";
+import { redirect } from "next/dist/server/api-utils";
 
 export const metadata: Metadata = {
     title: "SociaaNet, A social network for everyone",
     description: "Created by Nishan Bista"
 };
 
-export default function RootLayout({
+export default async function RootLayout({
     children
 }: Readonly<{
     children: React.ReactNode;
 }>) {
+
+
+    
     return (
         <html lang="en">
             <body className={`antialiased`}>
