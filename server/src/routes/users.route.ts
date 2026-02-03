@@ -1,6 +1,11 @@
 import { Router } from "express";
-import { authenticate } from "../middlewares";
-import { uploadAvatarController } from "../controllers";
+import { authenticate, moderatorAuthenticate } from "../middlewares";
+import {
+    getAllUsersController,
+    getProfileByUsernameController,
+    getUserSettingsController,
+    uploadAvatarController
+} from "../controllers";
 import multer from "multer";
 import { getCurrentUserController } from "../controllers/users/get-current-user.controller";
 
@@ -14,6 +19,7 @@ const upload = multer({
 });
 
 // Unprotected Routes
+usersRouter.get("/profile/:username", getProfileByUsernameController);
 
 // Protected Routes
 usersRouter.use(authenticate);
@@ -26,7 +32,14 @@ usersRouter.post(
     uploadAvatarController
 );
 
+// Get settings of current user
+usersRouter.get("/me/settings", getUserSettingsController);
+
 // Get current user via cookie
 usersRouter.get("/me", getCurrentUserController);
+
+// Moderators only routes
+usersRouter.use(moderatorAuthenticate);
+usersRouter.get("/", getAllUsersController);
 
 export default usersRouter;

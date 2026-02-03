@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "sonner";
-import { AuthProvider, UIProvider } from "@/contexts";
+import { UIProvider } from "@/contexts";
 
 export const metadata: Metadata = {
     title: "SociaaNet, A social network for everyone",
@@ -16,9 +16,7 @@ export default function RootLayout({
     return (
         <html lang="en">
             <body className={`antialiased`}>
-                <UIProvider>
-                    <AuthProvider>{children}</AuthProvider>
-                </UIProvider>
+                <UIProvider>{children}</UIProvider>
                 <Toaster />
             </body>
         </html>

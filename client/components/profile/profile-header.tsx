@@ -13,24 +13,55 @@ import { useState } from "react";
 import { ImagePickerModal } from "./image-picker-modal";
 import { api } from "@/lib/axios-instance";
 import { toast } from "sonner";
-import { IUser } from "@/types";
+import { IUserProfile } from "@/types";
+import { EditFieldModal } from "./edit-field-modal";
+import { Pencil } from "lucide-react";
 
 interface ProfileHeaderProps {
-    user: IUser;
+    user: IUserProfile;
     isOwner: boolean;
-    // Extended properties that might not be in IUser yet but in our dummy data
-    bio?: string;
     followers: number;
     following: number;
     joined: string;
 }
 
-export function ProfileHeader({ user, isOwner, bio, followers, following, joined }: ProfileHeaderProps) {
+export function ProfileHeader({ user, isOwner, followers, following, joined }: ProfileHeaderProps) {
     const [showImagePicker, setShowImagePicker] = useState(false);
+    const [editField, setEditField] = useState<{
+        isOpen: boolean;
+        title: string;
+        fieldLabel: string;
+        fieldName: "full_name" | "username" | "bio";
+        initialValue: string;
+        isTextarea?: boolean;
+    }>({
+        isOpen: false,
+        title: "",
+        fieldLabel: "",
+        fieldName: "full_name",
+        initialValue: "",
+    });
 
     const handleAvatarClick = () => {
         if (!isOwner) return;
         setShowImagePicker(true);
+    };
+
+    const handleEditField = (
+        title: string, 
+        fieldLabel: string, 
+        fieldName: "full_name" | "username" | "bio", 
+        value: string, 
+        isTextarea: boolean = false
+    ) => {
+        setEditField({
+            isOpen: true,
+            title,
+            fieldLabel,
+            fieldName,
+            initialValue: value,
+            isTextarea
+        });
     };
 
     const handleFileSelect = async (file: File) => {
@@ -55,77 +86,109 @@ export function ProfileHeader({ user, isOwner, bio, followers, following, joined
         });
     };
 
-    const handleEditProfile = () => {
-        toast("Edit profile functionality coming soon!");
-    };
-
     return (
         <>
-            <div className="relative mb-4 px-4">
-                <div className="flex justify-between items-start -mt-16">
-                    <div className="relative group">
+            <div className="relative mb-8 px-4">
+                <div className="flex flex-col md:flex-row gap-6 items-start">
+                    <div className="relative group shrink-0">
                         <div 
-                            className={`w-32 h-32 rounded-full border-4 border-background bg-muted flex items-center justify-center overflow-hidden ${isOwner ? 'cursor-pointer' : ''}`}
+                            className={`w-36 h-36 rounded-full border-4 border-background bg-muted flex items-center justify-center overflow-hidden ${isOwner ? 'cursor-pointer' : ''}`}
                             onClick={handleAvatarClick}
                         >
                             {user.avatar_url ? (
                                 <img src={user.avatar_url} alt={user.full_name} className="w-full h-full object-cover" />
                             ) : (
                                 <div className="w-full h-full bg-linear-to-br from-primary to-purple-600 flex items-center justify-center text-white">
-                                    <User className="w-16 h-16" />
+                                    <User className="w-20 h-20" />
                                 </div>
                             )}
                             {isOwner && (
                                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
-                                    <Camera className="w-8 h-8 text-white" />
+                                    <Camera className="w-10 h-10 text-white" />
                                 </div>
                             )}
                         </div>
                     </div>
-                    <div className="mt-20 sm:mt-0 pt-4 flex gap-3">
-                        {isOwner ? (
-                            <Button variant="outline" className="rounded-full font-semibold" onClick={handleEditProfile}>
-                                Edit Profile
-                            </Button>
-                        ) : (
-                            <>
-                                <Button className="rounded-full font-semibold">Follow</Button>
-                                <Button variant="outline" size="icon" className="rounded-full">
-                                    <MessageCircle className="w-5 h-5" />
-                                </Button>
-                                <Button variant="ghost" size="icon" className="rounded-full">
-                                    <MoreHorizontal className="w-5 h-5" />
-                                </Button>
-                            </>
-                        )}
-                    </div>
-                </div>
+                    
+                    <div className="flex-1 space-y-4 pt-2">
+                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                            <div>
+                                <div className="flex items-center gap-2 group/name">
+                                    <h1 className="text-3xl font-bold leading-tight">{user.full_name}</h1>
+                                    {isOwner && (
+                                        <Button 
+                                            variant="ghost" 
+                                            size="icon" 
+                                            className="h-8 w-8 opacity-0 group-hover/name:opacity-100 transition-opacity"
+                                            onClick={() => handleEditField("Edit Name", "Full Name", "full_name", user.full_name)}
+                                        >
+                                            <Pencil className="w-4 h-4 text-muted-foreground" />
+                                        </Button>
+                                    )}
+                                </div>
+                                <div className="flex items-center gap-2 group/username mt-1">
+                                    <p className="text-lg text-muted-foreground">@{user.username}</p>
+                                    {isOwner && (
+                                        <Button 
+                                            variant="ghost" 
+                                            size="icon" 
+                                            className="h-6 w-6 opacity-0 group-hover/username:opacity-100 transition-opacity"
+                                            onClick={() => handleEditField("Edit Username", "Username", "username", user.username)}
+                                        >
+                                            <Pencil className="w-3 h-3 text-muted-foreground" />
+                                        </Button>
+                                    )}
+                                </div>
+                            </div>
 
-                <div className="mt-4 space-y-3">
-                    <div>
-                        <h1 className="text-2xl font-bold leading-tight">{user.full_name}</h1>
-                        <p className="text-muted-foreground">@{user.username}</p>
-                    </div>
-
-                    <p className="text-foreground whitespace-pre-wrap max-w-xl">
-                        {bio}
-                    </p>
-
-                    <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                            <CalendarDays className="w-4 h-4" />
-                            <span>Joined {joined}</span>
+                            <div className="flex gap-3">
+                                {!isOwner && (
+                                    <>
+                                        <Button className="rounded-full font-semibold px-8">Follow</Button>
+                                        <Button variant="outline" size="icon" className="rounded-full">
+                                            <MessageCircle className="w-5 h-5" />
+                                        </Button>
+                                        <Button variant="ghost" size="icon" className="rounded-full">
+                                            <MoreHorizontal className="w-5 h-5" />
+                                        </Button>
+                                    </>
+                                )}
+                            </div>
                         </div>
-                    </div>
 
-                    <div className="flex items-center gap-6 text-sm">
-                        <div className="flex items-center gap-1 hover:underline cursor-pointer">
-                            <span className="font-bold text-foreground">{following}</span>
-                            <span className="text-muted-foreground">Following</span>
+                        <div className="group/bio relative">
+                            <p className="text-foreground whitespace-pre-wrap max-w-2xl leading-relaxed">
+                                {user.bio || (isOwner ? "Add a bio..." : "")}
+                            </p>
+                            {isOwner && (
+                                <div className="absolute top-0 right-full mr-2 md:static md:inline-flex md:mr-0 md:ml-2 align-top">
+                                    <Button 
+                                        variant="ghost" 
+                                        size="icon" 
+                                        className="h-6 w-6 opacity-0 group-hover/bio:opacity-100 transition-opacity"
+                                        onClick={() => handleEditField("Edit Bio", "Bio", "bio", user.bio || "", true)}
+                                    >
+                                        <Pencil className="w-3 h-3 text-muted-foreground" />
+                                    </Button>
+                                </div>
+                            )}
                         </div>
-                        <div className="flex items-center gap-1 hover:underline cursor-pointer">
-                            <span className="font-bold text-foreground">{followers}</span>
-                            <span className="text-muted-foreground">Followers</span>
+
+                        <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground pt-2">
+                            <div className="flex items-center gap-1">
+                                <CalendarDays className="w-4 h-4" />
+                                <span>Joined {joined}</span>
+                            </div>
+                            <div className="flex items-center gap-6 text-sm">
+                                <div className="flex items-center gap-1 hover:underline cursor-pointer">
+                                    <span className="font-bold text-foreground">{following}</span>
+                                    <span>Following</span>
+                                </div>
+                                <div className="flex items-center gap-1 hover:underline cursor-pointer">
+                                    <span className="font-bold text-foreground">{followers}</span>
+                                    <span>Followers</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -136,6 +199,10 @@ export function ProfileHeader({ user, isOwner, bio, followers, following, joined
                 onClose={() => setShowImagePicker(false)}
                 onFileSelect={handleFileSelect}
                 currentAvatar={user.avatar_url}
+            />
+            <EditFieldModal
+                {...editField}
+                onClose={() => setEditField(prev => ({ ...prev, isOpen: false }))}
             />
         </>
     );

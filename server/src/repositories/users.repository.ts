@@ -1,4 +1,10 @@
-import { Image, ImageDocument, UserDocument, User } from "../models";
+import {
+    Image,
+    ImageDocument,
+    UserDocument,
+    User,
+    UserSettings
+} from "../models";
 
 interface UserDocumentRepository {
     createUser(userData: Partial<UserDocument>): Promise<UserDocument>;
@@ -12,6 +18,7 @@ interface UserDocumentRepository {
 class UserRepository implements UserDocumentRepository {
     async createUser(userData: Partial<UserDocument>): Promise<UserDocument> {
         const user = await User.create(userData);
+        await UserSettings.create({ user_id: user._id });
         return user;
     }
 
@@ -28,6 +35,16 @@ class UserRepository implements UserDocumentRepository {
     async getUserByUsername(username: string): Promise<UserDocument | null> {
         const user = await User.findOne({ username });
         return user;
+    }
+
+    async getUserSettingsByUserId(userId: string) {
+        const settings = await UserSettings.findOne({ user_id: userId });
+        return settings;
+    }
+
+    async getUserSettingsBySettingsId(settingsId: string) {
+        const settings = await UserSettings.findById(settingsId);
+        return settings;
     }
 
     async getAllUsers(): Promise<UserDocument[]> {

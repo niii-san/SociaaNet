@@ -1,5 +1,11 @@
 import { genSalt, hash } from "bcryptjs";
-import { CreateUserDto, GetUserByIdDto, UploadAvatarDto } from "../dtos";
+import {
+    CreateUserDto,
+    GetUserByIdDto,
+    GetUserByUsernameDto,
+    GetUserSettingsByUserIdDto,
+    UploadAvatarDto
+} from "../dtos";
 import {
     HttpError,
     convertImageKeyToImageUrl,
@@ -112,6 +118,28 @@ class UsersService {
         };
     }
 
+    async getUserProfileByUsername(dto: GetUserByUsernameDto) {
+        const user = await userRepo.getUserByUsername(dto.username);
+
+        if (!user) {
+            throw new HttpError(404, false, "NOT_FOUND", "User not found");
+        }
+
+        const avatar_url =
+            user.avatar_key != null
+                ? convertImageKeyToImageUrl(user.avatar_key)
+                : null;
+
+        return {
+            _id: user._id,
+            full_name: user.full_name,
+            username: user.username,
+            bio: user.bio,
+            avatar_url: avatar_url,
+            created_at: user.created_at
+        };
+    }
+
     async uploadAvatar(dto: UploadAvatarDto, file: Express.Multer.File | null) {
         if (!file) {
             throw new HttpError(
@@ -134,6 +162,27 @@ class UsersService {
 
         return {
             avatar_url: res.data.image_key
+        };
+    }
+
+    async getUserSettingsByUserId(dto: GetUserSettingsByUserIdDto) {
+        const userSettings = await userRepo.getUserSettingsByUserId(dto.userId);
+
+        if (!userSettings)
+            throw new HttpError(
+                404,
+                false,
+                "NOT_FOUND",
+                "User settings not found"
+            );
+
+        return {
+            user_id: userSettings.user_id,
+            privacy: userSettings.privacy,
+            notifications: userSettings.notifications,
+            appearance: userSettings.appearance,
+            feed: userSettings.feed,
+            security: userSettings.security
         };
     }
 }
