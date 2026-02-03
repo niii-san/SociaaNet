@@ -26,8 +26,8 @@ export function AppSidebar() {
         {
             icon: Home,
             label: "Home",
-            href: "/home",
-            active: pathname === "/" || pathname === "/home"
+            href: "/",
+            active: pathname === "/" || pathname === "/"
         },
         {
             icon: Search,
@@ -43,9 +43,9 @@ export function AppSidebar() {
         },
         {
             icon: Mail,
-            label: "Messages",
-            href: "/messages",
-            active: pathname === "/messages"
+            label: "Inbox",
+            href: "/inbox",
+            active: pathname === "/inbox"
         },
         {
             icon: Clapperboard,

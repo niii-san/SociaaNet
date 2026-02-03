@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { IUser } from "@/types";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { api } from "@/lib/axios-instance";
 import { getCurrentUser } from "@/features";
 import { useUI } from "./ui.context";
@@ -24,6 +24,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const router = useRouter();
     const { showLoader, hideLoader } = useUI();
 
+    const pathname = usePathname();
+
     const validateSession = async () => {
         try {
             showLoader();
@@ -32,17 +34,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             // session valid → fetch user once
             const userData = await getCurrentUser();
             console.log("auth.context", userData);
-            
+
             setUser(userData);
             setIsLoggedIn(true);
         } catch (err) {
             setUser(null);
             setIsLoggedIn(false);
-            router.replace("/login");
+            if (pathname !== "/login" && pathname !== "/register") {
+                router.replace("/login");
+            }
         } finally {
             setIsLoading(false);
             hideLoader();
-            console.log("Session validated")
+            console.log("Session validated");
         }
     };
     const logout = async () => {
@@ -63,7 +67,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 isLoggedIn,
                 isLoading,
                 logout,
-                validateSession 
+                validateSession
             }}
         >
             {children}

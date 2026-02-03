@@ -31,13 +31,13 @@ export default function ProfilePage() {
                     username ?? "".toString()
                 );
                 setProfileData(data);
-                
+
                 if (currentUserData) {
                     setIsCurrentUserProfile(
                         currentUserData.username === data.username
                     );
                 }
-                
+
                 setLoading(false);
             } catch (error) {
                 console.error("Error fetching profile:", error);
