@@ -28,6 +28,11 @@ const userSchema = new mongoose.Schema<UserEntity>(
         avatar_key: {
             type: String,
             default: null
+        },
+        role: {
+            type: String,
+            enum: ["user", "moderator", "system_admin"],
+            default: "user"
         }
     },
     { timestamps: { createdAt: "created_at", updatedAt: "updated_at" } }

@@ -30,7 +30,12 @@ app.get("/", (_: Request, res: Response) => {
 
 // Routes
 // Auth Routes
-import { authRouter, usersRouter, filesRouter } from "./routes";
+import {
+    authRouter,
+    usersRouter,
+    filesRouter,
+    moderatorsRouter
+} from "./routes";
 // Auth Routes
 app.use("/api/v1/auth", authRouter);
 
@@ -39,6 +44,9 @@ app.use("/api/v1/files", filesRouter);
 
 // Users Routes
 app.use("/api/v1/users", usersRouter);
+
+// Moderators Routes
+app.use("/api/v1/moderators", moderatorsRouter);
 
 // Error handling middleware
 import { errorMiddleware } from "./utils";
