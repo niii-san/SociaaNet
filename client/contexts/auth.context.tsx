@@ -12,6 +12,7 @@ type AuthContextType = {
     isLoading: boolean;
     data: IUser | null;
     logout: () => void;
+    validateSession: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -41,6 +42,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         } finally {
             setIsLoading(false);
             hideLoader();
+            console.log("Session validated")
         }
     };
     const logout = async () => {
@@ -60,7 +62,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 data: user,
                 isLoggedIn,
                 isLoading,
-                logout
+                logout,
+                validateSession 
             }}
         >
             {children}

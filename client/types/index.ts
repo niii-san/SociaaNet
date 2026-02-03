@@ -1,3 +1,3 @@
-import { IUser } from "./user.type";
+import { IUser, IUserProfile } from "./user.type";
 
-export type { IUser };
+export type { IUser, IUserProfile };
