@@ -1,12 +1,12 @@
 import { Types } from "mongoose";
 
-type PrivacyVisibility = "everyone" | "followers_only" | "private";
+type PrivacyVisibility = "everyone" | "followers_only" | "no_one";
 
 type BlockedUser = {
-    user_id: string;
+    user_id: Types.ObjectId;
     username: string;
     full_name: string;
-    avatar_url: string;
+    avatar_key: string;
 };
 
 interface PrivacySettings {
@@ -35,8 +35,7 @@ interface AppearanceSettings {
 type FeedMode = "algorithmic" | "chronological";
 interface FeedSettings {
     mode: FeedMode;
-    hide_sensitive_content: boolean;
-    hide_nsfw_content: boolean;
+    show_sensitive_content: boolean;
 }
 
 interface SecuritySettings {

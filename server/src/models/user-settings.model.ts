@@ -15,17 +15,17 @@ const userSettingsSchema = new mongoose.Schema<UserSettingsEntity>({
         },
         allow_messages_from: {
             type: String,
-            enum: ["everyone", "followers_only", "private"],
+            enum: ["everyone", "followers_only", "no_one"],
             default: "everyone"
         },
         allow_comments_from: {
             type: String,
-            enum: ["everyone", "followers_only", "private"],
+            enum: ["everyone", "followers_only", "no_one"],
             default: "everyone"
         },
         allow_mentions_from: {
             type: String,
-            enum: ["everyone", "followers_only", "private"],
+            enum: ["everyone", "followers_only", "no_one"],
             default: "everyone"
         },
         show_online_status: {
@@ -37,7 +37,12 @@ const userSettingsSchema = new mongoose.Schema<UserSettingsEntity>({
             default: true
         },
         blocked_users: {
-            type: [String],
+            type: {
+                user_id: mongoose.Schema.Types.ObjectId,
+                username: String,
+                full_name: String,
+                avatar_key: String
+            },
             default: []
         }
     },
@@ -76,13 +81,9 @@ const userSettingsSchema = new mongoose.Schema<UserSettingsEntity>({
             enum: ["algorithmic", "chronological"],
             default: "algorithmic"
         },
-        hide_sensitive_content: {
+        show_sensitive_content: {
             type: Boolean,
-            default: false
-        },
-        hide_nsfw_content: {
-            type: Boolean,
-            default: false
+            default: true
         }
     },
     security: {
