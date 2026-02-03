@@ -2,6 +2,7 @@ import { LoginDto } from "../dtos";
 import bcrypt from "bcryptjs";
 import { HttpError } from "../utils";
 import { authRepo, userRepo } from "../repositories";
+import { env } from "../config";
 
 class AuthService {
     async login(dto: LoginDto) {
@@ -52,7 +53,10 @@ class AuthService {
             );
         }
         const sessionId = crypto.randomUUID();
-        const sessionExpiryTime = new Date(Date.now() + 1000 * 60 * 60); // 1 hour
+
+        const sessionExpiryTime = new Date(
+            Date.now() + 1000 * 60 * env.sessionExpiryInMinutes
+        );
 
         const session = await authRepo.createSession({
             session_id: sessionId,
