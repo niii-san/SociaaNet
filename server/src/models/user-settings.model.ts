@@ -1,6 +1,30 @@
 import mongoose from "mongoose";
 import { UserSettingsEntity } from "../types";
 
+const blockedUserSchema = new mongoose.Schema(
+    {
+        user_id: {
+            type: mongoose.Schema.Types.ObjectId,
+            required: true,
+            ref: "User"
+        },
+        username: {
+            type: String,
+            required: true
+        },
+        full_name: {
+            type: String,
+            required: true
+        },
+        avatar_key: {
+            type: String,
+            required: false,
+            default: null
+        }
+    },
+    { _id: false }
+);
+
 const userSettingsSchema = new mongoose.Schema<UserSettingsEntity>({
     user_id: {
         type: mongoose.Schema.Types.ObjectId,
@@ -37,12 +61,7 @@ const userSettingsSchema = new mongoose.Schema<UserSettingsEntity>({
             default: true
         },
         blocked_users: {
-            type: {
-                user_id: mongoose.Schema.Types.ObjectId,
-                username: String,
-                full_name: String,
-                avatar_key: String
-            },
+            type: [blockedUserSchema],
             default: []
         }
     },

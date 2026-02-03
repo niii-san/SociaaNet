@@ -1,6 +1,7 @@
 import { Router } from "express";
-import { authenticate } from "../middlewares";
+import { authenticate, moderatorAuthenticate } from "../middlewares";
 import {
+    getAllUsersController,
     getProfileByUsernameController,
     getUserSettingsController,
     uploadAvatarController
@@ -36,5 +37,9 @@ usersRouter.get("/me/settings", getUserSettingsController);
 
 // Get current user via cookie
 usersRouter.get("/me", getCurrentUserController);
+
+// Moderators only routes
+usersRouter.use(moderatorAuthenticate);
+usersRouter.get("/", getAllUsersController);
 
 export default usersRouter;

@@ -5,6 +5,7 @@ import { uploadAvatarController } from "./users/upload-avatar.controller";
 import { getImageController } from "./files/get-image.controller";
 import { getProfileByUsernameController } from "./users/get-profile-by-username.controller";
 import { getUserSettingsController } from "./users/get-user-settings.controller";
+import { getAllUsersController } from "./users/get-all-users.controller";
 
 export {
     signupController,
@@ -13,5 +14,6 @@ export {
     uploadAvatarController,
     getImageController,
     getProfileByUsernameController,
-    getUserSettingsController
+    getUserSettingsController,
+    getAllUsersController
 };
