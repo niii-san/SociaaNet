@@ -23,17 +23,19 @@ class UserRepository implements UserDocumentRepository {
     }
 
     async getUserByEmail(email: string): Promise<UserDocument | null> {
-        const user = await User.findOne({ email_address: email });
+        const user = await User.findOne({ email_address: email }).select(
+            "-password"
+        );
         return user;
     }
 
     async getUserById(userId: string): Promise<UserDocument | null> {
-        const user = await User.findById(userId);
+        const user = await User.findById(userId).select("-password");
         return user;
     }
 
     async getUserByUsername(username: string): Promise<UserDocument | null> {
-        const user = await User.findOne({ username });
+        const user = await User.findOne({ username }).select("-password");
         return user;
     }
 
@@ -47,6 +49,16 @@ class UserRepository implements UserDocumentRepository {
         return settings;
     }
 
+    async getUserWithSettingsByUserId(userId: string) {
+        const user = await User.findById(userId).select("-password");
+        const settings = await UserSettings.findOne({ user_id: userId });
+
+        return {
+            user,
+            settings
+        };
+    }
+
     async getAllUsers(): Promise<UserDocument[]> {
         const users = await User.find(
             {},
@@ -54,11 +66,12 @@ class UserRepository implements UserDocumentRepository {
         );
         return users;
     }
+
     async uploadAvatar(data: Partial<ImageDocument>): Promise<ImageDocument> {
         const image = await Image.create(data);
         await User.findByIdAndUpdate(data.uploader_id, {
             avatar_key: data.image_key
-        });
+        }).select("-password");
         return image;
     }
 
@@ -74,7 +87,7 @@ class UserRepository implements UserDocumentRepository {
             userId,
             { bio },
             { new: true }
-        );
+        ).select("-password");
         return user;
     }
 
@@ -89,7 +102,7 @@ class UserRepository implements UserDocumentRepository {
             userId,
             { full_name: fullName },
             { new: true }
-        );
+        ).select("-password");
         return user;
     }
 
@@ -104,7 +117,7 @@ class UserRepository implements UserDocumentRepository {
             userId,
             { username },
             { new: true }
-        );
+        ).select("-password");
         return user;
     }
 }
