@@ -13,7 +13,7 @@ export const getCurrentUserController = asyncHandler(
         return res
             .status(200)
             .json(
-                new HttpSuccess(true, 200, "User fetched successfully", user)
+                new HttpSuccess(200, true, "User fetched successfully", user)
             );
     }
 );

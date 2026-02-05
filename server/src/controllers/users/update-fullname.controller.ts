@@ -16,8 +16,8 @@ export const updateFullNameController = asyncHandler(
             .status(200)
             .json(
                 new HttpSuccess(
-                    true,
                     200,
+                    true,
                     "FullName updated successfully",
                     payload
                 )

@@ -1,4 +1,5 @@
 import type { NextFunction, Request, Response } from "express";
+import { ErrorCodes } from "../constants/error-code";
 
 export class HttpError {
     status_code: number = 400;
@@ -47,7 +48,7 @@ export const errorMiddleware = (
             success: false,
             message: `Server Error :/ ${err.message}`,
             error: {
-                code: "INTERNAL_ERROR"
+                code: ErrorCodes.SERVER_ERROR
             }
         });
     }

@@ -16,8 +16,8 @@ export const updateUsernameController = asyncHandler(
             .status(200)
             .json(
                 new HttpSuccess(
-                    true,
                     200,
+                    true,
                     "Username updated successfully",
                     payload
                 )

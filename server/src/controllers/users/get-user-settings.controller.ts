@@ -17,8 +17,8 @@ export const getUserSettingsController = asyncHandler(
             .status(200)
             .json(
                 new HttpSuccess(
-                    true,
                     200,
+                    true,
                     "User settings fetched",
                     userSettings
                 )

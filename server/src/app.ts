@@ -25,7 +25,7 @@ app.use(requestLogger);
 app.get("/", (_: Request, res: Response) => {
     return res
         .status(200)
-        .json(new HttpSuccess(true, 200, "SociaaNet server", null));
+        .json(new HttpSuccess(200,true, "SociaaNet server", null));
 });
 
 // Routes

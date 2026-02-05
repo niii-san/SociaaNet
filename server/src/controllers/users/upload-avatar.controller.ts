@@ -16,7 +16,7 @@ export const uploadAvatarController = asyncHandler(
         );
 
         res.status(200).json(
-            new HttpSuccess(true, 200, "Avatar uploaded successfully", data)
+            new HttpSuccess(200, true, "Avatar uploaded successfully", data)
         );
     }
 );

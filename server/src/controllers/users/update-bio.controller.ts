@@ -15,7 +15,7 @@ export const updateBioController = asyncHandler(
         return res
             .status(200)
             .json(
-                new HttpSuccess(true, 200, "Bio updated successfully", payload)
+                new HttpSuccess(200, true, "Bio updated successfully", payload)
             );
     }
 );

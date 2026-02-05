@@ -5,11 +5,10 @@ import { RequestWithUserContext } from "../../types";
 export const validateSessionController = asyncHandler(
     async (req: RequestWithUserContext, res: Response) => {
         return res.status(200).json(
-            new HttpSuccess(true, 200, "Session is valid", {
+            new HttpSuccess(200, true, "Session is valid", {
                 username: req.user.username,
                 full_name: req.user.full_name
             })
         );
     }
 );
-

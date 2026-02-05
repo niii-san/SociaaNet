@@ -5,15 +5,14 @@ export class HttpSuccess {
     data: any = {};
 
     constructor(
-        success: boolean,
         status_code: number,
+        success: boolean,
         message: string,
         data: any
     ) {
-        this.success = success;
         this.status_code = status_code;
+        this.success = success;
         this.message = message;
         this.data = data;
     }
 }
-

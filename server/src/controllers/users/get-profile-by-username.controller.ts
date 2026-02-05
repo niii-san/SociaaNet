@@ -20,8 +20,8 @@ export const getProfileByUsernameController = asyncHandler(
             .status(200)
             .json(
                 new HttpSuccess(
-                    true,
                     200,
+                    true,
                     `${userProfile.username} profile retrieved`,
                     userProfile
                 )
