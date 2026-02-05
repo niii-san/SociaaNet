@@ -4,6 +4,9 @@ import {
     GetUserByIdDto,
     GetUserByUsernameDto,
     GetUserSettingsByUserIdDto,
+    UpdateBioDto,
+    UpdateFullNameDto,
+    UpdateUsernameDto,
     UploadAvatarDto
 } from "../dtos";
 import {
@@ -14,6 +17,7 @@ import {
 import { userRepo } from "../repositories";
 import { fileServiceClient } from "../clients";
 import { Types } from "mongoose";
+import { UserFieldRequirements } from "../constants";
 
 class UsersService {
     async createUser(dto: CreateUserDto) {
@@ -183,6 +187,141 @@ class UsersService {
             appearance: userSettings.appearance,
             feed: userSettings.feed,
             security: userSettings.security
+        };
+    }
+
+    async updateBio(dto: UpdateBioDto) {
+        if (!dto.bio) {
+            throw new HttpError(400, false, "NO_BIO", "Bio is required");
+        }
+
+        if (dto.bio.length > UserFieldRequirements.bio.maxLength) {
+            throw new HttpError(
+                400,
+                false,
+                "BIO_LEN_ERROR",
+                UserFieldRequirements.bio.maxErrorMessage
+            );
+        }
+
+        const updatedUser = await userRepo.updateBio({
+            userId: dto.userId,
+            bio: dto.bio
+        });
+
+        if (!updatedUser) {
+            throw new HttpError(404, false, "NOT_FOUND", "User not found");
+        }
+
+        return {
+            bio: updatedUser.bio,
+            username: updatedUser.username
+        };
+    }
+
+    async updateUsername(dto: UpdateUsernameDto) {
+        if (!dto.username) {
+            throw new HttpError(
+                400,
+                false,
+                "NO_USERNAME",
+                "Username is required"
+            );
+        }
+
+        if (dto.username.length < UserFieldRequirements.username.minLength) {
+            throw new HttpError(
+                400,
+                false,
+                "USERNAME_LEN_ERROR",
+                UserFieldRequirements.username.minErrorMessage
+            );
+        }
+        if (dto.username.length > UserFieldRequirements.username.maxLength) {
+            throw new HttpError(
+                400,
+                false,
+                "USERNAME_LEN_ERROR",
+                UserFieldRequirements.username.maxErrorMessage
+            );
+        }
+
+        const userWithUsernameAlreadyExists = await userRepo.getUserByUsername(
+            dto.username
+        );
+
+        // if the new username is same as old username, return success without doing anything
+        if (dto.userId == userWithUsernameAlreadyExists?._id.toString()) {
+            return {
+                username: userWithUsernameAlreadyExists.username,
+                _id: userWithUsernameAlreadyExists._id.toString()
+            };
+        }
+
+        if (userWithUsernameAlreadyExists) {
+            throw new HttpError(
+                400,
+                false,
+                "ALREADY_EXISTS",
+                "Username is already taken"
+            );
+        }
+
+        const updatedUser = await userRepo.updateUsername({
+            userId: dto.userId,
+            username: dto.username
+        });
+
+        if (!updatedUser) {
+            throw new HttpError(404, false, "NOT_FOUND", "User not found");
+        }
+
+        return {
+            username: updatedUser.username
+        };
+    }
+
+    async updateFullName(dto: UpdateFullNameDto) {
+        const fullName = (dto.fullName ?? "").trim();
+
+        if (!fullName) {
+            throw new HttpError(
+                400,
+                false,
+                "NO_FULLNAME",
+                "Full name is required"
+            );
+        }
+
+        if (fullName.length < UserFieldRequirements.fullName.minLength) {
+            throw new HttpError(
+                400,
+                false,
+                "FULLNAME_LEN_ERROR",
+                UserFieldRequirements.fullName.minErrorMessage
+            );
+        }
+
+        if (fullName.length > UserFieldRequirements.fullName.maxLength) {
+            throw new HttpError(
+                400,
+                false,
+                "FULLNAME_LEN_ERROR",
+                UserFieldRequirements.fullName.maxErrorMessage
+            );
+        }
+
+        const updatedUser = await userRepo.updateFullName({
+            userId: dto.userId,
+            fullName
+        });
+
+        if (!updatedUser) {
+            throw new HttpError(404, false, "NOT_FOUND", "User not found");
+        }
+        return {
+            full_name: updatedUser.full_name,
+            username: updatedUser.username
         };
     }
 }

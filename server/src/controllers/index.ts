@@ -6,6 +6,9 @@ import { getImageController } from "./files/get-image.controller";
 import { getProfileByUsernameController } from "./users/get-profile-by-username.controller";
 import { getUserSettingsController } from "./users/get-user-settings.controller";
 import { getAllUsersController } from "./users/get-all-users.controller";
+import { updateBioController } from "./users/update-bio.controller";
+import { updateFullNameController } from "./users/update-fullname.controller";
+import { updateUsernameController } from "./users/update-username.controller";
 
 export {
     signupController,
@@ -15,5 +18,8 @@ export {
     getImageController,
     getProfileByUsernameController,
     getUserSettingsController,
-    getAllUsersController
+    getAllUsersController,
+    updateBioController,
+    updateFullNameController,
+    updateUsernameController
 };
