@@ -1,6 +1,8 @@
+import { Types } from "mongoose";
 import { UserSettingsEntity } from "../types";
 
 export const defaultUserSettings: UserSettingsEntity = {
+    user_id: "" as unknown as Types.ObjectId,
     privacy: {
         private_account: false,
         allow_messages_from: "everyone",
@@ -22,8 +24,7 @@ export const defaultUserSettings: UserSettingsEntity = {
     },
     feed: {
         mode: "algorithmic",
-        hide_sensitive_content: false,
-        hide_nsfw_content: false
+        show_sensitive_content: false
     },
     security: {
         login_alerts: true,
