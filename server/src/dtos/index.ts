@@ -5,6 +5,9 @@ import { GetUserByIdDto } from "./users/get-current-user.dto";
 import { GetUserByUsernameDto } from "./users/get-user-by-username.dto";
 import { GetUserSettingsByUserIdDto } from "./users/get-user-settings-by-userId.dto";
 import { UploadAvatarDto } from "./users/upload-avatar.dto";
+import { UpdateBioDto } from "./users/update-bio.dto";
+import { UpdateFullNameDto } from "./users/update-fullname.dto";
+import { UpdateUsernameDto } from "./users/update-username.dto";
 
 export {
     CreateUserDto,
@@ -13,5 +16,8 @@ export {
     GetUserByIdDto,
     GetImageDto,
     GetUserByUsernameDto,
-    GetUserSettingsByUserIdDto
+    GetUserSettingsByUserIdDto,
+    UpdateFullNameDto,
+    UpdateUsernameDto,
+    UpdateBioDto
 };

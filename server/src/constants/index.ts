@@ -1,2 +1,3 @@
 import { defaultUserSettings } from "./default-user-settings";
-export { defaultUserSettings };
+import { UserFieldRequirements } from "./user-field-requirements";
+export { defaultUserSettings, UserFieldRequirements };

@@ -4,6 +4,9 @@ import {
     getAllUsersController,
     getProfileByUsernameController,
     getUserSettingsController,
+    updateBioController,
+    updateFullNameController,
+    updateUsernameController,
     uploadAvatarController
 } from "../controllers";
 import multer from "multer";
@@ -37,6 +40,15 @@ usersRouter.get("/me/settings", getUserSettingsController);
 
 // Get current user via cookie
 usersRouter.get("/me", getCurrentUserController);
+
+// Update bio
+usersRouter.patch("/me/bio", updateBioController);
+
+// update username
+usersRouter.patch("/me/username", updateUsernameController);
+
+// update fullname
+usersRouter.patch("/me/fullname", updateFullNameController);
 
 // Moderators only routes
 usersRouter.use(moderatorAuthenticate);

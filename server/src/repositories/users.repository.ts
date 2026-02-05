@@ -61,6 +61,52 @@ class UserRepository implements UserDocumentRepository {
         });
         return image;
     }
+
+    // Updates
+    async updateBio({
+        userId,
+        bio
+    }: {
+        userId: string;
+        bio: string;
+    }): Promise<UserDocument | null> {
+        const user = await User.findByIdAndUpdate(
+            userId,
+            { bio },
+            { new: true }
+        );
+        return user;
+    }
+
+    async updateFullName({
+        userId,
+        fullName
+    }: {
+        userId: string;
+        fullName: string;
+    }): Promise<UserDocument | null> {
+        const user = await User.findByIdAndUpdate(
+            userId,
+            { full_name: fullName },
+            { new: true }
+        );
+        return user;
+    }
+
+    async updateUsername({
+        userId,
+        username
+    }: {
+        userId: string;
+        username: string;
+    }): Promise<UserDocument | null> {
+        const user = await User.findByIdAndUpdate(
+            userId,
+            { username },
+            { new: true }
+        );
+        return user;
+    }
 }
 
 export const userRepo = new UserRepository();
