@@ -2,7 +2,7 @@ import { NextFunction, Response } from "express";
 import { HttpError, asyncHandler } from "../utils";
 import { RequestWithUserContext } from "../types";
 import { authRepo, userRepo } from "../repositories";
-
+import { ErrorCodes } from "../constants/error-code";
 
 export const authenticate = asyncHandler(
     async (req: RequestWithUserContext, _: Response, next: NextFunction) => {
@@ -14,8 +14,8 @@ export const authenticate = asyncHandler(
             throw new HttpError(
                 401,
                 false,
-                "NO_COOKIE",
-                "Please provide a session_id cookie"
+                ErrorCodes.INVALID_INPUT,
+                "Authentication credentials were not provided"
             );
         }
 
@@ -25,7 +25,7 @@ export const authenticate = asyncHandler(
             throw new HttpError(
                 401,
                 false,
-                "INVALID_SESSION",
+                ErrorCodes.UNAUTHORIZED,
                 "Session is invalid or has expired"
             );
         }
@@ -34,20 +34,18 @@ export const authenticate = asyncHandler(
             throw new HttpError(
                 401,
                 false,
-                "INVALID_SESSION",
+                ErrorCodes.UNAUTHORIZED,
                 "Session is invalid or has expired"
             );
         }
 
-        const user = await userRepo.getUserById(
-            session.user_id as unknown as string
-        );
+        const user = await userRepo.getUserById(session.user_id.toString());
 
         if (!user) {
             throw new HttpError(
                 401,
                 false,
-                "INVALID_SESSION",
+                ErrorCodes.UNAUTHORIZED,
                 "Session is invalid or has expired"
             );
         }
@@ -56,8 +54,8 @@ export const authenticate = asyncHandler(
             throw new HttpError(
                 403,
                 false,
-                "USER_DISABLED",
-                "User account is disabled"
+                ErrorCodes.FORBIDDEN,
+                "User account has been disabled, please contact support for more information"
             );
         }
 
@@ -71,8 +69,8 @@ export const authenticate = asyncHandler(
             throw new HttpError(
                 401,
                 false,
-                "SESSION_EXPIRED",
-                "Session has expired, please log in again"
+                ErrorCodes.UNAUTHORIZED,
+                "Session is invalid or has expired"
             );
         }
 

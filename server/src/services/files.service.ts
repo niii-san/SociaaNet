@@ -1,3 +1,4 @@
+import { ErrorCodes } from "../constants/error-code";
 import { GetImageDto } from "../dtos";
 import { filesRepo } from "../repositories";
 import { HttpError } from "../utils";
@@ -7,7 +8,12 @@ class FilesService {
         const image = await filesRepo.getImageMetaDataByKey(dto.imageKey);
 
         if (!image)
-            throw new HttpError(404, false, "NOT_FOUND", "Image not found");
+            throw new HttpError(
+                404,
+                false,
+                ErrorCodes.NOT_FOUND,
+                "Image not found"
+            );
 
         //TODO: implement visibility check
         // if(image.visibility !== "private"){

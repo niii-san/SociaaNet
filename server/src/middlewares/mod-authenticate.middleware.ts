@@ -1,6 +1,7 @@
 import { NextFunction, Response } from "express";
 import { asyncHandler, HttpError } from "../utils";
 import { RequestWithUserContext } from "../types";
+import { ErrorCodes } from "../constants/error-code";
 
 // this middleware can only be used after using authenticate middleware
 export const moderatorAuthenticate = asyncHandler(
@@ -11,7 +12,7 @@ export const moderatorAuthenticate = asyncHandler(
             throw new HttpError(
                 403,
                 false,
-                "FORBIDDEN",
+                ErrorCodes.FORBIDDEN,
                 "Forbidden: Moderator access required"
             );
         }
