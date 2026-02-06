@@ -59,4 +59,5 @@ export interface ActivityEntity {
     target?: ActivityTarget;
     metadata?: Record<string, any>;
     visibility: "public" | "private" | "system";
+    created_at: Date;
 }

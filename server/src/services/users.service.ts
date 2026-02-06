@@ -333,6 +333,21 @@ class UsersService {
             user_id: updatedUser._id.toString()
         };
     }
+
+    async getUserActivities(userId: string) {
+        const activities = await activityRepo.getActivitiesByActor(userId);
+
+        return activities.map((activity) => ({
+            activity_id: activity._id,
+            verb: activity.verb,
+            actor: {
+                user_id: activity.actor.user_id
+            },
+            target: activity.target,
+            metadata: activity.metadata,
+            created_at: activity.created_at
+        }));
+    }
 }
 
 export const usersService = new UsersService();

@@ -11,6 +11,7 @@ import {
 } from "../controllers";
 import multer from "multer";
 import { getCurrentUserController } from "../controllers/users/get-current-user.controller";
+import { getUserActivitiesController } from "../controllers/users/get-user-activities.controller";
 
 const usersRouter = Router();
 
@@ -50,8 +51,9 @@ usersRouter.patch("/me/username", updateUsernameController);
 // update fullname
 usersRouter.patch("/me/fullname", updateFullNameController);
 
+usersRouter.get("/me/activities", getUserActivitiesController);
+
 // Moderators only routes
-usersRouter.use(moderatorAuthenticate);
-usersRouter.get("/", getAllUsersController);
+usersRouter.get("/", moderatorAuthenticate, getAllUsersController);
 
 export default usersRouter;
