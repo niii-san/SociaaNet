@@ -2,6 +2,7 @@ import { Session, SessionDocument } from "./session.model";
 import { User, UserDocument } from "./user.model";
 import { ImageDocument, Image } from "./image.model";
 import { UserSettings, UserSettingsDocument } from "./user-settings.model";
+import { Activity, ActivityDocument } from "./activity-model";
 
 export {
     User,
@@ -11,5 +12,7 @@ export {
     Image,
     ImageDocument,
     UserSettings,
-    UserSettingsDocument
+    UserSettingsDocument,
+    Activity,
+    ActivityDocument
 };
