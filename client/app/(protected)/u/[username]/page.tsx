@@ -11,6 +11,8 @@ import { ReelsGrid } from "@/components/profile/reels-grid";
 import { RepostsGrid } from "@/components/profile/reposts-grid";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
+import { MiniLoader } from "@/components/ui/mini-loader";
+import { UserX } from "lucide-react";
 
 export default function ProfilePage() {
     const { username } = useParams<{ username: string }>();
@@ -108,8 +110,25 @@ export default function ProfilePage() {
                         </Tabs>
                     </>
                 ) : (
-                    <div className="flex items-center justify-center h-64">
-                        {loading ? <p>Loading...</p> : <p>User not found</p>}
+                    <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6">
+                        {loading ? (
+                            <MiniLoader />
+                        ) : (
+                            <>
+                                <div className="relative">
+                                    <div className="absolute inset-0 rounded-full bg-destructive/10 blur-2xl" />
+                                    <div className="relative rounded-full bg-muted p-8">
+                                        <UserX className="w-16 h-16 text-muted-foreground" />
+                                    </div>
+                                </div>
+                                <div className="text-center space-y-2">
+                                    <h2 className="text-2xl font-bold">User Not Found</h2>
+                                    <p className="text-muted-foreground max-w-md">
+                                        This account doesn't exist or may have been removed.
+                                    </p>
+                                </div>
+                            </>
+                        )}
                     </div>
                 )}
             </div>
