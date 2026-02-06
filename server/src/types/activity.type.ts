@@ -2,8 +2,8 @@ import { Types } from "mongoose";
 
 export enum ActivityVerb {
     // Social
-    follow = "follow",
-    unfollow = "unfollow",
+    followed = "followed",
+    unfollowed = "unfollowed",
     follow_request_sent = "follow_request_sent",
     follow_request_accepted = "follow_request_accepted",
 
@@ -27,6 +27,7 @@ export enum ActivityVerb {
     username_updated = "username_updated",
     bio_updated = "bio_updated",
     full_name_updated = "full_name_updated",
+    avatar_updated = "avatar_updated",
 
     // Privacy
     private_account_enabled = "private_account_enabled",

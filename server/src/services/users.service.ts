@@ -8,11 +8,12 @@ import {
     UploadAvatarDto
 } from "../dtos";
 import { HttpError, convertImageKeyToImageUrl } from "../utils";
-import { authRepo, userRepo } from "../repositories";
+import { activityRepo, authRepo, userRepo } from "../repositories";
 import { fileServiceClient } from "../clients";
 import { Types } from "mongoose";
 import { UserFieldRequirements } from "../constants";
 import { ErrorCodes } from "../constants/error-code";
+import { ActivityVerb } from "../types";
 
 class UsersService {
     async getUserById(dto: GetUserByIdDto) {
@@ -89,6 +90,20 @@ class UsersService {
             visibility: "public"
         });
 
+        await activityRepo.createActivity({
+            verb: ActivityVerb.avatar_updated,
+            actor: {
+                user_id: dto.user_id as unknown as Types.ObjectId
+            },
+            target: {
+                user_id: dto.user_id as unknown as Types.ObjectId
+            },
+            metadata: {
+                image_key: res.data.image_key
+            },
+            visibility: "private"
+        });
+
         return {
             avatar_url: res.data.image_key
         };
@@ -153,6 +168,20 @@ class UsersService {
                 "User not found"
             );
         }
+
+        await activityRepo.createActivity({
+            verb: ActivityVerb.bio_updated,
+            actor: {
+                user_id: dto.userId as unknown as Types.ObjectId
+            },
+            target: {
+                user_id: dto.userId as unknown as Types.ObjectId
+            },
+            metadata: {
+                new_bio: dto.bio
+            },
+            visibility: "private"
+        });
 
         return {
             bio: updatedUser.bio,
@@ -222,6 +251,20 @@ class UsersService {
             );
         }
 
+        await activityRepo.createActivity({
+            verb: ActivityVerb.username_updated,
+            actor: {
+                user_id: dto.userId as unknown as Types.ObjectId
+            },
+            target: {
+                user_id: dto.userId as unknown as Types.ObjectId
+            },
+            metadata: {
+                new_username: dto.username
+            },
+            visibility: "private"
+        });
+
         return {
             username: updatedUser.username
         };
@@ -270,6 +313,21 @@ class UsersService {
                 "User not found"
             );
         }
+
+        await activityRepo.createActivity({
+            verb: ActivityVerb.full_name_updated,
+            actor: {
+                user_id: dto.userId as unknown as Types.ObjectId
+            },
+            target: {
+                user_id: dto.userId as unknown as Types.ObjectId
+            },
+            metadata: {
+                new_full_name: fullName
+            },
+            visibility: "private"
+        });
+
         return {
             full_name: updatedUser.full_name,
             user_id: updatedUser._id.toString()

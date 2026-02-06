@@ -2,10 +2,11 @@ import { LoginDto, CreateUserDto } from "../dtos";
 import { genSalt, hash } from "bcryptjs";
 import bcrypt from "bcryptjs";
 import { generateUniqueUsername, HttpError } from "../utils";
-import { authRepo, userRepo } from "../repositories";
+import { activityRepo, authRepo, userRepo } from "../repositories";
 import { env } from "../config";
 import { ErrorCodes } from "../constants/error-code";
 import { UserFieldRequirements } from "../constants";
+import { ActivityVerb } from "../types";
 
 class AuthService {
     async login(dto: LoginDto) {
@@ -77,6 +78,18 @@ class AuthService {
             expires_at: sessionExpiryTime,
             ip: ip_address,
             device
+        });
+
+        await activityRepo.createActivity({
+            verb: ActivityVerb.logged_in,
+            actor: {
+                user_id: user._id
+            },
+            metadata: {
+                ip: ip_address,
+                device
+            },
+            visibility: "private"
         });
 
         return session;
