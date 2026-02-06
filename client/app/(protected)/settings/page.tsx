@@ -24,12 +24,16 @@ import {
     FeedSettings,
     SecuritySettings
 } from "@/types";
-import { Settings as SettingsIcon, Search } from "lucide-react";
+import { Settings as SettingsIcon, Search, Activity, ChevronRight, History, Clock } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 
 export default function SettingsPage() {
     const { settings, refetchSettings } = useAuth();
     const [updating, setUpdating] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
+    const router = useRouter();
 
     if (!settings) {
         return (
@@ -140,6 +144,14 @@ export default function SettingsPage() {
         "login".includes(searchLower) ||
         "sessions".includes(searchLower) ||
         "alerts".includes(searchLower);
+    
+    const showActivities = searchLower === "" ||
+        "activities".includes(searchLower) ||
+        "activity".includes(searchLower) ||
+        "history".includes(searchLower) ||
+        "account".includes(searchLower) ||
+        "login".includes(searchLower) ||
+        "track".includes(searchLower);
 
     return (
         <div className="min-h-screen bg-background pb-12">
@@ -164,6 +176,34 @@ export default function SettingsPage() {
             </header>
 
             <div className="container max-w-3xl mx-auto px-4 py-8 space-y-6">
+                {showActivities && (
+                    <Card className="p-6">
+                        <div className="flex items-start justify-between gap-4">
+                            <div className="flex items-start gap-4 flex-1">
+                                <div className="p-3 rounded-lg bg-muted">
+                                    <Activity className="w-5 h-5 text-foreground" />
+                                </div>
+                                <div className="flex-1">
+                                    <h2 className="text-lg font-semibold mb-1">
+                                        Your Activities
+                                    </h2>
+                                    <p className="text-sm text-muted-foreground">
+                                        Track your account activities, logins, profile updates, and security events
+                                    </p>
+                                </div>
+                            </div>
+                            <Button
+                                onClick={() => router.push("/settings/activities")}
+                                variant="outline"
+                                className="gap-1 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 dark:hover:bg-blue-950/20 dark:hover:text-blue-400 dark:hover:border-blue-800 transition-colors"
+                            >
+                                View
+                                <ChevronRight className="w-4 h-4" />
+                            </Button>
+                        </div>
+                    </Card>
+                )}
+
                 {showPrivacy && (
                     <PrivacySettingsSection
                         settings={settings.privacy}
@@ -200,7 +240,7 @@ export default function SettingsPage() {
                     />
                 )}
                 
-                {!showPrivacy && !showNotifications && !showAppearance && !showFeed && !showSecurity && (
+                {!showActivities && !showPrivacy && !showNotifications && !showAppearance && !showFeed && !showSecurity && (
                     <div className="text-center py-12">
                         <p className="text-muted-foreground">No settings found matching "{searchQuery}"</p>
                     </div>
