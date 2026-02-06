@@ -34,6 +34,15 @@ class AuthRepository implements IAuthRepository {
 
         return sessions;
     }
+
+    async updateSessionLastActivity(sessionId: string) {
+        const session = await Session.findOneAndUpdate(
+            { session_id: sessionId },
+            { last_activity_at: new Date() },
+            { new: true }
+        );
+        return session;
+    }
 }
 
 export const authRepo = new AuthRepository();

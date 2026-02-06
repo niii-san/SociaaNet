@@ -74,6 +74,19 @@ export const authenticate = asyncHandler(
             );
         }
 
+        // Only update last activity if more than 5 minutes have passed
+        const FIVE_MINUTES = 5 * 60 * 1000;
+
+        if (
+            !session.last_activity ||
+            Date.now() - new Date(session.last_activity).getTime() >
+            FIVE_MINUTES
+        ) {
+            authRepo
+                .updateSessionLastActivity(session._id.toString())
+                .catch(() => { });
+        }
+
         req.user = user;
         next();
     }
