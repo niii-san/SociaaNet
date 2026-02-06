@@ -6,15 +6,21 @@ import type { Request, Response } from "express";
 
 export const loginController = asyncHandler(
     async (req: Request, res: Response) => {
-        const parser = new UAParser(req.headers["user-agent"] || "Unknown");
-        const result = parser.getResult();
-        const device = `${result.device.model || result.browser.name || "Unknown Device"} • ${result.os.name || "Unknown OS"}`;
+        let deviceLabel: string;
+
+        if (req.headers["x-app-platform"]) {
+            deviceLabel = `${req.headers["x-device-model"]} • ${req.headers["x-app-platform"]}`;
+        } else {
+            const parser = new UAParser(req.headers["user-agent"]);
+            const r = parser.getResult();
+            deviceLabel = `${r.browser.name || "Browser"} • ${r.os.name || "OS"}`;
+        }
 
         const dtoBody = {
             email_address: req.body.email_address,
             password: req.body.password,
             ip: req.ip,
-            device
+            device: deviceLabel
         };
 
         const dto = new LoginDto(dtoBody);
