@@ -18,6 +18,19 @@ const sessionSchema = new mongoose.Schema<SessionEntity>(
             required: true,
             default: false
         },
+        ip: {
+            type: String,
+            required: true
+        },
+        last_activity: {
+            type: Date,
+            required: true,
+            default: Date.now
+        },
+        device: {
+            type: String,
+            required: true
+        },
         expires_at: {
             type: Date,
             required: true

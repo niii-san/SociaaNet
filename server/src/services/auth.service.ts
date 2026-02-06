@@ -11,6 +11,8 @@ class AuthService {
     async login(dto: LoginDto) {
         const emailAddress = (dto.emailAddress ?? "").trim();
         const password: string | undefined = dto.password;
+        const ip_address = dto.ip;
+        const device = dto.device;
 
         if (!emailAddress) {
             throw new HttpError(
@@ -72,7 +74,9 @@ class AuthService {
         const session = await authRepo.createSession({
             session_id: sessionId,
             user_id: user._id,
-            expires_at: sessionExpiryTime
+            expires_at: sessionExpiryTime,
+            ip: ip_address,
+            device
         });
 
         return session;
