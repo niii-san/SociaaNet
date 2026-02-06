@@ -17,7 +17,7 @@ const userSchema = new mongoose.Schema<UserEntity>(
             type: Boolean,
             default: false
         },
-        is_private: {
+        is_private_account: {
             type: Boolean,
             default: false
         },
