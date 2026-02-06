@@ -17,6 +17,14 @@ const userSchema = new mongoose.Schema<UserEntity>(
             type: Boolean,
             default: false
         },
+        is_private: {
+            type: Boolean,
+            default: false
+        },
+        is_email_verified: {
+            type: Boolean,
+            default: false
+        },
         bio: {
             type: String,
             default: ""

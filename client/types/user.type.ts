@@ -2,6 +2,8 @@ export interface IUser {
     user_id: string;
     full_name: string;
     username: string;
+    is_private: boolean;
+    is_email_verified: boolean;
     email_address?: string;
     avatar_url: string | null;
     created_at: string;
@@ -9,6 +11,7 @@ export interface IUser {
 
 export interface IUserProfile {
     user_id: string;
+    is_private:boolean;
     full_name: string;
     username: string;
     bio: string;

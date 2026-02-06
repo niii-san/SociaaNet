@@ -3,6 +3,8 @@ export interface UserEntity {
     avatar_key: string | null;
     full_name: string;
     username: string;
+    is_private: boolean;
+    is_email_verified: boolean;
     bio: string;
     password: string;
     created_at: Date;
