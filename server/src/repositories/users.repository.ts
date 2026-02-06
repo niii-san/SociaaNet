@@ -1,10 +1,13 @@
+import { ErrorCodes } from "../constants/error-code";
 import {
-    Image,
-    ImageDocument,
+    ImageMetaDataDocument,
+    ImageMetaData,
     UserDocument,
     User,
     UserSettings
 } from "../models";
+import { HttpError } from "../utils";
+import { filesRepo } from "./files.repository";
 
 interface UserDocumentRepository {
     createUser(userData: Partial<UserDocument>): Promise<UserDocument>;
@@ -12,7 +15,9 @@ interface UserDocumentRepository {
     getUserById(userId: string): Promise<UserDocument | null>;
     getUserByUsername(username: string): Promise<UserDocument | null>;
     getAllUsers(): Promise<UserDocument[]>;
-    uploadAvatar(data: Partial<ImageDocument>): Promise<ImageDocument>;
+    uploadAvatar(
+        data: Partial<ImageMetaDataDocument>
+    ): Promise<ImageMetaDataDocument>;
 }
 
 class UserRepository implements UserDocumentRepository {
@@ -23,7 +28,7 @@ class UserRepository implements UserDocumentRepository {
     }
 
     async getUserByEmail(email: string): Promise<UserDocument | null> {
-        const user = await User.findOne({ email_address: email })
+        const user = await User.findOne({ email_address: email });
         return user;
     }
 
@@ -65,11 +70,32 @@ class UserRepository implements UserDocumentRepository {
         return users;
     }
 
-    async uploadAvatar(data: Partial<ImageDocument>): Promise<ImageDocument> {
-        const image = await Image.create(data);
-        await User.findByIdAndUpdate(data.uploader_id, {
-            avatar_key: data.image_key
-        }).select("-password");
+    async uploadAvatar(
+        data: Partial<ImageMetaDataDocument>
+    ): Promise<ImageMetaDataDocument> {
+        const image = await ImageMetaData.create(data);
+
+        const user = await User.findById(data.uploader_id);
+
+        if (!user) {
+            throw new HttpError(
+                404,
+                false,
+                ErrorCodes.NOT_FOUND,
+                "User not found"
+            );
+        }
+
+        // if the user already has an avatar, we need to delete the old one
+        if (user.avatar_key) {
+            filesRepo
+                .deleteImageMetaDataByImageKey(user.avatar_key)
+                .catch(() => {});
+        }
+
+        user.avatar_key = image.image_key;
+        await user.save();
+
         return image;
     }
 

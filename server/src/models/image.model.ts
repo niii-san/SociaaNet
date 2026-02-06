@@ -1,8 +1,8 @@
-import { ImageEntity } from "../types";
+import { ImageMetaDataEntity } from "../types";
 
 import mongoose from "mongoose";
 
-const imageSchema = new mongoose.Schema<ImageEntity>(
+const imageMetaDataSchema = new mongoose.Schema<ImageMetaDataEntity>(
     {
         uploader_id: {
             type: mongoose.Schema.Types.ObjectId,
@@ -41,5 +41,9 @@ const imageSchema = new mongoose.Schema<ImageEntity>(
     { timestamps: { createdAt: "created_at", updatedAt: false } }
 );
 
-export type ImageDocument = mongoose.HydratedDocument<ImageEntity>;
-export const Image = mongoose.model<ImageEntity>("Image", imageSchema);
+export type ImageMetaDataDocument =
+    mongoose.HydratedDocument<ImageMetaDataEntity>;
+export const ImageMetaData = mongoose.model<ImageMetaDataEntity>(
+    "ImageMetaData",
+    imageMetaDataSchema
+);

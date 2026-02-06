@@ -1,6 +1,6 @@
 import { Types } from "mongoose";
 
-export interface ImageEntity {
+export interface ImageMetaDataEntity {
     uploader_id: Types.ObjectId;
     chat_id: Types.ObjectId | null;
     image_key: string;
