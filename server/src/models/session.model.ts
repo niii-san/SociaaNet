@@ -13,7 +13,12 @@ const sessionSchema = new mongoose.Schema<SessionEntity>(
             ref: "User",
             required: true
         },
-        is_expired: {
+        has_expired: {
+            type: Boolean,
+            required: true,
+            default: false
+        },
+        is_deleted: {
             type: Boolean,
             required: true,
             default: false

@@ -6,6 +6,7 @@ export interface SessionEntity {
     ip: string;
     last_activity: Date;
     device: string;
-    is_expired: boolean;
+    has_expired: boolean;
+    is_deleted: boolean;
     expires_at: Date;
 }

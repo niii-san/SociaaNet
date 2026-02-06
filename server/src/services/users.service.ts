@@ -8,7 +8,7 @@ import {
     UploadAvatarDto
 } from "../dtos";
 import { HttpError, convertImageKeyToImageUrl } from "../utils";
-import { userRepo } from "../repositories";
+import { authRepo, userRepo } from "../repositories";
 import { fileServiceClient } from "../clients";
 import { Types } from "mongoose";
 import { UserFieldRequirements } from "../constants";
@@ -96,6 +96,9 @@ class UsersService {
 
     async getUserSettingsByUserId(dto: GetUserSettingsByUserIdDto) {
         const userSettings = await userRepo.getUserSettingsByUserId(dto.userId);
+        const sessions = await authRepo.getAllActiveSessionsByUserId(
+            dto.userId
+        );
 
         if (!userSettings)
             throw new HttpError(
@@ -111,7 +114,10 @@ class UsersService {
             notifications: userSettings.notifications,
             appearance: userSettings.appearance,
             feed: userSettings.feed,
-            security: userSettings.security
+            security: {
+                login_alerts: userSettings.security.login_alerts,
+                sessions: sessions
+            }
         };
     }
 

@@ -13,7 +13,7 @@ export const loginController = asyncHandler(
         } else {
             const parser = new UAParser(req.headers["user-agent"]);
             const r = parser.getResult();
-            deviceLabel = `${r.browser.name || "Browser"} • ${r.os.name || "OS"}`;
+            deviceLabel = `Device: ${r.browser.name || "Unknown"}  OS: ${r.os.name || "Unknown"}`;
         }
 
         const dtoBody = {

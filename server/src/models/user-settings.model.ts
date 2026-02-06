@@ -110,7 +110,7 @@ const userSettingsSchema = new mongoose.Schema<UserSettingsEntity>({
             type: Boolean,
             default: true
         },
-        active_session: {
+        sessions: {
             type: [
                 {
                     device: String,

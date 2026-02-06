@@ -30,7 +30,7 @@ export const authenticate = asyncHandler(
             );
         }
 
-        if (session.is_expired) {
+        if (session.has_expired) {
             throw new HttpError(
                 401,
                 false,
@@ -63,7 +63,7 @@ export const authenticate = asyncHandler(
         const expiresAt = new Date(session.expires_at);
 
         if (expiresAt < now) {
-            session.is_expired = true;
+            session.has_expired = true;
             await session.save();
 
             throw new HttpError(

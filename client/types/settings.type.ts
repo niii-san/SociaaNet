@@ -1,15 +1,13 @@
-import { Types } from "mongoose";
+export type PrivacyVisibility = "everyone" | "followers_only" | "no_one";
 
-type PrivacyVisibility = "everyone" | "followers_only" | "no_one";
-
-type BlockedUser = {
-    user_id: Types.ObjectId;
+export type BlockedUser = {
+    user_id: string;
     username: string;
     full_name: string;
     avatar_key: string;
 };
 
-interface PrivacySettings {
+export interface PrivacySettings {
     private_account: boolean;
     allow_messages_from: PrivacyVisibility;
     allow_comments_from: PrivacyVisibility;
@@ -19,7 +17,7 @@ interface PrivacySettings {
     blocked_users: BlockedUser[];
 }
 
-interface NotificationSettings {
+export interface NotificationSettings {
     likes: boolean;
     comments: boolean;
     mentions: boolean;
@@ -27,28 +25,32 @@ interface NotificationSettings {
     messages: boolean;
 }
 
-type ThemeMode = "light" | "dark" | "system";
-interface AppearanceSettings {
+export type ThemeMode = "light" | "dark" | "system";
+
+export interface AppearanceSettings {
     theme: ThemeMode;
 }
 
-type FeedMode = "algorithmic" | "chronological";
-interface FeedSettings {
+export type FeedMode = "algorithmic" | "chronological";
+
+export interface FeedSettings {
     mode: FeedMode;
     show_sensitive_content: boolean;
 }
 
-interface SecuritySettings {
+export interface SecuritySettings {
     login_alerts: boolean;
     sessions: {
         device: string;
         ip: string;
-        last_activity: Date;
+        last_activity: string;
+        has_expired: boolean;
+        is_deleted: boolean;
     }[];
 }
 
-export interface UserSettingsEntity {
-    user_id: Types.ObjectId;
+export interface UserSettings {
+    user_id: string;
     privacy: PrivacySettings;
     notifications: NotificationSettings;
     appearance: AppearanceSettings;

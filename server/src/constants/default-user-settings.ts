@@ -24,10 +24,10 @@ export const defaultUserSettings: UserSettingsEntity = {
     },
     feed: {
         mode: "algorithmic",
-        show_sensitive_content: false
+        show_sensitive_content: true
     },
     security: {
         login_alerts: true,
-        active_session: []
+        sessions: []
     }
 };
