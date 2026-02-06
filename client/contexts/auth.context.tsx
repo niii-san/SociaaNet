@@ -13,6 +13,7 @@ type AuthContextType = {
     data: IUser | null;
     logout: () => void;
     validateSession: () => Promise<void>;
+    invalidateCurrentUser: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -56,6 +57,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         router.replace("/login");
     };
 
+    const invalidateCurrentUser = async () => {
+        try {
+            const userData = await getCurrentUser();
+            setUser(userData);
+            setIsLoggedIn(true);
+            console.log("Current user refetched:", userData);
+        } catch (err) {
+            console.error("Failed to refetch current user:", err);
+        }
+    };
+
     useEffect(() => {
         validateSession();
     }, []);
@@ -67,7 +79,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 isLoggedIn,
                 isLoading,
                 logout,
-                validateSession
+                validateSession,
+                invalidateCurrentUser
             }}
         >
             {children}

@@ -26,26 +26,37 @@ export default function ProfilePage() {
 
     useEffect(() => {
         const fetchProfile = async () => {
+            if (!username) return;
+            
+            setLoading(true);
             try {
-                const data = await getUserProfileByUsername(
-                    username ?? "".toString()
-                );
+                const data = await getUserProfileByUsername(username);
                 setProfileData(data);
 
                 if (currentUserData) {
                     setIsCurrentUserProfile(
-                        currentUserData.username === data.username
+                        currentUserData.user_id === data.user_id
                     );
                 }
-
-                setLoading(false);
             } catch (error) {
                 console.error("Error fetching profile:", error);
+                setProfileData(null);
+            } finally {
+                setLoading(false);
             }
         };
 
         fetchProfile();
-    }, [username, currentUserData]); // Added currentUserData to dependency array
+    }, [username]); // Only depend on username from route
+    
+    // Separate effect to update isCurrentUserProfile when currentUserData changes
+    useEffect(() => {
+        if (currentUserData && profileData) {
+            setIsCurrentUserProfile(
+                currentUserData.user_id === profileData.user_id
+            );
+        }
+    }, [currentUserData, profileData]);
 
     return (
         <div className="min-h-screen bg-background pb-12 pt-16">

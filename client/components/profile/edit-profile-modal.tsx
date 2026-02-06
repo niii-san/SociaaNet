@@ -12,7 +12,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea"; 
-import { updateUserProfile } from "@/features/users/users.api";
+import { updateUsername, updateBio, updateFullName } from "@/features/users/users.api";
+import { getCurrentUser } from "@/features/users/users.api";
 import { IUserProfile } from "@/types";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
@@ -49,19 +50,41 @@ export function EditProfileModal({
         setIsLoading(true);
 
         try {
-            await updateUserProfile({
-                full_name: fullName,
-                username: username,
-                bio: bio,
-            });
+            // Update all fields that have changed
+            const updatePromises = [];
+            let usernameChanged = false;
+            let newUsername = username;
+            
+            if (fullName !== user.full_name) {
+                updatePromises.push(updateFullName(fullName));
+            }
+            if (username !== user.username) {
+                updatePromises.push(updateUsername(username));
+                usernameChanged = true;
+            }
+            if (bio !== (user.bio || "")) {
+                updatePromises.push(updateBio(bio));
+            }
+            
+            await Promise.all(updatePromises);
+            
             toast.success("Profile updated successfully");
-            router.refresh(); // Refresh server components if any, but also triggers client side re-renders often
-            // In client side we might need to manually trigger reload or callback
-            window.location.reload(); // Simple reload to refetch data for now as per previous component style
+            
+            // Refetch current user data
+            await getCurrentUser();
+            
+            // If username changed, redirect to new profile URL
+            if (usernameChanged) {
+                router.push(`/u/${newUsername}`);
+            } else {
+                // Otherwise just reload to refresh data
+                window.location.reload();
+            }
             onClose();
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            toast.error("Failed to update profile");
+            const errorMessage = error?.response?.data?.message || "Failed to update profile";
+            toast.error(errorMessage);
         } finally {
             setIsLoading(false);
         }

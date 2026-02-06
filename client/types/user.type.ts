@@ -1,5 +1,5 @@
 export interface IUser {
-    _id: string;
+    user_id: string;
     full_name: string;
     username: string;
     email_address?: string;
@@ -8,7 +8,7 @@ export interface IUser {
 }
 
 export interface IUserProfile {
-    _id: string;
+    user_id: string;
     full_name: string;
     username: string;
     bio: string;

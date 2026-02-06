@@ -6,15 +6,21 @@ import {
     DialogContent,
     DialogFooter,
     DialogHeader,
-    DialogTitle,
+    DialogTitle
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea"; 
-import { updateUserProfile } from "@/features/users/users.api";
+import { Textarea } from "@/components/ui/textarea";
+import {
+    updateUsername,
+    updateBio,
+    updateFullName
+} from "@/features/users/users.api";
+import { getCurrentUser } from "@/features/users/users.api";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/contexts";
 
 interface EditFieldModalProps {
     isOpen: boolean;
@@ -38,6 +44,7 @@ export function EditFieldModal({
     const [value, setValue] = useState(initialValue);
     const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
+    const { invalidateCurrentUser } = useAuth();
 
     useEffect(() => {
         if (isOpen) {
@@ -50,17 +57,28 @@ export function EditFieldModal({
         setIsLoading(true);
 
         try {
-            await updateUserProfile({
-                [fieldName]: value
-            });
+            const apiMap = {
+                username: updateUsername,
+                bio: updateBio,
+                full_name: updateFullName
+            };
+
+            await apiMap[fieldName](value);
+
             toast.success(`${fieldLabel} updated successfully`);
-            router.refresh();
-            // Simple reload to ensure data consistency as per previous pattern
-            setTimeout(() => window.location.reload(), 500);
+
+            // If username changed, redirect to new profile URL
+            if (fieldName === "username") {
+                router.push(`/u/${value}`);
+            }
+
+            await invalidateCurrentUser();
             onClose();
-        } catch (error) {
+        } catch (error: any) {
             console.error(error);
-            toast.error("Failed to update profile");
+            const errorMessage =
+                error?.response?.data?.message || "Failed to update profile";
+            toast.error(errorMessage);
         } finally {
             setIsLoading(false);
         }
@@ -75,9 +93,7 @@ export function EditFieldModal({
                 <form onSubmit={handleSubmit}>
                     <div className="grid gap-4 py-4">
                         <div className="grid gap-2">
-                            <Label htmlFor={fieldName}>
-                                {fieldLabel}
-                            </Label>
+                            <Label htmlFor={fieldName}>{fieldLabel}</Label>
                             {isTextarea ? (
                                 <Textarea
                                     id={fieldName}
@@ -97,7 +113,12 @@ export function EditFieldModal({
                         </div>
                     </div>
                     <DialogFooter>
-                        <Button variant="outline" type="button" onClick={onClose} disabled={isLoading}>
+                        <Button
+                            variant="outline"
+                            type="button"
+                            onClick={onClose}
+                            disabled={isLoading}
+                        >
                             Cancel
                         </Button>
                         <Button type="submit" disabled={isLoading}>

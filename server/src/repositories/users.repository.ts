@@ -23,9 +23,7 @@ class UserRepository implements UserDocumentRepository {
     }
 
     async getUserByEmail(email: string): Promise<UserDocument | null> {
-        const user = await User.findOne({ email_address: email }).select(
-            "-password"
-        );
+        const user = await User.findOne({ email_address: email })
         return user;
     }
 
