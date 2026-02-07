@@ -8,5 +8,6 @@ export interface SessionEntity {
     device: string;
     has_expired: boolean;
     is_deleted: boolean;
+    is_revoked:boolean;
     expires_at: Date;
 }

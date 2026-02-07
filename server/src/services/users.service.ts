@@ -36,6 +36,7 @@ class UsersService {
             user_id: user._id,
             full_name: user.full_name,
             username: user.username,
+            is_private_account: user.is_private_account,
             bio: user.bio,
             email_address: user.email_address,
             avatar_url: avatar_url,
@@ -64,6 +65,7 @@ class UsersService {
             user_id: user._id,
             full_name: user.full_name,
             username: user.username,
+            is_private_account: user.is_private_account,
             bio: user.bio,
             avatar_url: avatar_url,
             created_at: user.created_at

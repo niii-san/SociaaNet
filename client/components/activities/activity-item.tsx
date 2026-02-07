@@ -73,7 +73,10 @@ const formatDate = (date: string) => {
     return activityDate.toLocaleDateString("en-US", {
         month: "short",
         day: "numeric",
-        year: activityDate.getFullYear() !== now.getFullYear() ? "numeric" : undefined
+        year:
+            activityDate.getFullYear() !== now.getFullYear()
+                ? "numeric"
+                : undefined
     });
 };
 
@@ -85,12 +88,13 @@ const getMetadataDisplay = (verb: string, metadata: Record<string, any>) => {
                 <div className="mt-2 space-y-1 text-sm text-muted-foreground">
                     {metadata.device && (
                         <p className="flex items-center gap-1">
-                            <span className="font-medium">Device:</span> {metadata.device}
+                            {metadata.device}
                         </p>
                     )}
                     {metadata.ip && (
                         <p className="flex items-center gap-1">
-                            <span className="font-medium">IP:</span> {metadata.ip}
+                            <span className="font-medium">IP:</span>{" "}
+                            {metadata.ip}
                         </p>
                     )}
                 </div>
@@ -99,7 +103,10 @@ const getMetadataDisplay = (verb: string, metadata: Record<string, any>) => {
             return (
                 <div className="mt-2 text-sm">
                     <p className="text-muted-foreground">
-                        New username: <span className="font-medium text-foreground">@{metadata.new_username}</span>
+                        New username:{" "}
+                        <span className="font-medium text-foreground">
+                            @{metadata.new_username}
+                        </span>
                     </p>
                 </div>
             );
@@ -107,7 +114,10 @@ const getMetadataDisplay = (verb: string, metadata: Record<string, any>) => {
             return (
                 <div className="mt-2 text-sm">
                     <p className="text-muted-foreground">
-                        New name: <span className="font-medium text-foreground">{metadata.new_full_name}</span>
+                        New name:{" "}
+                        <span className="font-medium text-foreground">
+                            {metadata.new_full_name}
+                        </span>
                     </p>
                 </div>
             );
@@ -115,7 +125,10 @@ const getMetadataDisplay = (verb: string, metadata: Record<string, any>) => {
             return (
                 <div className="mt-2 text-sm">
                     <p className="text-muted-foreground">
-                        New bio: <span className="font-medium text-foreground italic">"{metadata.new_bio}"</span>
+                        New bio:{" "}
+                        <span className="font-medium text-foreground italic">
+                            "{metadata.new_bio}"
+                        </span>
                     </p>
                 </div>
             );
@@ -135,7 +148,9 @@ export function ActivityItem({ activity }: ActivityItemProps) {
             </div>
             <div className="flex-1 min-w-0">
                 <div className="flex items-start justify-between gap-2">
-                    <h3 className="font-semibold">{formatVerb(activity.verb)}</h3>
+                    <h3 className="font-semibold">
+                        {formatVerb(activity.verb)}
+                    </h3>
                     <span className="text-sm text-muted-foreground whitespace-nowrap">
                         {formatDate(activity.created_at)}
                     </span>

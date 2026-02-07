@@ -23,6 +23,11 @@ const sessionSchema = new mongoose.Schema<SessionEntity>(
             required: true,
             default: false
         },
+        is_revoked: {
+            type: Boolean,
+            required: true,
+            default: false
+        },
         ip: {
             type: String,
             required: true

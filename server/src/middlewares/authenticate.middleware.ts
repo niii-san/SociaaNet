@@ -73,6 +73,14 @@ export const authenticate = asyncHandler(
                 "Session is invalid or has expired"
             );
         }
+        if (session.is_deleted || session.is_revoked) {
+            throw new HttpError(
+                401,
+                false,
+                ErrorCodes.UNAUTHORIZED,
+                "Session is invalid or has expired"
+            );
+        }
 
         // Only update last activity if more than 5 minutes have passed
         const FIVE_MINUTES = 5 * 60 * 1000;
@@ -80,11 +88,11 @@ export const authenticate = asyncHandler(
         if (
             !session.last_activity ||
             Date.now() - new Date(session.last_activity).getTime() >
-            FIVE_MINUTES
+                FIVE_MINUTES
         ) {
             authRepo
                 .updateSessionLastActivity(session._id.toString())
-                .catch(() => { });
+                .catch(() => {});
         }
 
         req.user = user;
