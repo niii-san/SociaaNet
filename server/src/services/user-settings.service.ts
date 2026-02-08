@@ -1,7 +1,13 @@
 import mongoose, { Types } from "mongoose";
-import { EnablePrivateAccountDto, DisablePrivateAccountDto } from "../dtos";
+import {
+    EnablePrivateAccountDto,
+    DisablePrivateAccountDto,
+    AllowMessagesFromDto
+} from "../dtos";
 import { settingsRepo, activityRepo } from "../repositories";
 import { ActivityVerb } from "../types";
+import { HttpError } from "../utils";
+import { ErrorCodes } from "../constants/error-code";
 
 class UserSettingsService {
     async enablePrivateAccount(
@@ -54,6 +60,45 @@ class UserSettingsService {
         });
 
         return value;
+    }
+
+    async allowMessagesFrom(dto: AllowMessagesFromDto) {
+        const userId = new Types.ObjectId(dto.userId);
+        const allowMessagesFrom = dto.allowMessagesFrom;
+
+        const allowedValues = ["everyone", "followers_only", "no_one"];
+        let result;
+
+        if (!allowedValues.includes(allowMessagesFrom)) {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                "Invalid value for allow_messages_from"
+            );
+        }
+
+        if (allowMessagesFrom === "everyone") {
+            result = await settingsRepo.allowMessagesFromEveryone(
+                userId.toString()
+            );
+        } else if (allowMessagesFrom === "followers_only") {
+            result = await settingsRepo.allowMessagesFromFollowersOnly(
+                userId.toString()
+            );
+        } else if (allowMessagesFrom === "no_one") {
+            result = await settingsRepo.allowMessagesFromNoOne(
+                userId.toString()
+            );
+        } else {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                "Invalid value for allow_messages_fromx"
+            );
+        }
+        return result;
     }
 }
 

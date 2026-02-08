@@ -3,7 +3,11 @@ import { RequestWithUserContext } from "../../types";
 import { asyncHandler, HttpError, HttpSuccess } from "../../utils";
 import { ErrorCodes } from "../../constants/error-code";
 import { userSettingsService } from "../../services/user-settings.service";
-import { DisablePrivateAccountDto, EnablePrivateAccountDto } from "../../dtos";
+import {
+    AllowMessagesFromDto,
+    DisablePrivateAccountDto,
+    EnablePrivateAccountDto
+} from "../../dtos";
 
 interface UpdatePrivacySettingsRequest {
     private_account?: boolean;
@@ -24,7 +28,6 @@ export const privacyController = asyncHandler(
             allow_mentions_from,
             show_activity_status
         } = req.body as Partial<UpdatePrivacySettingsRequest>;
-
         // Validation: Ensure only one field is being updated at a time
         const fields = [
             private_account !== undefined,
@@ -65,6 +68,11 @@ export const privacyController = asyncHandler(
                 const dto = new DisablePrivateAccountDto(userId);
                 result = await userSettingsService.disablePrivateAccount(dto);
             }
+        }
+
+        if (allow_messages_from !== undefined) {
+            const dto = new AllowMessagesFromDto(userId, allow_messages_from);
+            result = await userSettingsService.allowMessagesFrom(dto);
         }
 
         return res

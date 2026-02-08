@@ -10,6 +10,7 @@ import { UpdateFullNameDto } from "./users/update-fullname.dto";
 import { UpdateUsernameDto } from "./users/update-username.dto";
 import { EnablePrivateAccountDto } from "./settings/enable-private-account.dto";
 import { DisablePrivateAccountDto } from "./settings/disable-private-account.dto";
+import { AllowMessagesFromDto } from "./settings/allow-messages-from.dto";
 
 export {
     CreateUserDto,
@@ -23,5 +24,6 @@ export {
     UpdateUsernameDto,
     UpdateBioDto,
     EnablePrivateAccountDto,
-    DisablePrivateAccountDto
+    DisablePrivateAccountDto,
+    AllowMessagesFromDto
 };

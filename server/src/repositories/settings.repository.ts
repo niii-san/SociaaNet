@@ -11,13 +11,13 @@ interface ISettingsRepository {
         userId: string
     ): Promise<{ is_private_account: boolean }>;
 
-    allowMessageRequestsFromEveryone(
+    allowMessagesFromEveryone(
         userId: string
     ): Promise<{ allow_messages_from: string }>;
-    allowMessageRequestsFromFollowersOnly(
+    allowMessagesFromFollowersOnly(
         userId: string
     ): Promise<{ allow_messages_from: string }>;
-    allowMessageRequestsFromNoOne(
+    allowMessagesFromNoOne(
         userId: string
     ): Promise<{ allow_messages_from: string }>;
 
@@ -131,7 +131,7 @@ class SettingsRepository implements ISettingsRepository {
                 ) {
                     throw new Error(
                         "Invariant violation: UserSettings document not found for user_id: " +
-                        userId
+                            userId
                     );
                 }
 
@@ -182,7 +182,7 @@ class SettingsRepository implements ISettingsRepository {
                 ) {
                     throw new Error(
                         "Invariant violation: UserSettings document not found for user_id: " +
-                        userId
+                            userId
                     );
                 }
 
@@ -205,22 +205,68 @@ class SettingsRepository implements ISettingsRepository {
         }
     }
 
-    async allowMessageRequestsFromEveryone(
+    async allowMessagesFromEveryone(
         userId: string
     ): Promise<{ allow_messages_from: string }> {
-        throw new Error("Method not implemented.");
+        const result = await UserSettings.updateOne(
+            { user_id: userId },
+            {
+                $set: {
+                    "privacy.allow_messages_from": "everyone"
+                }
+            }
+        );
+        if (result.matchedCount === 0) {
+            throw new Error(
+                "Invariant violation: UserSettings document not found for user_id: " +
+                    userId
+            );
+        }
+
+        return { allow_messages_from: "everyone" };
     }
 
-    async allowMessageRequestsFromFollowersOnly(
+    async allowMessagesFromFollowersOnly(
         userId: string
     ): Promise<{ allow_messages_from: string }> {
-        throw new Error("Method not implemented.");
+        const result = await UserSettings.updateOne(
+            { user_id: userId },
+            {
+                $set: {
+                    "privacy.allow_messages_from": "followers_only"
+                }
+            }
+        );
+
+        if (result.matchedCount === 0) {
+            throw new Error(
+                "Invariant violation: UserSettings document not found for user_id: " +
+                    userId
+            );
+        }
+
+        return { allow_messages_from: "followers_only" };
     }
 
-    async allowMessageRequestsFromNoOne(
+    async allowMessagesFromNoOne(
         userId: string
     ): Promise<{ allow_messages_from: string }> {
-        throw new Error("Method not implemented.");
+        const result = await UserSettings.updateOne(
+            { user_id: userId },
+            {
+                $set: {
+                    "privacy.allow_messages_from": "no_one"
+                }
+            }
+        );
+        if (result.matchedCount === 0) {
+            throw new Error(
+                "Invariant violation: UserSettings document not found for user_id: " +
+                    userId
+            );
+        }
+
+        return { allow_messages_from: "no_one" };
     }
 
     async allowCommentsFromEveryone(
