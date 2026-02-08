@@ -30,8 +30,7 @@ export enum ActivityVerb {
     avatar_updated = "avatar_updated",
 
     // Privacy
-    private_account_enabled = "private_account_enabled",
-    private_account_disabled = "private_account_disabled",
+    privacy_settings_updated = "privacy_settings_updated",
 
     // Moderation
     account_reported = "account_reported",

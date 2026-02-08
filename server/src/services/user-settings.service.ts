@@ -20,7 +20,7 @@ class UserSettingsService {
         );
 
         await activityRepo.createActivity({
-            verb: ActivityVerb.private_account_enabled,
+            verb: ActivityVerb.privacy_settings_updated,
             actor: {
                 user_id: userId
             },
@@ -46,7 +46,7 @@ class UserSettingsService {
         );
 
         await activityRepo.createActivity({
-            verb: ActivityVerb.private_account_disabled,
+            verb: ActivityVerb.privacy_settings_updated,
             actor: {
                 user_id: userId
             },
@@ -82,14 +82,54 @@ class UserSettingsService {
             result = await settingsRepo.allowMessagesFromEveryone(
                 userId.toString()
             );
+            await activityRepo.createActivity({
+                verb: ActivityVerb.privacy_settings_updated,
+                actor: {
+                    user_id: userId
+                },
+                target: {
+                    user_id: userId
+                },
+                metadata: {
+                    allow_messages_from: allowMessagesFrom
+                },
+                visibility: "private"
+            });
         } else if (allowMessagesFrom === "followers_only") {
             result = await settingsRepo.allowMessagesFromFollowersOnly(
                 userId.toString()
             );
+
+            await activityRepo.createActivity({
+                verb: ActivityVerb.privacy_settings_updated,
+                actor: {
+                    user_id: userId
+                },
+                target: {
+                    user_id: userId
+                },
+                metadata: {
+                    allow_messages_from: allowMessagesFrom
+                },
+                visibility: "private"
+            });
         } else if (allowMessagesFrom === "no_one") {
             result = await settingsRepo.allowMessagesFromNoOne(
                 userId.toString()
             );
+            await activityRepo.createActivity({
+                verb: ActivityVerb.privacy_settings_updated,
+                actor: {
+                    user_id: userId
+                },
+                target: {
+                    user_id: userId
+                },
+                metadata: {
+                    allow_messages_from: allowMessagesFrom
+                },
+                visibility: "private"
+            });
         } else {
             throw new HttpError(
                 400,

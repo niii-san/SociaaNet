@@ -57,6 +57,21 @@ const formatVerb = (verb: string) => {
         .join(" ");
 };
 
+const formatText = (text: string) => {
+    return text
+        .split("_")
+        .filter(
+            (word) =>
+                word !== "new" &&
+                word !== "is" &&
+                word !== "account" &&
+                word !== "updated" &&
+                word !== "has"
+        )
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(" ");
+};
+
 const formatDate = (date: string) => {
     const activityDate = new Date(date);
     const now = new Date();
@@ -132,8 +147,37 @@ const getMetadataDisplay = (verb: string, metadata: Record<string, any>) => {
                     </p>
                 </div>
             );
+        case "privacy_settings_updated":
+            if (metadata.is_private_account !== undefined) {
+                return (
+                    <div className="mt-2 text-sm">
+                        <p className="text-muted-foreground">
+                            {metadata.is_private_account
+                                ? "Account set to private"
+                                : "Account set to public"}
+                        </p>
+                    </div>
+                );
+            }
+
         default:
-            return null;
+            return (
+                <div className="mt-2 text-sm">
+                    <p className="text-muted-foreground">
+                        {formatText(Object.keys(metadata)[0])}:{" "}
+                        <span className="font-medium text-foreground">
+                            {typeof metadata[Object.keys(metadata)[0]] ===
+                                "boolean"
+                                ? metadata[Object.keys(metadata)[0]]
+                                    ? "Enabled"
+                                    : "Disabled"
+                                : formatText(
+                                    metadata[Object.keys(metadata)[0]]
+                                )}
+                        </span>
+                    </p>
+                </div>
+            );
     }
 };
 
