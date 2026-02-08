@@ -161,19 +161,33 @@ const getMetadataDisplay = (verb: string, metadata: Record<string, any>) => {
             }
 
         default:
+            const key = Object.keys(metadata)[0];
+            const value = metadata[key];
+
+            const displayValue =
+                typeof value === "boolean"
+                    ? value
+                        ? "Enabled"
+                        : "Disabled"
+                    : typeof value === "string"
+                        ? value.endsWith("_updated")
+                            ? ""
+                            : formatText(value)
+                        : String(value);
+
+            if (Object.keys(metadata).length > 1) {
+                return null;
+            } else if (key.endsWith("key")) {
+                return null;
+            } else if (key.endsWith("updated")) {
+                return null;
+            }
             return (
                 <div className="mt-2 text-sm">
                     <p className="text-muted-foreground">
-                        {formatText(Object.keys(metadata)[0])}:{" "}
+                        {formatText(key)}:{" "}
                         <span className="font-medium text-foreground">
-                            {typeof metadata[Object.keys(metadata)[0]] ===
-                                "boolean"
-                                ? metadata[Object.keys(metadata)[0]]
-                                    ? "Enabled"
-                                    : "Disabled"
-                                : formatText(
-                                    metadata[Object.keys(metadata)[0]]
-                                )}
+                            {displayValue}
                         </span>
                     </p>
                 </div>
