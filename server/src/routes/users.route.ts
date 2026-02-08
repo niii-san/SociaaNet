@@ -36,9 +36,6 @@ usersRouter.post(
     uploadAvatarController
 );
 
-// Get settings of current user
-usersRouter.get("/me/settings", getUserSettingsController);
-
 // Get current user via cookie
 usersRouter.get("/me", getCurrentUserController);
 

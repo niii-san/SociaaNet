@@ -8,6 +8,8 @@ import { UploadAvatarDto } from "./users/upload-avatar.dto";
 import { UpdateBioDto } from "./users/update-bio.dto";
 import { UpdateFullNameDto } from "./users/update-fullname.dto";
 import { UpdateUsernameDto } from "./users/update-username.dto";
+import { EnablePrivateAccountDto } from "./settings/enable-private-account.dto";
+import { DisablePrivateAccountDto } from "./settings/disable-private-account.dto";
 
 export {
     CreateUserDto,
@@ -19,5 +21,7 @@ export {
     GetUserSettingsByUserIdDto,
     UpdateFullNameDto,
     UpdateUsernameDto,
-    UpdateBioDto
+    UpdateBioDto,
+    EnablePrivateAccountDto,
+    DisablePrivateAccountDto
 };

@@ -52,11 +52,7 @@ const userSettingsSchema = new mongoose.Schema<UserSettingsEntity>({
             enum: ["everyone", "followers_only", "no_one"],
             default: "everyone"
         },
-        show_online_status: {
-            type: Boolean,
-            default: true
-        },
-        show_last_seen: {
+        show_activity_status: {
             type: Boolean,
             default: true
         },

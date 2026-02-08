@@ -9,6 +9,7 @@ import { getAllUsersController } from "./users/get-all-users.controller";
 import { updateBioController } from "./users/update-bio.controller";
 import { updateFullNameController } from "./users/update-fullname.controller";
 import { updateUsernameController } from "./users/update-username.controller";
+import { privacyController } from "./settings/privacy.controller";
 
 export {
     signupController,
@@ -21,5 +22,6 @@ export {
     getAllUsersController,
     updateBioController,
     updateFullNameController,
-    updateUsernameController
+    updateUsernameController,
+    privacyController
 };

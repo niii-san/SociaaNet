@@ -25,7 +25,7 @@ app.use(requestLogger);
 app.get("/", (_: Request, res: Response) => {
     return res
         .status(200)
-        .json(new HttpSuccess(200,true, "SociaaNet server", null));
+        .json(new HttpSuccess(200, true, "SociaaNet server", null));
 });
 
 // Routes
@@ -34,8 +34,10 @@ import {
     authRouter,
     usersRouter,
     filesRouter,
-    moderatorsRouter
+    moderatorsRouter,
+    settingsRouter
 } from "./routes";
+
 // Auth Routes
 app.use("/api/v1/auth", authRouter);
 
@@ -44,6 +46,9 @@ app.use("/api/v1/files", filesRouter);
 
 // Users Routes
 app.use("/api/v1/users", usersRouter);
+
+// Settings Routes
+app.use("/api/v1/users/me/settings", settingsRouter);
 
 // Moderators Routes
 app.use("/api/v1/moderators", moderatorsRouter);

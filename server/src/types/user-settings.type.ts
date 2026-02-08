@@ -14,8 +14,7 @@ interface PrivacySettings {
     allow_messages_from: PrivacyVisibility;
     allow_comments_from: PrivacyVisibility;
     allow_mentions_from: PrivacyVisibility;
-    show_online_status: boolean;
-    show_last_seen: boolean;
+    show_activity_status: boolean;
     blocked_users: BlockedUser[];
 }
 

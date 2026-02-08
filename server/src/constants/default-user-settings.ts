@@ -8,8 +8,7 @@ export const defaultUserSettings: UserSettingsEntity = {
         allow_messages_from: "everyone",
         allow_comments_from: "everyone",
         allow_mentions_from: "everyone",
-        show_online_status: true,
-        show_last_seen: true,
+        show_activity_status: true,
         blocked_users: []
     },
     notifications: {
