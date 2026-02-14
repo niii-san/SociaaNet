@@ -4,6 +4,8 @@ import { asyncHandler, HttpError, HttpSuccess } from "../../utils";
 import { ErrorCodes } from "../../constants/error-code";
 import { userSettingsService } from "../../services/user-settings.service";
 import {
+    AllowCommentsFromDto,
+    AllowMentionsFromDto,
     AllowMessagesFromDto,
     DisablePrivateAccountDto,
     EnablePrivateAccountDto
@@ -73,6 +75,16 @@ export const privacyController = asyncHandler(
         if (allow_messages_from !== undefined) {
             const dto = new AllowMessagesFromDto(userId, allow_messages_from);
             result = await userSettingsService.allowMessagesFrom(dto);
+        }
+
+        if (allow_comments_from !== undefined) {
+            const dto = new AllowCommentsFromDto(userId, allow_comments_from);
+            result = await userSettingsService.allowCommentsFrom(dto);
+        }
+
+        if (allow_mentions_from !== undefined) {
+            const dto = new AllowMentionsFromDto(userId, allow_mentions_from);
+            result = await userSettingsService.allowMentionsFrom(dto);
         }
 
         return res

@@ -2,7 +2,9 @@ import mongoose, { Types } from "mongoose";
 import {
     EnablePrivateAccountDto,
     DisablePrivateAccountDto,
-    AllowMessagesFromDto
+    AllowMessagesFromDto,
+    AllowCommentsFromDto,
+    AllowMentionsFromDto
 } from "../dtos";
 import { settingsRepo, activityRepo } from "../repositories";
 import { ActivityVerb } from "../types";
@@ -138,6 +140,165 @@ class UserSettingsService {
                 "Invalid value for allow_messages_fromx"
             );
         }
+        return result;
+    }
+
+    async allowCommentsFrom(dto: AllowCommentsFromDto) {
+        const userId = new Types.ObjectId(dto.userId);
+        const allowCommentsFrom = dto.allowCommentsFrom;
+
+        const allowedValues = ["everyone", "followers_only", "no_one"];
+        let result;
+
+        if (!allowedValues.includes(allowCommentsFrom)) {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                "Invalid value for allow_comments_from"
+            );
+        }
+
+        if (allowCommentsFrom === "everyone") {
+            result = await settingsRepo.allowCommentsFromEveryone(
+                userId.toString()
+            );
+            await activityRepo.createActivity({
+                verb: ActivityVerb.privacy_settings_updated,
+                actor: {
+                    user_id: userId
+                },
+                target: {
+                    user_id: userId
+                },
+                metadata: {
+                    allow_comments_from: allowCommentsFrom
+                },
+                visibility: "private"
+            });
+        } else if (allowCommentsFrom === "followers_only") {
+            result = await settingsRepo.allowCommentsFromFollowersOnly(
+                userId.toString()
+            );
+
+            await activityRepo.createActivity({
+                verb: ActivityVerb.privacy_settings_updated,
+                actor: {
+                    user_id: userId
+                },
+                target: {
+                    user_id: userId
+                },
+                metadata: {
+                    allow_comments_from: allowCommentsFrom
+                },
+                visibility: "private"
+            });
+        } else if (allowCommentsFrom === "no_one") {
+            result = await settingsRepo.allowCommentsFromNoOne(
+                userId.toString()
+            );
+            await activityRepo.createActivity({
+                verb: ActivityVerb.privacy_settings_updated,
+                actor: {
+                    user_id: userId
+                },
+                target: {
+                    user_id: userId
+                },
+                metadata: {
+                    allow_comments_from: allowCommentsFrom
+                },
+                visibility: "private"
+            });
+        } else {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                "Invalid value for allow_comments_from"
+            );
+        }
+
+        return result;
+    }
+
+    async allowMentionsFrom(dto: AllowMentionsFromDto) {
+        const userId = new Types.ObjectId(dto.userId);
+        const allowMentionsFrom = dto.allowMentionsFrom;
+
+        const allowedValues = ["everyone", "followers_only", "no_one"];
+        let result;
+
+        if (!allowedValues.includes(allowMentionsFrom)) {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                "Invalid value for allow_mentions_from"
+            );
+        }
+
+        if (allowMentionsFrom === "everyone") {
+            result = await settingsRepo.allowMentionsFromEveryone(
+                userId.toString()
+            );
+            await activityRepo.createActivity({
+                verb: ActivityVerb.privacy_settings_updated,
+                actor: {
+                    user_id: userId
+                },
+                target: {
+                    user_id: userId
+                },
+                metadata: {
+                    allow_mentions_from: allowMentionsFrom
+                },
+                visibility: "private"
+            });
+        } else if (allowMentionsFrom === "followers_only") {
+            result = await settingsRepo.allowMentionsFromFollowersOnly(
+                userId.toString()
+            );
+            await activityRepo.createActivity({
+                verb: ActivityVerb.privacy_settings_updated,
+                actor: {
+                    user_id: userId
+                },
+                target: {
+                    user_id: userId
+                },
+                metadata: {
+                    allow_mentions_from: allowMentionsFrom
+                },
+                visibility: "private"
+            });
+        } else if (allowMentionsFrom === "no_one") {
+            result = await settingsRepo.allowMentionsFromNoOne(
+                userId.toString()
+            );
+            await activityRepo.createActivity({
+                verb: ActivityVerb.privacy_settings_updated,
+                actor: {
+                    user_id: userId
+                },
+                target: {
+                    user_id: userId
+                },
+                metadata: {
+                    allow_mentions_from: allowMentionsFrom
+                },
+                visibility: "private"
+            });
+        } else {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                "Invalid value for allow_mentions_from"
+            );
+        }
+
         return result;
     }
 }

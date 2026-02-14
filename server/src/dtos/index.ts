@@ -11,6 +11,9 @@ import { UpdateUsernameDto } from "./users/update-username.dto";
 import { EnablePrivateAccountDto } from "./settings/enable-private-account.dto";
 import { DisablePrivateAccountDto } from "./settings/disable-private-account.dto";
 import { AllowMessagesFromDto } from "./settings/allow-messages-from.dto";
+import { AllowCommentsFromDto } from "./settings/allow-comments-from.dto";
+import { AllowMentionsFromDto } from "./settings/allow-mentions-from.dto";
+
 
 export {
     CreateUserDto,
@@ -25,5 +28,7 @@ export {
     UpdateBioDto,
     EnablePrivateAccountDto,
     DisablePrivateAccountDto,
-    AllowMessagesFromDto
+    AllowMessagesFromDto,
+    AllowCommentsFromDto,
+    AllowMentionsFromDto
 };

@@ -131,7 +131,7 @@ class SettingsRepository implements ISettingsRepository {
                 ) {
                     throw new Error(
                         "Invariant violation: UserSettings document not found for user_id: " +
-                            userId
+                        userId
                     );
                 }
 
@@ -182,7 +182,7 @@ class SettingsRepository implements ISettingsRepository {
                 ) {
                     throw new Error(
                         "Invariant violation: UserSettings document not found for user_id: " +
-                            userId
+                        userId
                     );
                 }
 
@@ -219,7 +219,7 @@ class SettingsRepository implements ISettingsRepository {
         if (result.matchedCount === 0) {
             throw new Error(
                 "Invariant violation: UserSettings document not found for user_id: " +
-                    userId
+                userId
             );
         }
 
@@ -241,7 +241,7 @@ class SettingsRepository implements ISettingsRepository {
         if (result.matchedCount === 0) {
             throw new Error(
                 "Invariant violation: UserSettings document not found for user_id: " +
-                    userId
+                userId
             );
         }
 
@@ -262,7 +262,7 @@ class SettingsRepository implements ISettingsRepository {
         if (result.matchedCount === 0) {
             throw new Error(
                 "Invariant violation: UserSettings document not found for user_id: " +
-                    userId
+                userId
             );
         }
 
@@ -272,37 +272,133 @@ class SettingsRepository implements ISettingsRepository {
     async allowCommentsFromEveryone(
         userId: string
     ): Promise<{ allow_comments_from: string }> {
-        throw new Error("Method not implemented.");
+        const result = await UserSettings.updateOne(
+            { user_id: userId },
+            {
+                $set: {
+                    "privacy.allow_comments_from": "everyone"
+                }
+            }
+        );
+
+        if (result.matchedCount === 0) {
+            throw new Error(
+                "Invariant violation: UserSettings document not found for user_id: " +
+                userId
+            );
+        }
+
+        return { allow_comments_from: "everyone" };
     }
 
     async allowCommentsFromFollowersOnly(
         userId: string
     ): Promise<{ allow_comments_from: string }> {
-        throw new Error("Method not implemented.");
+        const result = await UserSettings.updateOne(
+            { user_id: userId },
+            {
+                $set: {
+                    "privacy.allow_comments_from": "followers_only"
+                }
+            }
+        );
+
+        if (result.matchedCount === 0) {
+            throw new Error(
+                "Invariant violation: UserSettings document not found for user_id: " +
+                userId
+            );
+        }
+
+        return { allow_comments_from: "followers_only" };
     }
 
     async allowCommentsFromNoOne(
         userId: string
     ): Promise<{ allow_comments_from: string }> {
-        throw new Error("Method not implemented.");
+        const result = await UserSettings.updateOne(
+            { user_id: userId },
+            {
+                $set: {
+                    "privacy.allow_comments_from": "no_one"
+                }
+            }
+        );
+
+        if (result.matchedCount === 0) {
+            throw new Error(
+                "Invariant violation: UserSettings document not found for user_id: " +
+                userId
+            );
+        }
+
+        return { allow_comments_from: "no_one" };
     }
 
     async allowMentionsFromEveryone(
         userId: string
     ): Promise<{ allow_mentions_from: string }> {
-        throw new Error("Method not implemented.");
+        const result = await UserSettings.updateOne(
+            { user_id: userId },
+            {
+                $set: {
+                    "privacy.allow_mentions_from": "everyone"
+                }
+            }
+        );
+
+        if (result.matchedCount === 0) {
+            throw new Error(
+                "Invariant violation: UserSettings document not found for user_id: " +
+                userId
+            );
+        }
+
+        return { allow_mentions_from: "everyone" };
     }
 
     async allowMentionsFromFollowersOnly(
         userId: string
     ): Promise<{ allow_mentions_from: string }> {
-        throw new Error("Method not implemented.");
+        const result = await UserSettings.updateOne(
+            { user_id: userId },
+            {
+                $set: {
+                    "privacy.allow_mentions_from": "followers_only"
+                }
+            }
+        );
+
+        if (result.matchedCount === 0) {
+            throw new Error(
+                "Invariant violation: UserSettings document not found for user_id: " +
+                userId
+            );
+        }
+
+        return { allow_mentions_from: "followers_only" };
     }
 
     async allowMentionsFromNoOne(
         userId: string
     ): Promise<{ allow_mentions_from: string }> {
-        throw new Error("Method not implemented.");
+        const result = await UserSettings.updateOne(
+            { user_id: userId },
+            {
+                $set: {
+                    "privacy.allow_mentions_from": "no_one"
+                }
+            }
+        );
+
+        if (result.matchedCount === 0) {
+            throw new Error(
+                "Invariant violation: UserSettings document not found for user_id: " +
+                userId
+            );
+        }
+
+        return { allow_mentions_from: "no_one" };
     }
 
     async setShowOnlineStatus(
