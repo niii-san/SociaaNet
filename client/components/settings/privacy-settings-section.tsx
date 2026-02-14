@@ -1,6 +1,12 @@
 "use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle
+} from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -8,7 +14,7 @@ import {
     SelectContent,
     SelectItem,
     SelectTrigger,
-    SelectValue,
+    SelectValue
 } from "@/components/ui/select";
 import { PrivacySettings, PrivacyVisibility } from "@/types";
 import { Shield, Lock, Eye, MessageSquare, AtSign } from "lucide-react";
@@ -18,7 +24,10 @@ interface PrivacySettingsSectionProps {
     onUpdate: (field: keyof PrivacySettings, value: any) => void;
 }
 
-export function PrivacySettingsSection({ settings, onUpdate }: PrivacySettingsSectionProps) {
+export function PrivacySettingsSection({
+    settings,
+    onUpdate
+}: PrivacySettingsSectionProps) {
     return (
         <Card>
             <CardHeader>
@@ -35,7 +44,9 @@ export function PrivacySettingsSection({ settings, onUpdate }: PrivacySettingsSe
                     <div className="space-y-0.5">
                         <div className="flex items-center gap-2">
                             <Lock className="w-4 h-4 text-muted-foreground" />
-                            <Label htmlFor="private-account">Private Account</Label>
+                            <Label htmlFor="private-account">
+                                Private Account
+                            </Label>
                         </div>
                         <p className="text-sm text-muted-foreground">
                             Only approved followers can see your posts
@@ -44,7 +55,9 @@ export function PrivacySettingsSection({ settings, onUpdate }: PrivacySettingsSe
                     <Switch
                         id="private-account"
                         checked={settings.private_account}
-                        onCheckedChange={(checked) => onUpdate("private_account", checked)}
+                        onCheckedChange={(checked) =>
+                            onUpdate("private_account", checked)
+                        }
                     />
                 </div>
 
@@ -55,14 +68,18 @@ export function PrivacySettingsSection({ settings, onUpdate }: PrivacySettingsSe
                     </div>
                     <Select
                         value={settings.allow_messages_from}
-                        onValueChange={(value: PrivacyVisibility) => onUpdate("allow_messages_from", value)}
+                        onValueChange={(value: PrivacyVisibility) =>
+                            onUpdate("allow_messages_from", value)
+                        }
                     >
                         <SelectTrigger>
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="everyone">Everyone</SelectItem>
-                            <SelectItem value="followers_only">Followers Only</SelectItem>
+                            <SelectItem value="followers_only">
+                                Followers Only
+                            </SelectItem>
                             <SelectItem value="no_one">No One</SelectItem>
                         </SelectContent>
                     </Select>
@@ -72,14 +89,18 @@ export function PrivacySettingsSection({ settings, onUpdate }: PrivacySettingsSe
                     <Label>Allow Comments From</Label>
                     <Select
                         value={settings.allow_comments_from}
-                        onValueChange={(value: PrivacyVisibility) => onUpdate("allow_comments_from", value)}
+                        onValueChange={(value: PrivacyVisibility) =>
+                            onUpdate("allow_comments_from", value)
+                        }
                     >
                         <SelectTrigger>
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="everyone">Everyone</SelectItem>
-                            <SelectItem value="followers_only">Followers Only</SelectItem>
+                            <SelectItem value="followers_only">
+                                Followers Only
+                            </SelectItem>
                             <SelectItem value="no_one">No One</SelectItem>
                         </SelectContent>
                     </Select>
@@ -92,14 +113,18 @@ export function PrivacySettingsSection({ settings, onUpdate }: PrivacySettingsSe
                     </div>
                     <Select
                         value={settings.allow_mentions_from}
-                        onValueChange={(value: PrivacyVisibility) => onUpdate("allow_mentions_from", value)}
+                        onValueChange={(value: PrivacyVisibility) =>
+                            onUpdate("allow_mentions_from", value)
+                        }
                     >
                         <SelectTrigger>
                             <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="everyone">Everyone</SelectItem>
-                            <SelectItem value="followers_only">Followers Only</SelectItem>
+                            <SelectItem value="followers_only">
+                                Followers Only
+                            </SelectItem>
                             <SelectItem value="no_one">No One</SelectItem>
                         </SelectContent>
                     </Select>
@@ -109,30 +134,22 @@ export function PrivacySettingsSection({ settings, onUpdate }: PrivacySettingsSe
                     <div className="space-y-0.5">
                         <div className="flex items-center gap-2">
                             <Eye className="w-4 h-4 text-muted-foreground" />
-                            <Label htmlFor="online-status">Show Online Status</Label>
+                            <Label htmlFor="online-status">
+                                Show Activity Status
+                            </Label>
                         </div>
                         <p className="text-sm text-muted-foreground">
-                            Let others see when you're active
+                            Let others see when you're active,or recently
+                            active. Turning this off will also disable your
+                            ability to see other people's activity status.
                         </p>
                     </div>
                     <Switch
                         id="online-status"
-                        checked={settings.show_online_status}
-                        onCheckedChange={(checked) => onUpdate("show_online_status", checked)}
-                    />
-                </div>
-
-                <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                        <Label htmlFor="last-seen">Show Last Seen</Label>
-                        <p className="text-sm text-muted-foreground">
-                            Display your last activity time
-                        </p>
-                    </div>
-                    <Switch
-                        id="last-seen"
-                        checked={settings.show_last_seen}
-                        onCheckedChange={(checked) => onUpdate("show_last_seen", checked)}
+                        checked={settings.show_activity_status}
+                        onCheckedChange={(checked) =>
+                            onUpdate("show_activity_status", checked)
+                        }
                     />
                 </div>
             </CardContent>

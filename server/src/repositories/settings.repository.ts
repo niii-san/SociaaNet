@@ -41,11 +41,10 @@ interface ISettingsRepository {
         userId: string
     ): Promise<{ allow_mentions_from: string }>;
 
-    setShowOnlineStatus(
+    setShowActivityStatus(
         userId: string,
         show: boolean
-    ): Promise<{ show_online_status: boolean }>;
-    setShowLastSeen(userId: string, show: boolean): Promise<void>; // TODO: REMOVE ShowLastSeen
+    ): Promise<{ show_activity_status: boolean }>;
 
     blockUser(
         userId: string,
@@ -131,7 +130,7 @@ class SettingsRepository implements ISettingsRepository {
                 ) {
                     throw new Error(
                         "Invariant violation: UserSettings document not found for user_id: " +
-                        userId
+                            userId
                     );
                 }
 
@@ -182,7 +181,7 @@ class SettingsRepository implements ISettingsRepository {
                 ) {
                     throw new Error(
                         "Invariant violation: UserSettings document not found for user_id: " +
-                        userId
+                            userId
                     );
                 }
 
@@ -219,7 +218,7 @@ class SettingsRepository implements ISettingsRepository {
         if (result.matchedCount === 0) {
             throw new Error(
                 "Invariant violation: UserSettings document not found for user_id: " +
-                userId
+                    userId
             );
         }
 
@@ -241,7 +240,7 @@ class SettingsRepository implements ISettingsRepository {
         if (result.matchedCount === 0) {
             throw new Error(
                 "Invariant violation: UserSettings document not found for user_id: " +
-                userId
+                    userId
             );
         }
 
@@ -262,7 +261,7 @@ class SettingsRepository implements ISettingsRepository {
         if (result.matchedCount === 0) {
             throw new Error(
                 "Invariant violation: UserSettings document not found for user_id: " +
-                userId
+                    userId
             );
         }
 
@@ -284,7 +283,7 @@ class SettingsRepository implements ISettingsRepository {
         if (result.matchedCount === 0) {
             throw new Error(
                 "Invariant violation: UserSettings document not found for user_id: " +
-                userId
+                    userId
             );
         }
 
@@ -306,7 +305,7 @@ class SettingsRepository implements ISettingsRepository {
         if (result.matchedCount === 0) {
             throw new Error(
                 "Invariant violation: UserSettings document not found for user_id: " +
-                userId
+                    userId
             );
         }
 
@@ -328,7 +327,7 @@ class SettingsRepository implements ISettingsRepository {
         if (result.matchedCount === 0) {
             throw new Error(
                 "Invariant violation: UserSettings document not found for user_id: " +
-                userId
+                    userId
             );
         }
 
@@ -350,7 +349,7 @@ class SettingsRepository implements ISettingsRepository {
         if (result.matchedCount === 0) {
             throw new Error(
                 "Invariant violation: UserSettings document not found for user_id: " +
-                userId
+                    userId
             );
         }
 
@@ -372,7 +371,7 @@ class SettingsRepository implements ISettingsRepository {
         if (result.matchedCount === 0) {
             throw new Error(
                 "Invariant violation: UserSettings document not found for user_id: " +
-                userId
+                    userId
             );
         }
 
@@ -394,22 +393,34 @@ class SettingsRepository implements ISettingsRepository {
         if (result.matchedCount === 0) {
             throw new Error(
                 "Invariant violation: UserSettings document not found for user_id: " +
-                userId
+                    userId
             );
         }
 
         return { allow_mentions_from: "no_one" };
     }
 
-    async setShowOnlineStatus(
+    async setShowActivityStatus(
         userId: string,
         show: boolean
-    ): Promise<{ show_online_status: boolean }> {
-        throw new Error("Method not implemented.");
-    }
+    ): Promise<{ show_activity_status: boolean }> {
+        const result = await UserSettings.updateOne(
+            { user_id: userId },
+            {
+                $set: {
+                    "privacy.show_activity_status": show
+                }
+            }
+        );
 
-    async setShowLastSeen(userId: string, show: boolean): Promise<void> {
-        throw new Error("Method not implemented.");
+        if (result.matchedCount === 0) {
+            throw new Error(
+                "Invariant violation: UserSettings document not found for user_id: " +
+                    userId
+            );
+        }
+
+        return { show_activity_status: show };
     }
 
     async blockUser(

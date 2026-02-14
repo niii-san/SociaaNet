@@ -4,7 +4,8 @@ import {
     DisablePrivateAccountDto,
     AllowMessagesFromDto,
     AllowCommentsFromDto,
-    AllowMentionsFromDto
+    AllowMentionsFromDto,
+    ShowActivityStatusDto
 } from "../dtos";
 import { settingsRepo, activityRepo } from "../repositories";
 import { ActivityVerb } from "../types";
@@ -298,6 +299,42 @@ class UserSettingsService {
                 "Invalid value for allow_mentions_from"
             );
         }
+
+        return result;
+    }
+
+    async setShowActivityStatus(dto: ShowActivityStatusDto) {
+        const userId = dto.user_id;
+
+        const showActivityStatus = dto.show_activity_status;
+
+        if (typeof showActivityStatus !== "boolean") {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                "show_activity_status must be a boolean"
+            );
+        }
+
+        const result = await settingsRepo.setShowActivityStatus(
+            userId,
+            showActivityStatus
+        );
+
+        await activityRepo.createActivity({
+            verb: ActivityVerb.privacy_settings_updated,
+            actor: {
+                user_id: new Types.ObjectId(userId)
+            },
+            target: {
+                user_id: new Types.ObjectId(userId)
+            },
+            metadata: {
+                show_activity_status: showActivityStatus
+            },
+            visibility: "private"
+        });
 
         return result;
     }

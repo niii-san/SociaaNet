@@ -13,7 +13,7 @@ import { DisablePrivateAccountDto } from "./settings/disable-private-account.dto
 import { AllowMessagesFromDto } from "./settings/allow-messages-from.dto";
 import { AllowCommentsFromDto } from "./settings/allow-comments-from.dto";
 import { AllowMentionsFromDto } from "./settings/allow-mentions-from.dto";
-
+import { ShowActivityStatusDto } from "./settings/show-activity-status-dto";
 
 export {
     CreateUserDto,
@@ -30,5 +30,6 @@ export {
     DisablePrivateAccountDto,
     AllowMessagesFromDto,
     AllowCommentsFromDto,
-    AllowMentionsFromDto
+    AllowMentionsFromDto,
+    ShowActivityStatusDto
 };

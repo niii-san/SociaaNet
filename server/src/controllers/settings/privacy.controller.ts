@@ -8,7 +8,8 @@ import {
     AllowMentionsFromDto,
     AllowMessagesFromDto,
     DisablePrivateAccountDto,
-    EnablePrivateAccountDto
+    EnablePrivateAccountDto,
+    ShowActivityStatusDto
 } from "../../dtos";
 
 interface UpdatePrivacySettingsRequest {
@@ -85,6 +86,12 @@ export const privacyController = asyncHandler(
         if (allow_mentions_from !== undefined) {
             const dto = new AllowMentionsFromDto(userId, allow_mentions_from);
             result = await userSettingsService.allowMentionsFrom(dto);
+        }
+
+        if(show_activity_status !== undefined) {
+            const dto = new ShowActivityStatusDto(userId, show_activity_status);
+            result = await userSettingsService.setShowActivityStatus(dto)
+
         }
 
         return res
