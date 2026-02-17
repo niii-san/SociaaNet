@@ -32,6 +32,9 @@ export enum ActivityVerb {
     // Privacy
     privacy_settings_updated = "privacy_settings_updated",
 
+    // Notifications
+    notification_settings_updated = "notification_settings_updated",
+
     // Moderation
     account_reported = "account_reported",
 

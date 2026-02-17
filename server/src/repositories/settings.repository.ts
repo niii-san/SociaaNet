@@ -449,35 +449,112 @@ class SettingsRepository implements ISettingsRepository {
         userId: string,
         enabled: boolean
     ): Promise<{ likes: boolean }> {
-        throw new Error("Method not implemented.");
+        const result = await UserSettings.updateOne(
+            { user_id: userId },
+            {
+                $set: {
+                    "notifications.likes": enabled
+                }
+            }
+        );
+
+        if (result.matchedCount === 0) {
+            throw new Error(
+                "Invariant violation: UserSettings document not found for user_id: " +
+                    userId
+            );
+        }
+
+        return { likes: enabled };
     }
 
     async setCommentsNotifications(
         userId: string,
         enabled: boolean
     ): Promise<{ comments: boolean }> {
-        throw new Error("Method not implemented.");
+        const result = await UserSettings.updateOne(
+            { user_id: userId },
+            {
+                $set: {
+                    "notifications.comments": enabled
+                }
+            }
+        );
+        if (result.matchedCount === 0) {
+            throw new Error(
+                "Invariant violation: UserSettings document not found for user_id: " +
+                    userId
+            );
+        }
+
+        return { comments: enabled };
     }
 
     async setMentionsNotifications(
         userId: string,
         enabled: boolean
     ): Promise<{ mentions: boolean }> {
-        throw new Error("Method not implemented.");
+        const result = await UserSettings.updateOne(
+            { user_id: userId },
+            {
+                $set: {
+                    "notifications.mentions": enabled
+                }
+            }
+        );
+
+        if (result.matchedCount === 0) {
+            throw new Error(
+                "Invariant violation: UserSettings document not found for user_id: " +
+                    userId
+            );
+        }
+
+        return { mentions: enabled };
     }
 
     async setFollowsNotifications(
         userId: string,
         enabled: boolean
     ): Promise<{ follows: boolean }> {
-        throw new Error("Method not implemented.");
+        const result = await UserSettings.updateOne(
+            { user_id: userId },
+            {
+                $set: {
+                    "notifications.follows": enabled
+                }
+            }
+        );
+        if (result.matchedCount === 0) {
+            throw new Error(
+                "Invariant violation: UserSettings document not found for user_id: " +
+                    userId
+            );
+        }
+
+        return { follows: enabled };
     }
 
     async setMessagesNotifications(
         userId: string,
         enabled: boolean
     ): Promise<{ messages: boolean }> {
-        throw new Error("Method not implemented.");
+        const result = await UserSettings.updateOne(
+            { user_id: userId },
+            {
+                $set: {
+                    "notifications.messages": enabled
+                }
+            }
+        );
+        if (result.matchedCount === 0) {
+            throw new Error(
+                "Invariant violation: UserSettings document not found for user_id: " +
+                    userId
+            );
+        }
+
+        return { messages: enabled };
     }
 
     // Appearance Settings

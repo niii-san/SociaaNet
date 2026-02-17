@@ -14,6 +14,11 @@ import { AllowMessagesFromDto } from "./settings/allow-messages-from.dto";
 import { AllowCommentsFromDto } from "./settings/allow-comments-from.dto";
 import { AllowMentionsFromDto } from "./settings/allow-mentions-from.dto";
 import { ShowActivityStatusDto } from "./settings/show-activity-status-dto";
+import { SetFollowsNotificationDto } from "./settings/set-follows-notification.dto";
+import { SetCommentsNotificationDto } from "./settings/set-comments-notification.dto";
+import { SetLikesNotificationDto } from "./settings/set-likes-notification.dto";
+import { SetMentionsNotificationDto } from "./settings/set-mentions-notification.dto";
+import { SetMessagesNotificationDto } from "./settings/set-messages-notification.dto";
 
 export {
     CreateUserDto,
@@ -31,5 +36,10 @@ export {
     AllowMessagesFromDto,
     AllowCommentsFromDto,
     AllowMentionsFromDto,
-    ShowActivityStatusDto
+    ShowActivityStatusDto,
+    SetFollowsNotificationDto,
+    SetCommentsNotificationDto,
+    SetLikesNotificationDto,
+    SetMentionsNotificationDto,
+    SetMessagesNotificationDto
 };

@@ -10,6 +10,7 @@ import { updateBioController } from "./users/update-bio.controller";
 import { updateFullNameController } from "./users/update-fullname.controller";
 import { updateUsernameController } from "./users/update-username.controller";
 import { privacyController } from "./settings/privacy.controller";
+import { notificationsController } from "./settings/notifications.controller";
 
 export {
     signupController,
@@ -23,5 +24,6 @@ export {
     updateBioController,
     updateFullNameController,
     updateUsernameController,
-    privacyController
+    privacyController,
+    notificationsController
 };

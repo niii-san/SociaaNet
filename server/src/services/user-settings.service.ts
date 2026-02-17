@@ -5,7 +5,12 @@ import {
     AllowMessagesFromDto,
     AllowCommentsFromDto,
     AllowMentionsFromDto,
-    ShowActivityStatusDto
+    ShowActivityStatusDto,
+    SetLikesNotificationDto,
+    SetCommentsNotificationDto,
+    SetMentionsNotificationDto,
+    SetMessagesNotificationDto,
+    SetFollowsNotificationDto
 } from "../dtos";
 import { settingsRepo, activityRepo } from "../repositories";
 import { ActivityVerb } from "../types";
@@ -332,6 +337,177 @@ class UserSettingsService {
             },
             metadata: {
                 show_activity_status: showActivityStatus
+            },
+            visibility: "private"
+        });
+
+        return result;
+    }
+
+    async setLikesNotification(dto: SetLikesNotificationDto) {
+        const userId = dto.userId;
+        const enabled = dto.value;
+
+        if (typeof enabled !== "boolean") {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                "likes value must be a boolean"
+            );
+        }
+
+        const result = await settingsRepo.setLikesNotifications(
+            userId,
+            enabled
+        );
+
+        await activityRepo.createActivity({
+            verb: ActivityVerb.notification_settings_updated,
+            actor: {
+                user_id: new Types.ObjectId(userId)
+            },
+            target: {
+                user_id: new Types.ObjectId(userId)
+            },
+            metadata: {
+                likes_notifications: enabled
+            },
+            visibility: "private"
+        });
+
+        return result;
+    }
+    async setCommentsNotification(dto: SetCommentsNotificationDto) {
+        const userId = dto.userId;
+        const enabled = dto.value;
+
+        if (typeof enabled !== "boolean") {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                "comments value must be a boolean"
+            );
+        }
+
+        const result = await settingsRepo.setCommentsNotifications(
+            userId,
+            enabled
+        );
+
+        await activityRepo.createActivity({
+            verb: ActivityVerb.notification_settings_updated,
+            actor: {
+                user_id: new Types.ObjectId(userId)
+            },
+            target: {
+                user_id: new Types.ObjectId(userId)
+            },
+            metadata: {
+                comments_notifications: enabled
+            },
+            visibility: "private"
+        });
+
+        return result;
+    }
+    async setMentionsNotification(dto: SetMentionsNotificationDto) {
+        const userId = dto.userId;
+        const enabled = dto.value;
+
+        if (typeof enabled !== "boolean") {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                "mentions value must be a boolean"
+            );
+        }
+
+        const result = await settingsRepo.setMentionsNotifications(
+            userId,
+            enabled
+        );
+
+        await activityRepo.createActivity({
+            verb: ActivityVerb.notification_settings_updated,
+            actor: {
+                user_id: new Types.ObjectId(userId)
+            },
+            target: {
+                user_id: new Types.ObjectId(userId)
+            },
+            metadata: {
+                mentions_notifications: enabled
+            },
+            visibility: "private"
+        });
+
+        return result;
+    }
+    async setFollowsNotification(dto: SetFollowsNotificationDto) {
+        const userId = dto.userId;
+        const enabled = dto.value;
+
+        if (typeof enabled !== "boolean") {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                "follows value must be a boolean"
+            );
+        }
+
+        const result = await settingsRepo.setFollowsNotifications(
+            userId,
+            enabled
+        );
+
+        await activityRepo.createActivity({
+            verb: ActivityVerb.notification_settings_updated,
+            actor: {
+                user_id: new Types.ObjectId(userId)
+            },
+            target: {
+                user_id: new Types.ObjectId(userId)
+            },
+            metadata: {
+                follows_notifications: enabled
+            },
+            visibility: "private"
+        });
+
+        return result;
+    }
+    async setMessagesNotification(dto: SetMessagesNotificationDto) {
+        const userId = dto.userId;
+        const enabled = dto.value;
+
+        if (typeof enabled !== "boolean") {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                "messages value must be a boolean"
+            );
+        }
+
+        const result = await settingsRepo.setMessagesNotifications(
+            userId,
+            enabled
+        );
+
+        await activityRepo.createActivity({
+            verb: ActivityVerb.notification_settings_updated,
+            actor: {
+                user_id: new Types.ObjectId(userId)
+            },
+            target: {
+                user_id: new Types.ObjectId(userId)
+            },
+            metadata: {
+                messages_notifications: enabled
             },
             visibility: "private"
         });
