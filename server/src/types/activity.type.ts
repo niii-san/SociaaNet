@@ -38,6 +38,9 @@ export enum ActivityVerb {
     // Appearance
     appearance_settings_updated = "appearance_settings_updated",
 
+    // Feed
+    feed_settings_updated = "feed_settings_updated",
+
     // Moderation
     account_reported = "account_reported",
 

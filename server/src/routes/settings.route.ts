@@ -3,7 +3,8 @@ import {
     getUserSettingsController,
     notificationsController,
     privacyController,
-    appearanceController
+    appearanceController,
+    updateFeedSettingsController
 } from "../controllers";
 
 export const settingsRouter = Router();
@@ -19,3 +20,6 @@ settingsRouter.patch("/notifications", notificationsController);
 
 // Update appearance settings of current user
 settingsRouter.patch("/appearance", appearanceController);
+
+// Update feed settings of current user
+settingsRouter.patch("/feed", updateFeedSettingsController);

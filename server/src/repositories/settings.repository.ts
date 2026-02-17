@@ -586,14 +586,50 @@ class SettingsRepository implements ISettingsRepository {
         userId: string,
         mode: "algorithmic" | "chronological"
     ): Promise<{ mode: string }> {
-        throw new Error("Method not implemented.");
+        const result = await UserSettings.updateOne(
+            {
+                user_id: userId
+            },
+            {
+                $set: {
+                    "feed.mode": mode
+                }
+            }
+        );
+
+        if (result.matchedCount === 0) {
+            throw new Error(
+                "Invariant violation: UserSettings document not found for user_id: " +
+                    userId
+            );
+        }
+
+        return { mode: mode };
     }
 
     async setShowSensitiveContent(
         userId: string,
         show: boolean
     ): Promise<{ show_sensitive_content: boolean }> {
-        throw new Error("Method not implemented.");
+        const result = await UserSettings.updateOne(
+            {
+                user_id: userId
+            },
+            {
+                $set: {
+                    "feed.show_sensitive_content": show
+                }
+            }
+        );
+
+        if (result.matchedCount === 0) {
+            throw new Error(
+                "Invariant violation: UserSettings document not found for user_id: " +
+                    userId
+            );
+        }
+
+        return { show_sensitive_content: show };
     }
 
     // Security Settings

@@ -20,6 +20,8 @@ import { SetLikesNotificationDto } from "./settings/set-likes-notification.dto";
 import { SetMentionsNotificationDto } from "./settings/set-mentions-notification.dto";
 import { SetMessagesNotificationDto } from "./settings/set-messages-notification.dto";
 import { SetThemeDto } from "./settings/set-theme.dto";
+import { SetShowSensitiveContentDto } from "./settings/set-show-sensitive-content.dto";
+import { UpdateFeedModeDto } from "./settings/update-feed-mode.dto";
 
 export {
     CreateUserDto,
@@ -43,5 +45,7 @@ export {
     SetLikesNotificationDto,
     SetMentionsNotificationDto,
     SetMessagesNotificationDto,
-    SetThemeDto
+    SetThemeDto,
+    SetShowSensitiveContentDto,
+    UpdateFeedModeDto
 };

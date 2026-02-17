@@ -11,7 +11,9 @@ import {
     SetMentionsNotificationDto,
     SetMessagesNotificationDto,
     SetFollowsNotificationDto,
-    SetThemeDto
+    SetThemeDto,
+    UpdateFeedModeDto,
+    SetShowSensitiveContentDto
 } from "../dtos";
 import { settingsRepo, activityRepo } from "../repositories";
 import { ActivityVerb } from "../types";
@@ -554,6 +556,78 @@ class UserSettingsService {
             },
             metadata: {
                 theme_mode: theme
+            },
+            visibility: "private"
+        });
+
+        return res;
+    }
+
+    async updateFeedMode(dto: UpdateFeedModeDto) {
+        const userId = dto.userId;
+        const feedMode = dto.mode ?? "".trim();
+
+        const allowedValues = ["chronological", "algorithmic"];
+
+        if (!allowedValues.includes(feedMode)) {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                "Invalid feed mode value. Allowed values are: chronological, algorithmic"
+            );
+        }
+
+        const res = await settingsRepo.setFeedMode(
+            userId,
+            feedMode as "chronological" | "algorithmic"
+        );
+
+        await activityRepo.createActivity({
+            verb: ActivityVerb.feed_settings_updated,
+            actor: {
+                user_id: new Types.ObjectId(userId)
+            },
+            target: {
+                user_id: new Types.ObjectId(userId)
+            },
+            metadata: {
+                feed_mode: feedMode
+            },
+            visibility: "private"
+        });
+
+        return res;
+    }
+
+    async setShowSensitiveContent(dto: SetShowSensitiveContentDto) {
+        const userId = dto.userId;
+        const showSensitiveContent = dto.showSensitiveContent;
+
+        if (typeof showSensitiveContent !== "boolean") {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                "show_sensitive_content value must be a boolean"
+            );
+        }
+
+        const res = await settingsRepo.setShowSensitiveContent(
+            userId,
+            showSensitiveContent
+        );
+
+        await activityRepo.createActivity({
+            verb: ActivityVerb.feed_settings_updated,
+            actor: {
+                user_id: new Types.ObjectId(userId)
+            },
+            target: {
+                user_id: new Types.ObjectId(userId)
+            },
+            metadata: {
+                show_sensitive_content: showSensitiveContent
             },
             visibility: "private"
         });
