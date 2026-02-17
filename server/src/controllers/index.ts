@@ -11,6 +11,7 @@ import { updateFullNameController } from "./users/update-fullname.controller";
 import { updateUsernameController } from "./users/update-username.controller";
 import { privacyController } from "./settings/privacy.controller";
 import { notificationsController } from "./settings/notifications.controller";
+import { appearanceController } from "./settings/appearance.controller";
 
 export {
     signupController,
@@ -25,5 +26,6 @@ export {
     updateFullNameController,
     updateUsernameController,
     privacyController,
-    notificationsController
+    notificationsController,
+    appearanceController
 };

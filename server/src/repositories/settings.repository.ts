@@ -563,7 +563,22 @@ class SettingsRepository implements ISettingsRepository {
         userId: string,
         mode: "light" | "dark" | "system"
     ): Promise<{ theme: string }> {
-        throw new Error("Method not implemented.");
+        const result = await UserSettings.updateOne(
+            { user_id: userId },
+            {
+                $set: {
+                    "appearance.theme": mode
+                }
+            }
+        );
+        if (result.matchedCount === 0) {
+            throw new Error(
+                "Invariant violation: UserSettings document not found for user_id: " +
+                    userId
+            );
+        }
+
+        return { theme: mode };
     }
 
     // Feed Settings

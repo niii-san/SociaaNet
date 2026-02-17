@@ -35,6 +35,9 @@ export enum ActivityVerb {
     // Notifications
     notification_settings_updated = "notification_settings_updated",
 
+    // Appearance
+    appearance_settings_updated = "appearance_settings_updated",
+
     // Moderation
     account_reported = "account_reported",
 

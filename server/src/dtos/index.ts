@@ -19,6 +19,7 @@ import { SetCommentsNotificationDto } from "./settings/set-comments-notification
 import { SetLikesNotificationDto } from "./settings/set-likes-notification.dto";
 import { SetMentionsNotificationDto } from "./settings/set-mentions-notification.dto";
 import { SetMessagesNotificationDto } from "./settings/set-messages-notification.dto";
+import { SetThemeDto } from "./settings/set-theme.dto";
 
 export {
     CreateUserDto,
@@ -41,5 +42,6 @@ export {
     SetCommentsNotificationDto,
     SetLikesNotificationDto,
     SetMentionsNotificationDto,
-    SetMessagesNotificationDto
+    SetMessagesNotificationDto,
+    SetThemeDto
 };

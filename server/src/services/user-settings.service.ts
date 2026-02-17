@@ -1,4 +1,4 @@
-import mongoose, { Types } from "mongoose";
+import { Types } from "mongoose";
 import {
     EnablePrivateAccountDto,
     DisablePrivateAccountDto,
@@ -10,7 +10,8 @@ import {
     SetCommentsNotificationDto,
     SetMentionsNotificationDto,
     SetMessagesNotificationDto,
-    SetFollowsNotificationDto
+    SetFollowsNotificationDto,
+    SetThemeDto
 } from "../dtos";
 import { settingsRepo, activityRepo } from "../repositories";
 import { ActivityVerb } from "../types";
@@ -513,6 +514,51 @@ class UserSettingsService {
         });
 
         return result;
+    }
+
+    async setTheme(dto: SetThemeDto) {
+        const userId = dto.userId.toString();
+        const theme = dto.theme ?? "".trim();
+        const allowedValues = ["light", "dark", "system"];
+
+        if (!theme) {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                "Theme value is required"
+            );
+        }
+
+        if (!allowedValues.includes(theme)) {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                "Invalid theme value. Allowed values are: light, dark, system"
+            );
+        }
+
+        const res = await settingsRepo.setThemeMode(
+            userId,
+            theme as "light" | "dark" | "system"
+        );
+
+        await activityRepo.createActivity({
+            verb: ActivityVerb.appearance_settings_updated,
+            actor: {
+                user_id: new Types.ObjectId(userId)
+            },
+            target: {
+                user_id: new Types.ObjectId(userId)
+            },
+            metadata: {
+                theme_mode: theme
+            },
+            visibility: "private"
+        });
+
+        return res;
     }
 }
 
