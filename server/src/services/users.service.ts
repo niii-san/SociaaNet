@@ -2,6 +2,7 @@ import {
     GetUserByIdDto,
     GetUserByUsernameDto,
     GetUserSettingsByUserIdDto,
+    SearchUsersDto,
     UpdateBioDto,
     UpdateFullNameDto,
     UpdateUsernameDto,
@@ -349,6 +350,24 @@ class UsersService {
             metadata: activity.metadata,
             created_at: activity.created_at
         }));
+    }
+
+    async searchUsers(dto: SearchUsersDto) {
+        const query = dto.query ?? "".trim();
+        const page = dto.page
+
+        if (!query) {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                "Search query cannot be empty"
+            );
+        }
+
+        const users = await userRepo.searchUsers(query,20,page);
+
+        return users;
     }
 }
 

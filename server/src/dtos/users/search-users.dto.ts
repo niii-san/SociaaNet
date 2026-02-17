@@ -1,0 +1,9 @@
+export class SearchUsersDto {
+    query: string;
+    page: number;
+
+    constructor(query: string, page: number) {
+        this.query = query;
+        this.page = page;
+    }
+}

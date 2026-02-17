@@ -4,6 +4,7 @@ import {
     getAllUsersController,
     getProfileByUsernameController,
     getUserSettingsController,
+    searchUsersController,
     updateBioController,
     updateFullNameController,
     updateUsernameController,
@@ -49,6 +50,8 @@ usersRouter.patch("/me/username", updateUsernameController);
 usersRouter.patch("/me/fullname", updateFullNameController);
 
 usersRouter.get("/me/activities", getUserActivitiesController);
+
+usersRouter.get("/search", searchUsersController);
 
 // Moderators only routes
 usersRouter.get("/", moderatorAuthenticate, getAllUsersController);

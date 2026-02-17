@@ -22,6 +22,7 @@ import { SetMessagesNotificationDto } from "./settings/set-messages-notification
 import { SetThemeDto } from "./settings/set-theme.dto";
 import { SetShowSensitiveContentDto } from "./settings/set-show-sensitive-content.dto";
 import { UpdateFeedModeDto } from "./settings/update-feed-mode.dto";
+import { SearchUsersDto } from "./users/search-users.dto";
 
 export {
     CreateUserDto,
@@ -47,5 +48,6 @@ export {
     SetMessagesNotificationDto,
     SetThemeDto,
     SetShowSensitiveContentDto,
-    UpdateFeedModeDto
+    UpdateFeedModeDto,
+    SearchUsersDto
 };

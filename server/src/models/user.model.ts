@@ -46,5 +46,7 @@ const userSchema = new mongoose.Schema<UserEntity>(
     { timestamps: { createdAt: "created_at", updatedAt: "updated_at" } }
 );
 
+userSchema.index({ username: 1, full_name: 1 });
+
 export const User = mongoose.model("User", userSchema);
 export type UserDocument = mongoose.HydratedDocument<UserEntity>;

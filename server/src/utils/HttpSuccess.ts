@@ -8,11 +8,13 @@ export class HttpSuccess {
         status_code: number,
         success: boolean,
         message: string,
-        data: any
+        data: any,
+        others: any = {}
     ) {
         this.status_code = status_code;
         this.success = success;
         this.message = message;
         this.data = data;
+        Object.assign(this, others);
     }
 }

@@ -13,6 +13,7 @@ import { privacyController } from "./settings/privacy.controller";
 import { notificationsController } from "./settings/notifications.controller";
 import { appearanceController } from "./settings/appearance.controller";
 import { updateFeedSettingsController } from "./settings/feed.controller";
+import { searchUsersController } from "./users/search-users.controller";
 
 export {
     signupController,
@@ -29,5 +30,6 @@ export {
     privacyController,
     notificationsController,
     appearanceController,
-    updateFeedSettingsController
+    updateFeedSettingsController,
+    searchUsersController
 };

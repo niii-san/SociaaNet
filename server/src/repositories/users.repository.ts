@@ -18,6 +18,10 @@ interface UserDocumentRepository {
     uploadAvatar(
         data: Partial<ImageMetaDataDocument>
     ): Promise<ImageMetaDataDocument>;
+    searchUsers(query: string): Promise<{
+        users: UserDocument[];
+        pagination: { current_page: number; has_next_page: boolean };
+    }>;
 }
 
 class UserRepository implements UserDocumentRepository {
@@ -143,6 +147,40 @@ class UserRepository implements UserDocumentRepository {
             { new: true }
         ).select("-password");
         return user;
+    }
+
+    private escapeRegex(text: string): string {
+        return text.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    }
+
+    async searchUsers(
+        query: string,
+        limit: number = 20,
+        page: number = 1
+    ): Promise<{
+        users: UserDocument[];
+        pagination: { current_page: number; has_next_page: boolean };
+    }> {
+        const skip = (page - 1) * limit;
+        const safeQuery = this.escapeRegex(query);
+
+        const users = await User.find({
+            $or: [
+                { username: { $regex: safeQuery, $options: "i" } },
+                { full_name: { $regex: safeQuery, $options: "i" } }
+            ]
+        })
+            .select("-password")
+            .skip(skip)
+            .limit(limit);
+
+        return {
+            users,
+            pagination: {
+                current_page: page,
+                has_next_page: users.length === limit
+            }
+        };
     }
 }
 
