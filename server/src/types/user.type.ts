@@ -5,6 +5,8 @@ export interface UserEntity {
     username: string;
     is_private_account: boolean;
     is_email_verified: boolean;
+    followers_count: number;
+    following_count: number;
     bio: string;
     password: string;
     created_at: Date;

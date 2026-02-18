@@ -25,6 +25,14 @@ const userSchema = new mongoose.Schema<UserEntity>(
             type: Boolean,
             default: false
         },
+        followers_count: {
+            type: Number,
+            default: 0
+        },
+        following_count: {
+            type: Number,
+            default: 0
+        },
         bio: {
             type: String,
             default: ""

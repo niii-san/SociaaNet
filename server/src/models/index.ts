@@ -3,6 +3,7 @@ import { User, UserDocument } from "./user.model";
 import { ImageMetaDataDocument, ImageMetaData } from "./image.model";
 import { UserSettings, UserSettingsDocument } from "./user-settings.model";
 import { Activity, ActivityDocument } from "./activity-model";
+import { Follow, FollowDocument } from "./follow.model";
 
 export {
     User,
@@ -14,5 +15,7 @@ export {
     UserSettings,
     UserSettingsDocument,
     Activity,
-    ActivityDocument
+    ActivityDocument,
+    Follow,
+    FollowDocument
 };

@@ -39,6 +39,8 @@ class UsersService {
             username: user.username,
             is_private_account: user.is_private_account,
             bio: user.bio,
+            followers_count: user.followers_count,
+            following_count: user.following_count,
             email_address: user.email_address,
             avatar_url: avatar_url,
             created_at: user.created_at
@@ -67,6 +69,8 @@ class UsersService {
             full_name: user.full_name,
             username: user.username,
             is_private_account: user.is_private_account,
+            followers_count: user.followers_count,
+            following_count: user.following_count,
             bio: user.bio,
             avatar_url: avatar_url,
             created_at: user.created_at
@@ -373,6 +377,8 @@ class UsersService {
                 full_name: user.full_name,
                 username: user.username,
                 is_private_account: user.is_private_account,
+                followers_count: user.followers_count,
+                following_count: user.following_count,
                 avatar_url: user.avatar_key
                     ? convertImageKeyToImageUrl(user.avatar_key)
                     : null

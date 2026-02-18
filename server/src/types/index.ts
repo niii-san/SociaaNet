@@ -4,6 +4,7 @@ import { RequestWithUserContext } from "./RequestWithUserContext";
 import { ImageMetaDataEntity } from "./image.type";
 import { UserSettingsEntity } from "./user-settings.type";
 import { ActivityEntity, ActivityVerb } from "./activity.type";
+import { FollowEntity } from "./follow.type";
 
 export {
     UserEntity,
@@ -12,5 +13,6 @@ export {
     RequestWithUserContext,
     ImageMetaDataEntity,
     ActivityEntity,
-    ActivityVerb
+    ActivityVerb,
+    FollowEntity
 };

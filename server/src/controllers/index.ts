@@ -14,6 +14,13 @@ import { notificationsController } from "./settings/notifications.controller";
 import { appearanceController } from "./settings/appearance.controller";
 import { updateFeedSettingsController } from "./settings/feed.controller";
 import { searchUsersController } from "./users/search-users.controller";
+import { followController } from "./social-interactions/follow.controller";
+import { acceptFollowRequestController } from "./social-interactions/accept-follow-request.controller";
+import { getFollowersController } from "./social-interactions/get-followers.controller";
+import { getFollowingsController } from "./social-interactions/get-followings.controller";
+import { rejectFollowRequestController } from "./social-interactions/reject-follow-request.controller";
+import { unfollowController } from "./social-interactions/unfollow.controller";
+import { getFollowRequestsController } from "./social-interactions/get-follow-requests.controller";
 
 export {
     signupController,
@@ -31,5 +38,12 @@ export {
     notificationsController,
     appearanceController,
     updateFeedSettingsController,
-    searchUsersController
+    searchUsersController,
+    followController,
+    acceptFollowRequestController,
+    getFollowersController,
+    getFollowingsController,
+    rejectFollowRequestController,
+    unfollowController,
+    getFollowRequestsController
 };

@@ -23,6 +23,8 @@ import { SetThemeDto } from "./settings/set-theme.dto";
 import { SetShowSensitiveContentDto } from "./settings/set-show-sensitive-content.dto";
 import { UpdateFeedModeDto } from "./settings/update-feed-mode.dto";
 import { SearchUsersDto } from "./users/search-users.dto";
+import { FollowUserDTO } from "./social/follow-user.dto";
+import { UnfollowUserDTO } from "./social/unfollow-user.dto";
 
 export {
     CreateUserDto,
@@ -49,5 +51,7 @@ export {
     SetThemeDto,
     SetShowSensitiveContentDto,
     UpdateFeedModeDto,
-    SearchUsersDto
+    SearchUsersDto,
+    FollowUserDTO,
+    UnfollowUserDTO
 };
