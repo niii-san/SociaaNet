@@ -11,9 +11,11 @@ export interface IUser {
 
 export interface IUserProfile {
     user_id: string;
-    is_private_account: boolean;
     full_name: string;
     username: string;
+    is_private_account: boolean;
+    followers_count: number;
+    following_count: number;
     bio: string;
     avatar_url: string;
     created_at: string;

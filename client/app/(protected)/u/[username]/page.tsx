@@ -68,8 +68,8 @@ export default function ProfilePage() {
                         <ProfileHeader
                             user={profileData}
                             isOwner={isCurrentUserProfile}
-                            followers={1234}
-                            following={567}
+                            followers={profileData.followers_count}
+                            following={profileData.following_count}
                             joined={new Date(
                                 profileData.created_at
                             ).toLocaleDateString()}
