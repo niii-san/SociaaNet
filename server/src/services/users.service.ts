@@ -354,7 +354,7 @@ class UsersService {
 
     async searchUsers(dto: SearchUsersDto) {
         const query = dto.query ?? "".trim();
-        const page = dto.page
+        const page = dto.page;
 
         if (!query) {
             throw new HttpError(
@@ -365,9 +365,24 @@ class UsersService {
             );
         }
 
-        const users = await userRepo.searchUsers(query,20,page);
+        const result = await userRepo.searchUsers(query, 20, page);
 
-        return users;
+        const preparedUsers = result.users.map((user) => {
+            return {
+                user_id: user._id,
+                full_name: user.full_name,
+                username: user.username,
+                is_private_account: user.is_private_account,
+                avatar_url: user.avatar_key
+                    ? convertImageKeyToImageUrl(user.avatar_key)
+                    : null
+            };
+        });
+
+        return {
+            users: preparedUsers,
+            pagination: result.pagination
+        };
     }
 }
 
