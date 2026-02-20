@@ -44,7 +44,6 @@ const followSchema = new mongoose.Schema<FollowEntity>(
     { timestamps: { createdAt: "followed_at", updatedAt: "updated_at" } }
 );
 
-followSchema.index({ follower: 1, following: 1 }, { unique: true });
 
 export const Follow = mongoose.model("Follow", followSchema);
 export type FollowDocument = mongoose.HydratedDocument<FollowEntity>;

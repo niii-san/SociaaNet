@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { ErrorCodes } from "../constants/error-code";
 import { Follow, FollowDocument, User, UserDocument } from "../models";
+import { convertImageKeyToImageUrl } from "../utils";
 
 interface ISocialsRepository {
     followUser(followerId: string, followeeId: string): Promise<FollowDocument>;
@@ -9,6 +10,8 @@ interface ISocialsRepository {
         followeeId: string
     ): Promise<{ followerId: string; followeeId: string }>;
     isFollowing(followerId: string, followeeId: string): Promise<boolean>;
+    getAllFollowers(userId: string): Promise<Partial<UserDocument>[]>;
+    getAllFollowings(userId: string): Promise<Partial<UserDocument>[]>;
 }
 
 class SocialsRepository implements ISocialsRepository {
@@ -109,14 +112,15 @@ class SocialsRepository implements ISocialsRepository {
                 {
                     follower: followerId,
                     following: followeeId,
-                    status: "accepted"
+                    status: "accepted",
+                    is_removed: false
                 },
                 {
                     is_removed: true,
                     removed_at: new Date(),
                     removed_by: new mongoose.Types.ObjectId(followerId)
                 },
-                { session, new: true }
+                { session }
             );
 
             await this.decreaseFollowerCount(followeeId, session);
@@ -128,6 +132,44 @@ class SocialsRepository implements ISocialsRepository {
         } finally {
             await session.endSession();
         }
+    }
+
+    async getAllFollowers(userId: string): Promise<Partial<UserDocument>[]> {
+        const followers = await Follow.find({
+            following: userId,
+            status: "accepted",
+            is_removed: false
+        }).populate<{ follower: UserDocument }>("follower");
+
+        return followers.map((f) => {
+            return {
+                _id: f.follower._id,
+                username: f.follower.username,
+                fullname: f.follower.full_name,
+                avatar_url: f.follower.avatar_key
+                    ? convertImageKeyToImageUrl(f.follower.avatar_key)
+                    : null
+            };
+        });
+    }
+
+    async getAllFollowings(userId: string): Promise<Partial<UserDocument>[]> {
+        const followings = await Follow.find({
+            follower: userId,
+            status: "accepted",
+            is_removed: false
+        }).populate<{ following: UserDocument }>("following");
+
+        return followings.map((f) => {
+            return {
+                _id: f.following._id,
+                username: f.following.username,
+                fullname: f.following.full_name,
+                avatar_url: f.following.avatar_key
+                    ? convertImageKeyToImageUrl(f.following.avatar_key)
+                    : null
+            };
+        });
     }
 }
 

@@ -61,9 +61,6 @@ class SocialService {
         };
     }
 
-    async getFollowers(userId: string) {
-        throw new Error("Not implemented yet - Service Layer");
-    }
     async unfollowUser(dto: UnfollowUserDTO) {
         const followerId = dto.followerId;
         const followeeId = dto.followeeId;
@@ -105,8 +102,13 @@ class SocialService {
         return unfollow;
     }
 
-    async getFollowing(userId: string) {
-        throw new Error("Not implemented yet - Service Layer");
+    async getFollowers(userId: string) {
+        const followers = await socialsRepo.getAllFollowers(userId);
+        return followers;
+    }
+    async getFollowings(userId: string) {
+        const followings = await socialsRepo.getAllFollowings(userId);
+        return followings;
     }
 
     async requestFollow() {
