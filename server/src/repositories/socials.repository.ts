@@ -4,6 +4,11 @@ import { Follow, FollowDocument, User, UserDocument } from "../models";
 
 interface ISocialsRepository {
     followUser(followerId: string, followeeId: string): Promise<FollowDocument>;
+    unfollowUser(
+        followerId: string,
+        followeeId: string
+    ): Promise<{ followerId: string; followeeId: string }>;
+    isFollowing(followerId: string, followeeId: string): Promise<boolean>;
 }
 
 class SocialsRepository implements ISocialsRepository {
@@ -49,13 +54,18 @@ class SocialsRepository implements ISocialsRepository {
         );
     }
 
-    async doesUserAlreadyFollows(followerId: string, followeeId: string) {
-        const existingFollow = await Follow.findOne({
+    async isFollowing(
+        followerId: string,
+        followeeId: string
+    ): Promise<boolean> {
+        const follow = await Follow.findOne({
             follower: followerId,
-            following: followeeId
+            following: followeeId,
+            status: "accepted",
+            is_removed: false
         });
 
-        return !!existingFollow;
+        return !!follow;
     }
 
     async followUser(
@@ -81,6 +91,40 @@ class SocialsRepository implements ISocialsRepository {
 
             await session.commitTransaction();
             return follow;
+        } finally {
+            await session.endSession();
+        }
+    }
+
+    async unfollowUser(
+        followerId: string,
+        followeeId: string
+    ): Promise<{ followerId: string; followeeId: string }> {
+        const session = await mongoose.startSession();
+
+        try {
+            session.startTransaction();
+
+            await Follow.findOneAndUpdate(
+                {
+                    follower: followerId,
+                    following: followeeId,
+                    status: "accepted"
+                },
+                {
+                    is_removed: true,
+                    removed_at: new Date(),
+                    removed_by: new mongoose.Types.ObjectId(followerId)
+                },
+                { session, new: true }
+            );
+
+            await this.decreaseFollowerCount(followeeId, session);
+            await this.decreaseFollowingCount(followerId, session);
+
+            await session.commitTransaction();
+
+            return { followerId, followeeId };
         } finally {
             await session.endSession();
         }

@@ -39,7 +39,7 @@ class SocialService {
             );
         }
 
-        const alreadyFollows = await socialsRepo.doesUserAlreadyFollows(
+        const alreadyFollows = await socialsRepo.isFollowing(
             followerId,
             followeeId
         );
@@ -64,14 +64,51 @@ class SocialService {
     async getFollowers(userId: string) {
         throw new Error("Not implemented yet - Service Layer");
     }
+    async unfollowUser(dto: UnfollowUserDTO) {
+        const followerId = dto.followerId;
+        const followeeId = dto.followeeId;
+
+        if (followerId === followeeId) {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                "You cannot unfollow yourself"
+            );
+        }
+
+        if (!isValidObjectId(followeeId)) {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                "Invalid followeeId"
+            );
+        }
+
+        const isFollowing = await socialsRepo.isFollowing(
+            followerId,
+            followeeId
+        );
+
+        if (!isFollowing) {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                "You do not follow this user"
+            );
+        }
+
+        const unfollow = await socialsRepo.unfollowUser(followerId, followeeId);
+
+        return unfollow;
+    }
 
     async getFollowing(userId: string) {
         throw new Error("Not implemented yet - Service Layer");
     }
 
-    async unfollowUser(dto: UnfollowUserDTO) {
-        throw new Error("Not implemented yet - Service Layer");
-    }
     async requestFollow() {
         throw new Error("Not implemented yet - Service Layer");
     }

@@ -63,7 +63,7 @@ usersRouter.get("/search", searchUsersController);
 
 // Follow and unfollow
 usersRouter.post("/me/:followeeId/follow", followController);
-usersRouter.delete("/me/:userId/follow", unfollowController);
+usersRouter.delete("/me/:followeeId/follow", unfollowController);
 // Accept or Reject follow Request
 usersRouter.patch(
     "/me/:followerId/follow-request",
