@@ -62,7 +62,7 @@ usersRouter.get("/search", searchUsersController);
 // Social Interactions
 
 // Follow and unfollow
-usersRouter.post("/me/:userId/follow", followController);
+usersRouter.post("/me/:followeeId/follow", followController);
 usersRouter.delete("/me/:userId/follow", unfollowController);
 // Accept or Reject follow Request
 usersRouter.patch(
