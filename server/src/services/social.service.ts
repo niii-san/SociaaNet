@@ -145,8 +145,10 @@ class SocialService {
         return followingRequests;
     }
 
-    async getFollowRequests() {
-        throw new Error("Not implemented yet - Service Layer");
+    async getFollowRequests(userId: string) {
+        const followRequests = await socialsRepo.getFollowRequests(userId);
+
+        return followRequests;
     }
 
     async acceptFollowRequest(followerId: string, userId: string) {
