@@ -5,7 +5,9 @@ import {
     followController,
     getAllUsersController,
     getFollowersController,
+    getFollowingRequests,
     getFollowingsController,
+    getFollowRequestsController,
     getProfileByUsernameController,
     getUserSettingsController,
     rejectFollowRequestController,
@@ -64,21 +66,27 @@ usersRouter.get("/search", searchUsersController);
 // Follow and unfollow
 usersRouter.post("/me/:followeeId/follow", followController);
 usersRouter.delete("/me/:followeeId/follow", unfollowController);
+
+// Get following, followers, and follow requests
+usersRouter.get("/:userId/following", getFollowingsController);
+usersRouter.get("/:userId/followers", getFollowersController);
+usersRouter.get("/me/follow-requests", getFollowRequestsController);
+
+// Get follwing requests
+usersRouter.get("/me/following-requests", getFollowingRequests);
+
 // Accept or Reject follow Request
 usersRouter.patch(
     "/me/:followerId/follow-request",
     acceptFollowRequestController
 );
+
 usersRouter.delete(
     "/me/:followerId/follow-request",
     rejectFollowRequestController
 );
 
-// Get following, followers, and follow requests
-(usersRouter.get("/:userId/following", getFollowingsController),
-    usersRouter.get("/:userId/followers", getFollowersController),
-    usersRouter.get("/me/follow-requests", getFollowersController),
-    // Moderators only routes
-    usersRouter.get("/", moderatorAuthenticate, getAllUsersController));
+// Moderators only routes
+usersRouter.get("/", moderatorAuthenticate, getAllUsersController);
 
 export default usersRouter;

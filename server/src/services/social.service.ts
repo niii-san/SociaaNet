@@ -53,12 +53,41 @@ class SocialService {
             );
         }
 
-        const result = await socialsRepo.followUser(followerId, followeeId);
+        if (followee.is_private_account) {
+            const isFollowRequestPending =
+                await socialsRepo.isFollowRequestPending(
+                    followerId,
+                    followeeId
+                );
+            if (isFollowRequestPending) {
+                throw new HttpError(
+                    400,
+                    false,
+                    ErrorCodes.DUPLICATE,
+                    "Follow request already sent and pending"
+                );
+            }
 
-        return {
-            followerId: result.follower.toString(),
-            followeeId: result.following.toString()
-        };
+            const followRequest = await socialsRepo.createFollowRequest(
+                followerId,
+                followeeId
+            );
+
+            return {
+                followerId: followRequest.follower.toString(),
+                followeeId: followRequest.following.toString(),
+                is_follow_request: true
+            };
+
+        } else {
+            const result = await socialsRepo.followUser(followerId, followeeId);
+
+            return {
+                followerId: result.follower.toString(),
+                followeeId: result.following.toString(),
+                is_follow_request: false
+            };
+        }
     }
 
     async unfollowUser(dto: UnfollowUserDTO) {
@@ -115,7 +144,7 @@ class SocialService {
         throw new Error("Not implemented yet - Service Layer");
     }
 
-    async getFollowRequests() {}
+    async getFollowRequests() { }
 
     async acceptFollowRequest() {
         throw new Error("Not implemented yet - Service Layer");

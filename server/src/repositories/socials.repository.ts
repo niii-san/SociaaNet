@@ -12,6 +12,28 @@ interface ISocialsRepository {
     isFollowing(followerId: string, followeeId: string): Promise<boolean>;
     getAllFollowers(userId: string): Promise<Partial<UserDocument>[]>;
     getAllFollowings(userId: string): Promise<Partial<UserDocument>[]>;
+    isFollowRequestPending(
+        followerId: string,
+        followeeId: string
+    ): Promise<boolean>;
+    createFollowRequest(
+        followerId: string,
+        followeeId: string
+    ): Promise<FollowDocument>;
+    getFollowRequests(
+        userId: string
+    ): Promise<FollowDocument & { follower: UserDocument }[]>;
+    getFollowingRequests(
+        userId: string
+    ): Promise<FollowDocument & { follower: UserDocument }[]>;
+    // acceptFollowRequest(
+    //     requestId: string,
+    //     userId: string
+    // ): Promise<FollowDocument>;
+    // rejectFollowRequest(
+    //     requestId: string,
+    //     userId: string
+    // ): Promise<FollowDocument>;
 }
 
 class SocialsRepository implements ISocialsRepository {
@@ -69,6 +91,20 @@ class SocialsRepository implements ISocialsRepository {
         });
 
         return !!follow;
+    }
+
+    async isFollowRequestPending(
+        followerId: string,
+        followeeId: string
+    ): Promise<boolean> {
+        const followRequest = await Follow.findOne({
+            follower: followerId,
+            following: followeeId,
+            status: "pending",
+            is_removed: false
+        });
+
+        return !!followRequest;
     }
 
     async followUser(
@@ -170,6 +206,68 @@ class SocialsRepository implements ISocialsRepository {
                     : null
             };
         });
+    }
+
+    async createFollowRequest(
+        followerId: string,
+        followeeId: string
+    ): Promise<FollowDocument> {
+        const followRequest = new Follow({
+            follower: followerId,
+            following: followeeId,
+            status: "pending"
+        });
+
+        await followRequest.save();
+
+        return followRequest;
+    }
+
+    async getFollowRequests(
+        userId: string
+    ): Promise<FollowDocument & { follower: UserDocument }[]> {
+        const followRequests = await Follow.find({
+            following: userId,
+            status: "pending",
+            is_removed: false
+        })
+            .populate<{ follower: UserDocument }>("follower")
+            .lean();
+
+        const result = followRequests.map((req) => {
+            return {
+                _id: req._id,
+                follower: {
+                    _id: req.follower._id,
+                    username: req.follower.username,
+                    fullname: req.follower.full_name,
+                    avatar_url: req.follower.avatar_key
+                        ? convertImageKeyToImageUrl(req.follower.avatar_key)
+                        : null
+                },
+                following: req.following,
+                status: req.status,
+                followed_at: req.followed_at
+            };
+        });
+
+        return result as unknown as FollowDocument &
+            { follower: UserDocument }[];
+    }
+
+    async getFollowingRequests(
+        userId: string
+    ): Promise<FollowDocument & { follower: UserDocument }[]> {
+        const followingRequests = await Follow.find({
+            follower: userId,
+            status: "pending",
+            is_removed: false
+        })
+            .populate<{ follower: UserDocument }>("follower")
+            .lean();
+
+        return followingRequests as unknown as FollowDocument &
+            { follower: UserDocument }[];
     }
 }
 

@@ -13,6 +13,19 @@ export const followController = asyncHandler(
 
         const result = await socialService.followUser(dto);
 
+        if (result.is_follow_request) {
+            return res
+                .status(200)
+                .json(
+                    new HttpSuccess(
+                        200,
+                        true,
+                        "Follow Request Sent Successfully",
+                        result
+                    )
+                );
+        }
+
         return res
             .status(200)
             .json(
