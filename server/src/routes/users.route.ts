@@ -2,6 +2,7 @@ import { Router } from "express";
 import { authenticate, moderatorAuthenticate } from "../middlewares";
 import {
     acceptFollowRequestController,
+    deleteFollowRequestController,
     followController,
     getAllUsersController,
     getFollowersController,
@@ -66,6 +67,10 @@ usersRouter.get("/search", searchUsersController);
 // Follow and unfollow
 usersRouter.post("/me/:followeeId/follow", followController);
 usersRouter.delete("/me/:followeeId/follow", unfollowController);
+usersRouter.delete(
+    "/me/:followeeId/follow-request",
+    deleteFollowRequestController
+);
 
 // Get following, followers, and follow requests
 usersRouter.get("/:userId/following", getFollowingsController);

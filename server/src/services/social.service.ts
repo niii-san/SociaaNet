@@ -223,6 +223,43 @@ class SocialService {
             followeeId: result.following.toString()
         };
     }
+
+    async deleteFollowRequest(followeeId: string, userId: string) {
+        if (!isValidObjectId(followeeId)) {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                "Invalid followeeId"
+            );
+        }
+
+        const followRequest =
+            await socialsRepo.getPendingFollowRequestByFollowerIdAndFolloweeId(
+                userId,
+                followeeId
+            );
+
+        if (!followRequest) {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.NOT_FOUND,
+                "You do not have a follow request to this user"
+            );
+        }
+
+        const result =
+            await socialsRepo.deleteFollowRequestByFollowerIdAndFolloweeId(
+                userId,
+                followeeId
+            );
+
+        return {
+            followerId: result.follower.toString(),
+            followeeId: result.following.toString()
+        };
+    }
 }
 
 export const socialService = new SocialService();

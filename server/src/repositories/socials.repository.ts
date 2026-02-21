@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { ErrorCodes } from "../constants/error-code";
 import { Follow, FollowDocument, User, UserDocument } from "../models";
 import { convertImageKeyToImageUrl } from "../utils";
 
@@ -35,6 +34,10 @@ interface ISocialsRepository {
         followeeId: string
     ): Promise<FollowDocument>;
     rejectFollowRequestByFollowerIdAndFolloweeId(
+        followerId: string,
+        followeeId: string
+    ): Promise<FollowDocument>;
+    deleteFollowRequestByFollowerIdAndFolloweeId(
         followerId: string,
         followeeId: string
     ): Promise<FollowDocument>;
@@ -346,8 +349,7 @@ class SocialsRepository implements ISocialsRepository {
             {
                 status: "rejected",
                 is_removed: true,
-                removed_at: new Date(),
-                removed_by: new mongoose.Types.ObjectId(followeeId)
+                rejected_at: new Date()
             },
             { new: true }
         );
@@ -369,6 +371,32 @@ class SocialsRepository implements ISocialsRepository {
             status: "pending",
             is_removed: false
         });
+
+        return followRequest;
+    }
+
+    async deleteFollowRequestByFollowerIdAndFolloweeId(
+        followerId: string,
+        followeeId: string
+    ): Promise<FollowDocument> {
+        const followRequest = await Follow.findOneAndUpdate(
+            {
+                follower: followerId,
+                following: followeeId,
+                status: "pending",
+                is_removed: false
+            },
+            {
+                is_removed: true,
+                removed_by: new mongoose.Types.ObjectId(followerId),
+                removed_at: new Date()
+            },
+            { new: true }
+        );
+
+        if (!followRequest) {
+            throw new Error("Follow request not found");
+        }
 
         return followRequest;
     }

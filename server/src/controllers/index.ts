@@ -22,6 +22,7 @@ import { rejectFollowRequestController } from "./social-interactions/reject-foll
 import { unfollowController } from "./social-interactions/unfollow.controller";
 import { getFollowRequestsController } from "./social-interactions/get-follow-requests.controller";
 import { getFollowingRequests } from "./social-interactions/get-following-requests.controller";
+import { deleteFollowRequestController } from "./social-interactions/delete-follow-request.controller";
 
 export {
     signupController,
@@ -47,5 +48,6 @@ export {
     rejectFollowRequestController,
     unfollowController,
     getFollowRequestsController,
-    getFollowingRequests
+    getFollowingRequests,
+    deleteFollowRequestController
 };
