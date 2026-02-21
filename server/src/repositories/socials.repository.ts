@@ -179,7 +179,7 @@ class SocialsRepository implements ISocialsRepository {
 
         return followers.map((f) => {
             return {
-                _id: f.follower._id,
+                user_id: f.follower._id,
                 username: f.follower.username,
                 fullname: f.follower.full_name,
                 avatar_url: f.follower.avatar_key
@@ -198,7 +198,7 @@ class SocialsRepository implements ISocialsRepository {
 
         return followings.map((f) => {
             return {
-                _id: f.following._id,
+                user_id: f.following._id,
                 username: f.following.username,
                 fullname: f.following.full_name,
                 avatar_url: f.following.avatar_key
@@ -236,9 +236,9 @@ class SocialsRepository implements ISocialsRepository {
 
         const result = followRequests.map((req) => {
             return {
-                _id: req._id,
+                request_id: req._id,
                 follower: {
-                    _id: req.follower._id,
+                    user_id: req.follower._id,
                     username: req.follower.username,
                     fullname: req.follower.full_name,
                     avatar_url: req.follower.avatar_key
@@ -266,7 +266,24 @@ class SocialsRepository implements ISocialsRepository {
             .populate<{ follower: UserDocument }>("follower")
             .lean();
 
-        return followingRequests as unknown as FollowDocument &
+        const result = followingRequests.map((req) => {
+            return {
+                request_id: req._id,
+                follower: {
+                    user_id: req.follower._id,
+                    username: req.follower.username,
+                    fullname: req.follower.full_name,
+                    avatar_url: req.follower.avatar_key
+                        ? convertImageKeyToImageUrl(req.follower.avatar_key)
+                        : null
+                },
+                following: req.following,
+                status: req.status,
+                followed_at: req.followed_at
+            };
+        });
+
+        return result as unknown as FollowDocument &
             { follower: UserDocument }[];
     }
 }

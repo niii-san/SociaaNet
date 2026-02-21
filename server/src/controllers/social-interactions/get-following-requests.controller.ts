@@ -7,6 +7,17 @@ export const getFollowingRequests = asyncHandler(
     async (req: RequestWithUserContext, res: Response) => {
         const userId = req.user._id.toString();
 
-        throw new Error("Not implemented yet - Controller Layer");
+        const result = await socialService.getFollowingRequests(userId);
+
+        return res
+            .status(200)
+            .json(
+                new HttpSuccess(
+                    200,
+                    true,
+                    "Following Requests Retrieved Successfully",
+                    result
+                )
+            );
     }
 );

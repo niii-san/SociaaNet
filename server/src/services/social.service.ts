@@ -78,7 +78,6 @@ class SocialService {
                 followeeId: followRequest.following.toString(),
                 is_follow_request: true
             };
-
         } else {
             const result = await socialsRepo.followUser(followerId, followeeId);
 
@@ -140,11 +139,14 @@ class SocialService {
         return followings;
     }
 
-    async requestFollow() {
-        throw new Error("Not implemented yet - Service Layer");
+    async getFollowingRequests(userId:string) {
+        const followingRequests = await socialsRepo.getFollowingRequests(userId);
+        return followingRequests;
     }
 
-    async getFollowRequests() { }
+    async getFollowRequests() {
+        throw new Error("Not implemented yet - Service Layer");
+    }
 
     async acceptFollowRequest() {
         throw new Error("Not implemented yet - Service Layer");
