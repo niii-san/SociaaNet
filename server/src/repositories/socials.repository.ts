@@ -26,7 +26,7 @@ interface ISocialsRepository {
     getFollowingRequests(
         userId: string
     ): Promise<FollowDocument & { follower: UserDocument }[]>;
-    getFollowRequestByFollowerIdAndFolloweeId(
+    getPendingFollowRequestByFollowerIdAndFolloweeId(
         followerId: string,
         followeeId: string
     ): Promise<FollowDocument | null>;
@@ -345,8 +345,9 @@ class SocialsRepository implements ISocialsRepository {
             },
             {
                 status: "rejected",
+                is_removed: true,
                 removed_at: new Date(),
-                removed_by: new mongoose.Types.ObjectId(followerId)
+                removed_by: new mongoose.Types.ObjectId(followeeId)
             },
             { new: true }
         );
@@ -358,7 +359,7 @@ class SocialsRepository implements ISocialsRepository {
         return followRequest;
     }
 
-    async getFollowRequestByFollowerIdAndFolloweeId(
+    async getPendingFollowRequestByFollowerIdAndFolloweeId(
         followerId: string,
         followeeId: string
     ): Promise<FollowDocument | null> {

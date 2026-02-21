@@ -149,7 +149,7 @@ class SocialService {
         throw new Error("Not implemented yet - Service Layer");
     }
 
-    async acceptFollowRequest(userId:string,followerId: string) {
+    async acceptFollowRequest(followerId: string, userId: string) {
         if (!isValidObjectId(followerId)) {
             throw new HttpError(
                 400,
@@ -160,7 +160,10 @@ class SocialService {
         }
 
         const followRequest =
-            await socialsRepo.getFollowRequestByFollowerIdAndFolloweeId(followerId,userId);
+            await socialsRepo.getPendingFollowRequestByFollowerIdAndFolloweeId(
+                followerId,
+                userId
+            );
 
         if (!followRequest) {
             throw new HttpError(
@@ -171,13 +174,52 @@ class SocialService {
             );
         }
 
-        const result = await socialsRepo.acceptFollowRequestByFollowerIdAndFolloweeId(followerId,userId);
+        const result =
+            await socialsRepo.acceptFollowRequestByFollowerIdAndFolloweeId(
+                followerId,
+                userId
+            );
 
         return {
             followerId: result.follower.toString(),
-            followeeId: result.following.toString(),
+            followeeId: result.following.toString()
         };
+    }
 
+    async rejectFollowRequest(followerId: string, userId: string) {
+        if (!isValidObjectId(followerId)) {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                "Invalid followerId"
+            );
+        }
+
+        const followRequest =
+            await socialsRepo.getPendingFollowRequestByFollowerIdAndFolloweeId(
+                followerId,
+                userId
+            );
+        if (!followRequest) {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.NOT_FOUND,
+                "You do not have a follow request from this user"
+            );
+        }
+
+        const result =
+            await socialsRepo.rejectFollowRequestByFollowerIdAndFolloweeId(
+                followerId,
+                userId
+            );
+
+        return {
+            followerId: result.follower.toString(),
+            followeeId: result.following.toString()
+        };
     }
 }
 

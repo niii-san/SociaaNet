@@ -9,8 +9,8 @@ export const acceptFollowRequestController = asyncHandler(
         const userId = req.user._id.toString();
 
         const result = await socialService.acceptFollowRequest(
-            userId,
-            followerId
+            followerId,
+            userId
         );
 
         return res
