@@ -26,14 +26,18 @@ interface ISocialsRepository {
     getFollowingRequests(
         userId: string
     ): Promise<FollowDocument & { follower: UserDocument }[]>;
-    // acceptFollowRequest(
-    //     requestId: string,
-    //     userId: string
-    // ): Promise<FollowDocument>;
-    // rejectFollowRequest(
-    //     requestId: string,
-    //     userId: string
-    // ): Promise<FollowDocument>;
+    getFollowRequestByFollowerIdAndFolloweeId(
+        followerId: string,
+        followeeId: string
+    ): Promise<FollowDocument | null>;
+    acceptFollowRequestByFollowerIdAndFolloweeId(
+        followerId: string,
+        followeeId: string
+    ): Promise<FollowDocument>;
+    rejectFollowRequestByFollowerIdAndFolloweeId(
+        followerId: string,
+        followeeId: string
+    ): Promise<FollowDocument>;
 }
 
 class SocialsRepository implements ISocialsRepository {
@@ -285,6 +289,87 @@ class SocialsRepository implements ISocialsRepository {
 
         return result as unknown as FollowDocument &
             { follower: UserDocument }[];
+    }
+
+    async acceptFollowRequestByFollowerIdAndFolloweeId(
+        followerId: string,
+        followeeId: string
+    ): Promise<FollowDocument> {
+        const session = await mongoose.startSession();
+
+        try {
+            session.startTransaction();
+
+            const followRequest = await Follow.findOneAndUpdate(
+                {
+                    follower: followerId,
+                    following: followeeId,
+                    status: "pending",
+                    is_removed: false
+                },
+                {
+                    status: "accepted",
+                    accepted_at: new Date()
+                },
+                { session, new: true }
+            );
+
+            if (!followRequest) {
+                throw new Error("Follow request not found");
+            }
+
+            await this.increaseFollowerCount(
+                followRequest.following.toString(),
+                session
+            );
+            await this.increaseFollowingCount(followerId, session);
+
+            await session.commitTransaction();
+
+            return followRequest;
+        } finally {
+            await session.endSession();
+        }
+    }
+
+    async rejectFollowRequestByFollowerIdAndFolloweeId(
+        followerId: string,
+        followeeId: string
+    ): Promise<FollowDocument> {
+        const followRequest = await Follow.findOneAndUpdate(
+            {
+                follower: followerId,
+                following: followeeId,
+                status: "pending",
+                is_removed: false
+            },
+            {
+                status: "rejected",
+                removed_at: new Date(),
+                removed_by: new mongoose.Types.ObjectId(followerId)
+            },
+            { new: true }
+        );
+
+        if (!followRequest) {
+            throw new Error("Follow request not found");
+        }
+
+        return followRequest;
+    }
+
+    async getFollowRequestByFollowerIdAndFolloweeId(
+        followerId: string,
+        followeeId: string
+    ): Promise<FollowDocument | null> {
+        const followRequest = await Follow.findOne({
+            follower: followerId,
+            following: followeeId,
+            status: "pending",
+            is_removed: false
+        });
+
+        return followRequest;
     }
 }
 

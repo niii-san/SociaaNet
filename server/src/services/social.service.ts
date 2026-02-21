@@ -139,8 +139,9 @@ class SocialService {
         return followings;
     }
 
-    async getFollowingRequests(userId:string) {
-        const followingRequests = await socialsRepo.getFollowingRequests(userId);
+    async getFollowingRequests(userId: string) {
+        const followingRequests =
+            await socialsRepo.getFollowingRequests(userId);
         return followingRequests;
     }
 
@@ -148,8 +149,35 @@ class SocialService {
         throw new Error("Not implemented yet - Service Layer");
     }
 
-    async acceptFollowRequest() {
-        throw new Error("Not implemented yet - Service Layer");
+    async acceptFollowRequest(userId:string,followerId: string) {
+        if (!isValidObjectId(followerId)) {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                "Invalid followerId"
+            );
+        }
+
+        const followRequest =
+            await socialsRepo.getFollowRequestByFollowerIdAndFolloweeId(followerId,userId);
+
+        if (!followRequest) {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.NOT_FOUND,
+                "You do not have a follow request from this user"
+            );
+        }
+
+        const result = await socialsRepo.acceptFollowRequestByFollowerIdAndFolloweeId(followerId,userId);
+
+        return {
+            followerId: result.follower.toString(),
+            followeeId: result.following.toString(),
+        };
+
     }
 }
 
