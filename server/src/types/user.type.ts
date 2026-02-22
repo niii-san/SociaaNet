@@ -1,4 +1,7 @@
+import { Types } from "mongoose";
+
 export interface UserEntity {
+    _id: Types.ObjectId;
     email_address: string;
     avatar_key: string | null;
     full_name: string;

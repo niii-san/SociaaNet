@@ -236,12 +236,14 @@ export function ProfileHeader({ user, isOwner, followers, following, joined, onP
                 onOpenChange={setShowFollowers}
                 userId={user.user_id}
                 username={user.username}
+                onDataChange={onProfileUpdate}
             />
             <FollowingDialog
                 open={showFollowing}
                 onOpenChange={setShowFollowing}
                 userId={user.user_id}
                 username={user.username}
+                onDataChange={onProfileUpdate}
             />
         </>
     );

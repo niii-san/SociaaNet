@@ -33,11 +33,12 @@ const upload = multer({
     }
 });
 
-// Unprotected Routes
-usersRouter.get("/profile/:username", getProfileByUsernameController);
 
 // Protected Routes
 usersRouter.use(authenticate);
+
+// Get user profile
+usersRouter.get("/profile/:username", getProfileByUsernameController);
 
 // Upload Avatar
 usersRouter.post(

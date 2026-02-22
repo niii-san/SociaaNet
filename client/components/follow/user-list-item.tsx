@@ -10,13 +10,15 @@ interface UserListItemProps {
     onFollowChange?: () => void;
     onNavigate?: () => void;
     showFollowButton?: boolean;
+    followButtonText?: string;
 }
 
 export function UserListItem({ 
     user, 
     onFollowChange, 
     onNavigate,
-    showFollowButton = true
+    showFollowButton = true,
+    followButtonText
 }: UserListItemProps) {
     const { data: currentUser } = useAuth();
     const isCurrentUser = currentUser?.user_id === user.user_id;
@@ -57,6 +59,7 @@ export function UserListItem({
                     isPrivate={false}
                     onFollowChange={onFollowChange}
                     size="sm"
+                    customFollowText={followButtonText}
                 />
             )}
         </div>

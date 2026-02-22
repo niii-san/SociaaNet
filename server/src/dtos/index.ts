@@ -25,6 +25,7 @@ import { UpdateFeedModeDto } from "./settings/update-feed-mode.dto";
 import { SearchUsersDto } from "./users/search-users.dto";
 import { FollowUserDTO } from "./social/follow-user.dto";
 import { UnfollowUserDTO } from "./social/unfollow-user.dto";
+import { GetUserProfileDto } from "./users/get-user-profile.dto";
 
 export {
     CreateUserDto,
@@ -53,5 +54,6 @@ export {
     UpdateFeedModeDto,
     SearchUsersDto,
     FollowUserDTO,
-    UnfollowUserDTO
+    UnfollowUserDTO,
+    GetUserProfileDto
 };

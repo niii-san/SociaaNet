@@ -23,9 +23,6 @@ export default function ProfilePage() {
     const [isCurrentUserProfile, setIsCurrentUserProfile] = useState(false);
     const [loading, setLoading] = useState(true);
 
-    console.log("current user data,", currentUserData);
-    console.log("current profile data,", profileData);
-
     useEffect(() => {
         const fetchProfile = async () => {
             if (!username) return;
@@ -33,8 +30,6 @@ export default function ProfilePage() {
             setLoading(true);
             try {
                 const data = await getUserProfileByUsername(username);
-                console.log("Initial profile data:", data);
-                console.log("is_following:", data.is_following);
                 setProfileData(data);
 
                 if (currentUserData) {
@@ -66,8 +61,6 @@ export default function ProfilePage() {
         if (!username) return;
         try {
             const data = await getUserProfileByUsername(username);
-            console.log("Profile data received:", data);
-            console.log("is_following value:", data.is_following);
             setProfileData(data);
         } catch (error) {
             console.error("Error refetching profile:", error);

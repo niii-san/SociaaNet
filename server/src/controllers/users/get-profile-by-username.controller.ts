@@ -1,11 +1,12 @@
 // get-profile-by-username.controller.ts
 
-import { Request, Response } from "express";
+import { Response } from "express";
 import { asyncHandler, HttpSuccess } from "../../utils";
-import { GetUserByUsernameDto } from "../../dtos";
+import { GetUserByUsernameDto, GetUserProfileDto } from "../../dtos";
 import { usersService } from "../../services";
+import { RequestWithUserContext } from "../../types";
 
-interface RequestWithUsername extends Request {
+interface RequestWithUsername extends RequestWithUserContext {
     params: {
         username: string;
     };
@@ -13,7 +14,11 @@ interface RequestWithUsername extends Request {
 
 export const getProfileByUsernameController = asyncHandler(
     async (req: RequestWithUsername, res: Response) => {
-        const dto = new GetUserByUsernameDto(req.params.username);
+        const currentUserId = req.user._id.toString()
+        const targetProfileUsername = req.params?.username ?? "";
+
+        const dto = new GetUserProfileDto(targetProfileUsername, currentUserId);
+
         const userProfile = await usersService.getUserProfileByUsername(dto);
 
         return res

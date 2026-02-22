@@ -6,14 +6,20 @@ import {
     User,
     UserSettings
 } from "../models";
+import { UserEntity } from "../types";
 import { HttpError } from "../utils";
 import { filesRepo } from "./files.repository";
+import { socialsRepo } from "./socials.repository";
 
 interface UserDocumentRepository {
     createUser(userData: Partial<UserDocument>): Promise<UserDocument>;
     getUserByEmail(email: string): Promise<UserDocument | null>;
     getUserById(userId: string): Promise<UserDocument | null>;
     getUserByUsername(username: string): Promise<UserDocument | null>;
+    getProfileByUsername(
+        targetUsername: string,
+        currentUserId: string
+    ): Promise<(UserEntity & { is_following: boolean }) | null>;
     getAllUsers(): Promise<UserDocument[]>;
     uploadAvatar(
         data: Partial<ImageMetaDataDocument>
@@ -39,6 +45,32 @@ class UserRepository implements UserDocumentRepository {
     async getUserById(userId: string): Promise<UserDocument | null> {
         const user = await User.findById(userId).select("-password");
         return user;
+    }
+
+    async getProfileByUsername(
+        targetUsername: string,
+        currentUserId: string
+    ): Promise<(UserEntity & { is_following: boolean }) | null> {
+        const userDoc = await User.findOne({ username: targetUsername }).select(
+            "-password"
+        );
+
+        if (!userDoc) return null;
+
+        const user = userDoc.toObject(); 
+
+        const userId = String(user._id); 
+
+        let following = false;
+
+        if (currentUserId && userId !== currentUserId) {
+            following = await socialsRepo.isFollowing(currentUserId, userId);
+        }
+
+        return {
+            ...user,
+            is_following: following
+        };
     }
 
     async getUserByUsername(username: string): Promise<UserDocument | null> {
@@ -94,7 +126,7 @@ class UserRepository implements UserDocumentRepository {
         if (user.avatar_key) {
             filesRepo
                 .deleteImageMetaDataByImageKey(user.avatar_key)
-                .catch(() => {});
+                .catch(() => { });
         }
 
         user.avatar_key = image.image_key;

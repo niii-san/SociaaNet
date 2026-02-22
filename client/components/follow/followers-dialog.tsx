@@ -17,9 +17,10 @@ interface FollowersDialogProps {
     onOpenChange: (open: boolean) => void;
     userId: string;
     username: string;
+    onDataChange?: () => void;
 }
 
-export function FollowersDialog({ open, onOpenChange, userId, username }: FollowersDialogProps) {
+export function FollowersDialog({ open, onOpenChange, userId, username, onDataChange }: FollowersDialogProps) {
     const [followers, setFollowers] = useState<FollowUser[]>([]);
     const [loading, setLoading] = useState(false);
     const [removingId, setRemovingId] = useState<string | null>(null);
@@ -52,11 +53,19 @@ export function FollowersDialog({ open, onOpenChange, userId, username }: Follow
             toast.success("Follower removed");
             // Remove from local state
             setFollowers(prev => prev.filter(f => f.user_id !== followerId));
+            // Refresh profile data
+            onDataChange?.();
         } catch (error: any) {
             toast.error(error?.response?.data?.message || "Failed to remove follower");
         } finally {
             setRemovingId(null);
         }
+    };
+
+    const handleFollowChange = () => {
+        fetchFollowers();
+        // Refresh profile data
+        onDataChange?.();
     };
 
     return (
@@ -78,9 +87,10 @@ export function FollowersDialog({ open, onOpenChange, userId, username }: Follow
                                     <div className="flex-1">
                                         <UserListItem
                                             user={user}
-                                            onFollowChange={fetchFollowers}
+                                            onFollowChange={handleFollowChange}
                                             onNavigate={() => onOpenChange(false)}
-                                            showFollowButton={!isOwnProfile}
+                                            showFollowButton={true}
+                                            followButtonText={isOwnProfile && !user.is_following ? "Follow Back" : undefined}
                                         />
                                     </div>
                                     {isOwnProfile && (

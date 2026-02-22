@@ -14,6 +14,7 @@ interface FollowButtonProps {
     onFollowChange?: () => void;
     variant?: "default" | "outline";
     size?: "default" | "sm" | "lg";
+    customFollowText?: string;
 }
 
 export function FollowButton({
@@ -24,6 +25,7 @@ export function FollowButton({
     onFollowChange,
     variant = "default",
     size = "default",
+    customFollowText,
 }: FollowButtonProps) {
     const { handleFollow, handleUnfollow, handleCancelRequest, loading } = useFollowUser();
     const { followingRequests } = useFollow();
@@ -86,7 +88,7 @@ export function FollowButton({
         return (
             <>
                 <UserPlus className="w-4 h-4" />
-                <span className="ml-2">Follow</span>
+                <span className="ml-2">{customFollowText || "Follow"}</span>
             </>
         );
     };

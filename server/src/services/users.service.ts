@@ -1,6 +1,7 @@
 import {
     GetUserByIdDto,
     GetUserByUsernameDto,
+    GetUserProfileDto,
     GetUserSettingsByUserIdDto,
     SearchUsersDto,
     UpdateBioDto,
@@ -47,8 +48,13 @@ class UsersService {
         };
     }
 
-    async getUserProfileByUsername(dto: GetUserByUsernameDto) {
-        const user = await userRepo.getUserByUsername(dto.username);
+    async getUserProfileByUsername(dto: GetUserProfileDto) {
+        const user = await userRepo.getProfileByUsername(
+            dto.targetProfileUsername,
+            dto.currentUserId
+        );
+
+
 
         if (!user) {
             throw new HttpError(
@@ -59,10 +65,12 @@ class UsersService {
             );
         }
 
+
         const avatar_url =
             user.avatar_key != null
                 ? convertImageKeyToImageUrl(user.avatar_key)
                 : null;
+
 
         return {
             user_id: user._id,
@@ -73,7 +81,9 @@ class UsersService {
             following_count: user.following_count,
             bio: user.bio,
             avatar_url: avatar_url,
-            created_at: user.created_at
+            created_at: user.created_at,
+            is_own_profile: dto.currentUserId === dto.targetProfileUsername,
+            is_following: user.is_following
         };
     }
 

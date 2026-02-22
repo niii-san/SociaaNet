@@ -1,7 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle
+} from "@/components/ui/dialog";
 import { getFollowing } from "@/features/follow/follow.api";
 import { FollowUser } from "@/types";
 import { MiniLoader } from "@/components/ui/mini-loader";
@@ -13,9 +18,16 @@ interface FollowingDialogProps {
     onOpenChange: (open: boolean) => void;
     userId: string;
     username: string;
+    onDataChange?: () => void;
 }
 
-export function FollowingDialog({ open, onOpenChange, userId, username }: FollowingDialogProps) {
+export function FollowingDialog({
+    open,
+    onOpenChange,
+    userId,
+    username,
+    onDataChange
+}: FollowingDialogProps) {
     const [following, setFollowing] = useState<FollowUser[]>([]);
     const [loading, setLoading] = useState(false);
 
@@ -38,6 +50,11 @@ export function FollowingDialog({ open, onOpenChange, userId, username }: Follow
         }
     };
 
+    const handleFollowChange = () => {
+        // Refresh profile data
+        onDataChange?.();
+    };
+
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="max-w-md p-0 gap-0 max-h-[80vh] flex flex-col">
@@ -56,7 +73,7 @@ export function FollowingDialog({ open, onOpenChange, userId, username }: Follow
                                 <UserListItem
                                     key={user.user_id}
                                     user={user}
-                                    onFollowChange={fetchFollowing}
+                                    onFollowChange={handleFollowChange}
                                     onNavigate={() => onOpenChange(false)}
                                 />
                             ))}
@@ -64,7 +81,9 @@ export function FollowingDialog({ open, onOpenChange, userId, username }: Follow
                     ) : (
                         <div className="text-center py-12 px-4">
                             <Users className="w-12 h-12 mx-auto text-muted-foreground mb-3" />
-                            <p className="text-muted-foreground">Not following anyone yet</p>
+                            <p className="text-muted-foreground">
+                                Not following anyone yet
+                            </p>
                         </div>
                     )}
                 </div>
