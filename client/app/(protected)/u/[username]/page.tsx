@@ -33,6 +33,8 @@ export default function ProfilePage() {
             setLoading(true);
             try {
                 const data = await getUserProfileByUsername(username);
+                console.log("Initial profile data:", data);
+                console.log("is_following:", data.is_following);
                 setProfileData(data);
 
                 if (currentUserData) {
@@ -64,6 +66,8 @@ export default function ProfilePage() {
         if (!username) return;
         try {
             const data = await getUserProfileByUsername(username);
+            console.log("Profile data received:", data);
+            console.log("is_following value:", data.is_following);
             setProfileData(data);
         } catch (error) {
             console.error("Error refetching profile:", error);

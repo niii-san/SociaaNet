@@ -57,3 +57,8 @@ export const rejectFollowRequest = async (followerId: string): Promise<FollowRes
     const response = await api.delete(`/users/me/${followerId}/follow-request`);
     return response.data;
 };
+
+// Remove follower
+export const removeFollower = async (followerId: string): Promise<void> => {
+    await api.delete(`/users/me/followers/${followerId}`);
+};

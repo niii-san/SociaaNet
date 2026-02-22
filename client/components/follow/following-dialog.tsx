@@ -18,23 +18,17 @@ interface FollowingDialogProps {
 export function FollowingDialog({ open, onOpenChange, userId, username }: FollowingDialogProps) {
     const [following, setFollowing] = useState<FollowUser[]>([]);
     const [loading, setLoading] = useState(false);
-    console.log(userId)
 
     useEffect(() => {
         if (open && userId) {
             fetchFollowing();
-        } else if (!open) {
-            // Reset state when dialog closes
-            setFollowing([]);
         }
     }, [open, userId]);
 
     const fetchFollowing = async () => {
         setLoading(true);
         try {
-            console.log("Fetching following for userId:", userId);
             const response = await getFollowing(userId);
-            console.log("Following response:", response);
             setFollowing(response.data);
         } catch (error) {
             console.error("Failed to fetch following:", error);

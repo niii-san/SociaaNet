@@ -2,11 +2,15 @@
 
 import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { getFollowers } from "@/features/follow/follow.api";
+import { getFollowers, removeFollower } from "@/features/follow/follow.api";
 import { FollowUser } from "@/types";
 import { MiniLoader } from "@/components/ui/mini-loader";
 import { UserListItem } from "./user-list-item";
-import { Users } from "lucide-react";
+import { Users, X } from "lucide-react";
+import { useAuth } from "@/contexts";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
+import Link from "next/link";
 
 interface FollowersDialogProps {
     open: boolean;
@@ -18,28 +22,40 @@ interface FollowersDialogProps {
 export function FollowersDialog({ open, onOpenChange, userId, username }: FollowersDialogProps) {
     const [followers, setFollowers] = useState<FollowUser[]>([]);
     const [loading, setLoading] = useState(false);
+    const [removingId, setRemovingId] = useState<string | null>(null);
+    const { data: currentUser } = useAuth();
+    const isOwnProfile = currentUser?.user_id === userId;
 
     useEffect(() => {
         if (open && userId) {
             fetchFollowers();
-        } else if (!open) {
-            // Reset state when dialog closes
-            setFollowers([]);
         }
     }, [open, userId]);
 
     const fetchFollowers = async () => {
         setLoading(true);
         try {
-            console.log("Fetching followers for userId:", userId);
             const response = await getFollowers(userId);
-            console.log("Followers response:", response);
             setFollowers(response.data);
         } catch (error) {
             console.error("Failed to fetch followers:", error);
             setFollowers([]);
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleRemoveFollower = async (followerId: string) => {
+        setRemovingId(followerId);
+        try {
+            await removeFollower(followerId);
+            toast.success("Follower removed");
+            // Remove from local state
+            setFollowers(prev => prev.filter(f => f.user_id !== followerId));
+        } catch (error: any) {
+            toast.error(error?.response?.data?.message || "Failed to remove follower");
+        } finally {
+            setRemovingId(null);
         }
     };
 
@@ -58,12 +74,27 @@ export function FollowersDialog({ open, onOpenChange, userId, username }: Follow
                     ) : followers.length > 0 ? (
                         <div className="p-2">
                             {followers.map((user) => (
-                                <UserListItem
-                                    key={user.user_id}
-                                    user={user}
-                                    onFollowChange={fetchFollowers}
-                                    onNavigate={() => onOpenChange(false)}
-                                />
+                                <div key={user.user_id} className="flex items-center gap-2">
+                                    <div className="flex-1">
+                                        <UserListItem
+                                            user={user}
+                                            onFollowChange={fetchFollowers}
+                                            onNavigate={() => onOpenChange(false)}
+                                            showFollowButton={!isOwnProfile}
+                                        />
+                                    </div>
+                                    {isOwnProfile && (
+                                        <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            className="h-8 w-8 text-muted-foreground hover:text-destructive shrink-0"
+                                            onClick={() => handleRemoveFollower(user.user_id)}
+                                            disabled={removingId === user.user_id}
+                                        >
+                                            <X className="w-4 h-4" />
+                                        </Button>
+                                    )}
+                                </div>
                             ))}
                         </div>
                     ) : (

@@ -96,7 +96,7 @@ class SocialsRepository implements ISocialsRepository {
     ): Promise<boolean> {
         console.log("FollowerId", followerId);
         console.log("FolloweeId", followeeId);
-        const follow = await Follow.findOne({
+        const follow = await Follow.exists({
             follower: followerId,
             following: followeeId,
             status: "accepted",
@@ -110,7 +110,7 @@ class SocialsRepository implements ISocialsRepository {
         followerId: string,
         followeeId: string
     ): Promise<boolean> {
-        const followRequest = await Follow.findOne({
+        const followRequest = await Follow.exists({
             follower: followerId,
             following: followeeId,
             status: "pending",
