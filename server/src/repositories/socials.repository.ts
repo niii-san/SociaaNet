@@ -41,6 +41,10 @@ interface ISocialsRepository {
         followerId: string,
         followeeId: string
     ): Promise<FollowDocument>;
+    removeFollower(
+        followerId: string,
+        followeeId: string
+    ): Promise<{ followerId: string; followeeId: string }>;
 }
 
 class SocialsRepository implements ISocialsRepository {
@@ -90,6 +94,8 @@ class SocialsRepository implements ISocialsRepository {
         followerId: string,
         followeeId: string
     ): Promise<boolean> {
+        console.log("FollowerId", followerId);
+        console.log("FolloweeId", followeeId);
         const follow = await Follow.findOne({
             follower: followerId,
             following: followeeId,
@@ -188,14 +194,18 @@ class SocialsRepository implements ISocialsRepository {
             follower: userId,
             status: "accepted",
             is_removed: false
-        })
+        });
 
         return followers.map((f) => {
             return {
                 user_id: f.follower._id,
                 username: f.follower.username,
                 fullname: f.follower.full_name,
-                is_following: currentUserFollowings.some(following => following.following.toString() === f.follower._id.toString()),
+                is_following: currentUserFollowings.some(
+                    (following) =>
+                        following.following.toString() ===
+                        f.follower._id.toString()
+                ),
                 avatar_url: f.follower.avatar_key
                     ? convertImageKeyToImageUrl(f.follower.avatar_key)
                     : null
@@ -215,7 +225,7 @@ class SocialsRepository implements ISocialsRepository {
                 user_id: f.following._id,
                 username: f.following.username,
                 fullname: f.following.full_name,
-                is_following:true,
+                is_following: true,
                 avatar_url: f.following.avatar_key
                     ? convertImageKeyToImageUrl(f.following.avatar_key)
                     : null
@@ -409,6 +419,45 @@ class SocialsRepository implements ISocialsRepository {
         }
 
         return followRequest;
+    }
+
+    async removeFollower(
+        followerId: string,
+        followeeId: string
+    ): Promise<{ followerId: string; followeeId: string }> {
+        const session = await mongoose.startSession();
+
+        try {
+            session.startTransaction();
+
+            const follow = await Follow.findOneAndUpdate(
+                {
+                    follower: followerId,
+                    following: followeeId,
+                    status: "accepted",
+                    is_removed: false
+                },
+                {
+                    is_removed: true,
+                    removed_at: new Date(),
+                    removed_by: new mongoose.Types.ObjectId(followeeId)
+                },
+                { session, new: true }
+            );
+
+            if (!follow) {
+                throw new Error("Follow relationship not found");
+            }
+
+            await this.decreaseFollowerCount(followeeId, session);
+            await this.decreaseFollowingCount(followerId, session);
+
+            await session.commitTransaction();
+
+            return { followerId, followeeId: follow.following.toString() };
+        } finally {
+            await session.endSession();
+        }
     }
 }
 

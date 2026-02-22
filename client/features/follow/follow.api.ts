@@ -25,7 +25,6 @@ export const cancelFollowRequest = async (followeeId: string): Promise<void> => 
 // Get following requests (users you've requested to follow)
 export const getFollowingRequests = async (): Promise<FollowingRequestsResponse> => {
     const response = await api.get(`/users/me/following-requests`);
-    console.log("Following requests response:", response.data);
     return response.data;
 };
 

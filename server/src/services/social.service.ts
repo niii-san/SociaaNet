@@ -277,6 +277,30 @@ class SocialService {
             followeeId: result.following.toString()
         };
     }
+
+    async removeFollower(followerId: string, userId: string) {
+        if (!isValidObjectId(followerId)) {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                "Invalid followerId"
+            );
+        }
+
+        const isFollowing = await socialsRepo.isFollowing(followerId, userId);
+
+        if (!isFollowing) {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                "This user does not follow you"
+            );
+        }
+        const unfollow = await socialsRepo.unfollowUser(followerId, userId);
+        return unfollow;
+    }
 }
 
 export const socialService = new SocialService();

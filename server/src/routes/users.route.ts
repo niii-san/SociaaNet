@@ -12,6 +12,7 @@ import {
     getProfileByUsernameController,
     getUserSettingsController,
     rejectFollowRequestController,
+    removeFollowerController,
     searchUsersController,
     unfollowController,
     updateBioController,
@@ -71,6 +72,9 @@ usersRouter.delete(
     "/me/:followeeId/follow-request/cancel",
     deleteFollowRequestController
 );
+
+// Remove follower
+usersRouter.delete("/me/followers/:followerId", removeFollowerController);
 
 // Get following, followers, and follow requests
 usersRouter.get("/:userId/following", getFollowingsController);
