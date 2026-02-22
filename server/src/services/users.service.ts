@@ -82,7 +82,7 @@ class UsersService {
             bio: user.bio,
             avatar_url: avatar_url,
             created_at: user.created_at,
-            is_own_profile: dto.currentUserId === dto.targetProfileUsername,
+            is_own_profile: dto.currentUserId === user._id.toString(),
             is_following: user.is_following
         };
     }
