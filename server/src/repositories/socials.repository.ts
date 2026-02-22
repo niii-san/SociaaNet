@@ -184,11 +184,18 @@ class SocialsRepository implements ISocialsRepository {
             is_removed: false
         }).populate<{ follower: UserDocument }>("follower");
 
+        const currentUserFollowings = await Follow.find({
+            follower: userId,
+            status: "accepted",
+            is_removed: false
+        })
+
         return followers.map((f) => {
             return {
                 user_id: f.follower._id,
                 username: f.follower.username,
                 fullname: f.follower.full_name,
+                is_following: currentUserFollowings.some(following => following.following.toString() === f.follower._id.toString()),
                 avatar_url: f.follower.avatar_key
                     ? convertImageKeyToImageUrl(f.follower.avatar_key)
                     : null
@@ -208,6 +215,7 @@ class SocialsRepository implements ISocialsRepository {
                 user_id: f.following._id,
                 username: f.following.username,
                 fullname: f.following.full_name,
+                is_following:true,
                 avatar_url: f.following.avatar_key
                     ? convertImageKeyToImageUrl(f.following.avatar_key)
                     : null
@@ -371,6 +379,8 @@ class SocialsRepository implements ISocialsRepository {
             status: "pending",
             is_removed: false
         });
+        console.log("Followerid", followerId);
+        console.log("FolloweeId", followeeId);
 
         return followRequest;
     }

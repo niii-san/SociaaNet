@@ -6,7 +6,8 @@ import {
     Camera,
     MessageCircle,
     MoreHorizontal,
-    User
+    User,
+    UserPlus
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -16,6 +17,10 @@ import { toast } from "sonner";
 import { IUserProfile } from "@/types";
 import { EditFieldModal } from "./edit-field-modal";
 import { Pencil } from "lucide-react";
+import { FollowButton } from "@/components/follow/follow-button";
+import { FollowersDialog } from "@/components/follow/followers-dialog";
+import { FollowingDialog } from "@/components/follow/following-dialog";
+import Link from "next/link";
 
 interface ProfileHeaderProps {
     user: IUserProfile;
@@ -23,10 +28,13 @@ interface ProfileHeaderProps {
     followers: number;
     following: number;
     joined: string;
+    onProfileUpdate?: () => void;
 }
 
-export function ProfileHeader({ user, isOwner, followers, following, joined }: ProfileHeaderProps) {
+export function ProfileHeader({ user, isOwner, followers, following, joined, onProfileUpdate }: ProfileHeaderProps) {
     const [showImagePicker, setShowImagePicker] = useState(false);
+    const [showFollowers, setShowFollowers] = useState(false);
+    const [showFollowing, setShowFollowing] = useState(false);
     const [editField, setEditField] = useState<{
         isOpen: boolean;
         title: string;
@@ -142,9 +150,22 @@ export function ProfileHeader({ user, isOwner, followers, following, joined }: P
                             </div>
 
                             <div className="flex gap-3">
-                                {!isOwner && (
+                                {isOwner ? (
+                                    <Link href="/follow-requests">
+                                        <Button variant="outline" className="gap-2">
+                                            <UserPlus className="w-4 h-4" />
+                                            Follow Requests
+                                        </Button>
+                                    </Link>
+                                ) : (
                                     <>
-                                        <Button className="rounded-full font-semibold px-8">Follow</Button>
+                                        <FollowButton
+                                            userId={user.user_id}
+                                            username={user.username}
+                                            isFollowing={user.is_following || false}
+                                            isPrivate={user.is_private_account}
+                                            onFollowChange={onProfileUpdate}
+                                        />
                                         <Button variant="outline" size="icon" className="rounded-full">
                                             <MessageCircle className="w-5 h-5" />
                                         </Button>
@@ -180,14 +201,20 @@ export function ProfileHeader({ user, isOwner, followers, following, joined }: P
                                 <span>Joined {joined}</span>
                             </div>
                             <div className="flex items-center gap-6 text-sm">
-                                <div className="flex items-center gap-1 hover:underline cursor-pointer">
+                                <button 
+                                    onClick={() => setShowFollowing(true)}
+                                    className="flex items-center gap-1 hover:underline cursor-pointer"
+                                >
                                     <span className="font-bold text-foreground">{following}</span>
                                     <span>Following</span>
-                                </div>
-                                <div className="flex items-center gap-1 hover:underline cursor-pointer">
+                                </button>
+                                <button 
+                                    onClick={() => setShowFollowers(true)}
+                                    className="flex items-center gap-1 hover:underline cursor-pointer"
+                                >
                                     <span className="font-bold text-foreground">{followers}</span>
                                     <span>Followers</span>
-                                </div>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -203,6 +230,18 @@ export function ProfileHeader({ user, isOwner, followers, following, joined }: P
             <EditFieldModal
                 {...editField}
                 onClose={() => setEditField(prev => ({ ...prev, isOpen: false }))}
+            />
+            <FollowersDialog
+                open={showFollowers}
+                onOpenChange={setShowFollowers}
+                userId={user.user_id}
+                username={user.username}
+            />
+            <FollowingDialog
+                open={showFollowing}
+                onOpenChange={setShowFollowing}
+                userId={user.user_id}
+                username={user.username}
             />
         </>
     );

@@ -68,7 +68,7 @@ usersRouter.get("/search", searchUsersController);
 usersRouter.post("/me/:followeeId/follow", followController);
 usersRouter.delete("/me/:followeeId/follow", unfollowController);
 usersRouter.delete(
-    "/me/:followeeId/follow-request",
+    "/me/:followeeId/follow-request/cancel",
     deleteFollowRequestController
 );
 

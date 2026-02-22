@@ -60,6 +60,16 @@ export default function ProfilePage() {
         }
     }, [currentUserData, profileData]);
 
+    const handleProfileUpdate = async () => {
+        if (!username) return;
+        try {
+            const data = await getUserProfileByUsername(username);
+            setProfileData(data);
+        } catch (error) {
+            console.error("Error refetching profile:", error);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-background pb-12 pt-16">
             <div className="container max-w-5xl mx-auto px-4">
@@ -73,6 +83,7 @@ export default function ProfilePage() {
                             joined={new Date(
                                 profileData.created_at
                             ).toLocaleDateString()}
+                            onProfileUpdate={handleProfileUpdate}
                         />
 
                         <Separator className="my-6" />

@@ -131,10 +131,27 @@ class SocialService {
     }
 
     async getFollowers(userId: string) {
+        if (!isValidObjectId(userId)) {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                "Invalid userId"
+            );
+        }
+
         const followers = await socialsRepo.getAllFollowers(userId);
         return followers;
     }
     async getFollowings(userId: string) {
+        if (!isValidObjectId(userId)) {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                "Invalid userId"
+            );
+        }
         const followings = await socialsRepo.getAllFollowings(userId);
         return followings;
     }

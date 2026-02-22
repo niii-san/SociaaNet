@@ -5,7 +5,7 @@ import { socialService } from "../../services/social.service";
 
 export const getFollowingsController = asyncHandler(
     async (req: RequestWithUserContext, res: Response) => {
-        const userId = req.user._id.toString();
+        const userId = req.params?.userId ?? "";
 
         const followings = await socialService.getFollowings(userId);
 

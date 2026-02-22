@@ -8,6 +8,9 @@ export const rejectFollowRequestController = asyncHandler(
         const userId = req.user._id.toString();
         const followerId = req.params?.followerId ?? "";
 
+        console.log("Follower Id controller side: ", followerId);
+        console.log("User Id controller side: ", userId);
+
         const result = await socialService.rejectFollowRequest(
             followerId,
             userId

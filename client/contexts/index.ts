@@ -1,3 +1,3 @@
-import { AuthProvider, useAuth } from "./auth.context";
-import { UIProvider, useUI } from "./ui.context";
-export { AuthProvider, useAuth, UIProvider, useUI };
+export { AuthProvider, useAuth } from "./auth.context";
+export { UIProvider, useUI } from "./ui.context";
+export { FollowProvider, useFollow } from "./follow.context";

@@ -19,6 +19,7 @@ export interface IUserProfile {
     bio: string;
     avatar_url: string;
     created_at: string;
+    is_following?: boolean;
 }
 
 export interface IUserSettings {}
