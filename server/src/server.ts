@@ -1,5 +1,6 @@
 import app from "./app";
 import { env } from "./config";
+import { mailService } from "./services";
 import { connectMongoDB } from "./utils";
 
 connectMongoDB()

@@ -5,6 +5,7 @@ import { generateUniqueUsername } from "./generate-unique-username";
 import { errorMiddleware, HttpError } from "./HttpError";
 import { HttpSuccess } from "./HttpSuccess";
 import { logger } from "./logger";
+import { otpEmailTemplate } from "./otp-email-template";
 
 export {
     asyncHandler,
@@ -14,5 +15,6 @@ export {
     errorMiddleware,
     generateUniqueUsername,
     convertImageKeyToImageUrl,
-    logger
+    logger,
+    otpEmailTemplate
 };

@@ -7,18 +7,28 @@ interface Env {
     nodeEnv: string;
     file_service_url: string;
     file_service_internal_api_key: string;
-    log_level?: string;
+    log_level: string;
     base_url: string;
+    gmail_address: string;
+    gmail_app_password: string;
 }
 
 export const env: Env = {
-    port: Number(process.env.PORT) || 8000,
-    sessionExpiryInMinutes: Number(process.env.SESSION_EXPIRY_IN_MINUTES) || 60,
-    nodeEnv: process.env.NODE_ENV || "development",
-    file_service_url: process.env.FILE_SERVICE_URL || "http://localhost:8001",
-    file_service_internal_api_key:
-        process.env.FILE_SERVICE_INTERNAL_API_KEY || "xxxx",
-    log_level: process.env.LOG_LEVEL || "info",
-    base_url: process.env.BASE_URL || "http://localhost:8000"
+    port: parseInt(envRequired("PORT")),
+    sessionExpiryInMinutes: parseInt(envRequired("SESSION_EXPIRY_IN_MINUTES")),
+    nodeEnv: envRequired("NODE_ENV"),
+    file_service_url: envRequired("FILE_SERVICE_URL"),
+    file_service_internal_api_key: envRequired("FILE_SERVICE_INTERNAL_API_KEY"),
+    log_level: envRequired("LOG_LEVEL"),
+    base_url: envRequired("BASE_URL"),
+    gmail_address: envRequired("GMAIL_ADDRESS"),
+    gmail_app_password: envRequired("GMAIL_APP_PASSWORD")
 };
 
+export function envRequired(key: string) {
+    const value = process.env[key];
+    if (!value) {
+        throw new Error(`Environment variable ${key} is required but not set.`);
+    }
+    return value;
+}
