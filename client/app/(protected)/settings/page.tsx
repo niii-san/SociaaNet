@@ -24,13 +24,20 @@ import {
     FeedSettings,
     SecuritySettings
 } from "@/types";
-import { Settings as SettingsIcon, Search, Activity, ChevronRight, History, Clock } from "lucide-react";
+import {
+    Settings as SettingsIcon,
+    Search,
+    Activity,
+    ChevronRight,
+    History,
+    Clock
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 export default function SettingsPage() {
-    const { settings, refetchSettings } = useAuth();
+    const { settings, refetchSettings, invalidateCurrentUser } = useAuth();
     const [updating, setUpdating] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const router = useRouter();
@@ -43,40 +50,56 @@ export default function SettingsPage() {
         );
     }
 
-    const handlePrivacyUpdate = async (field: keyof PrivacySettings, value: any) => {
+    const handlePrivacyUpdate = async (
+        field: keyof PrivacySettings,
+        value: any
+    ) => {
         setUpdating(true);
         try {
             await updatePrivacySettings({ [field]: value });
             await refetchSettings();
+            await invalidateCurrentUser();
             toast.success("Privacy settings updated");
         } catch (error: any) {
-            toast.error(error?.response?.data?.message || "Failed to update settings");
+            toast.error(
+                error?.response?.data?.message || "Failed to update settings"
+            );
         } finally {
             setUpdating(false);
         }
     };
 
-    const handleNotificationUpdate = async (field: keyof NotificationSettings, value: boolean) => {
+    const handleNotificationUpdate = async (
+        field: keyof NotificationSettings,
+        value: boolean
+    ) => {
         setUpdating(true);
         try {
             await updateNotificationSettings({ [field]: value });
             await refetchSettings();
             toast.success("Notification settings updated");
         } catch (error: any) {
-            toast.error(error?.response?.data?.message || "Failed to update settings");
+            toast.error(
+                error?.response?.data?.message || "Failed to update settings"
+            );
         } finally {
             setUpdating(false);
         }
     };
 
-    const handleAppearanceUpdate = async (field: keyof AppearanceSettings, value: any) => {
+    const handleAppearanceUpdate = async (
+        field: keyof AppearanceSettings,
+        value: any
+    ) => {
         setUpdating(true);
         try {
             await updateAppearanceSettings({ [field]: value });
             await refetchSettings();
             toast.success("Appearance settings updated");
         } catch (error: any) {
-            toast.error(error?.response?.data?.message || "Failed to update settings");
+            toast.error(
+                error?.response?.data?.message || "Failed to update settings"
+            );
         } finally {
             setUpdating(false);
         }
@@ -89,20 +112,27 @@ export default function SettingsPage() {
             await refetchSettings();
             toast.success("Feed settings updated");
         } catch (error: any) {
-            toast.error(error?.response?.data?.message || "Failed to update settings");
+            toast.error(
+                error?.response?.data?.message || "Failed to update settings"
+            );
         } finally {
             setUpdating(false);
         }
     };
 
-    const handleSecurityUpdate = async (field: keyof SecuritySettings, value: any) => {
+    const handleSecurityUpdate = async (
+        field: keyof SecuritySettings,
+        value: any
+    ) => {
         setUpdating(true);
         try {
             await updateSecuritySettings({ [field]: value });
             await refetchSettings();
             toast.success("Security settings updated");
         } catch (error: any) {
-            toast.error(error?.response?.data?.message || "Failed to update settings");
+            toast.error(
+                error?.response?.data?.message || "Failed to update settings"
+            );
         } finally {
             setUpdating(false);
         }
@@ -110,42 +140,48 @@ export default function SettingsPage() {
 
     // Filter sections based on search query
     const searchLower = searchQuery.toLowerCase();
-    const showPrivacy = searchLower === "" || 
-        "privacy".includes(searchLower) || 
+    const showPrivacy =
+        searchLower === "" ||
+        "privacy".includes(searchLower) ||
         "private account".includes(searchLower) ||
         "messages".includes(searchLower) ||
         "comments".includes(searchLower) ||
         "mentions".includes(searchLower) ||
         "online status".includes(searchLower) ||
         "last seen".includes(searchLower);
-    
-    const showNotifications = searchLower === "" ||
+
+    const showNotifications =
+        searchLower === "" ||
         "notification".includes(searchLower) ||
         "likes".includes(searchLower) ||
         "comments".includes(searchLower) ||
         "mentions".includes(searchLower) ||
         "follows".includes(searchLower) ||
         "messages".includes(searchLower);
-    
-    const showAppearance = searchLower === "" ||
+
+    const showAppearance =
+        searchLower === "" ||
         "appearance".includes(searchLower) ||
         "theme".includes(searchLower) ||
         "light".includes(searchLower) ||
         "dark".includes(searchLower);
-    
-    const showFeed = searchLower === "" ||
+
+    const showFeed =
+        searchLower === "" ||
         "feed".includes(searchLower) ||
         "algorithmic".includes(searchLower) ||
         "chronological".includes(searchLower) ||
         "sensitive".includes(searchLower);
-    
-    const showSecurity = searchLower === "" ||
+
+    const showSecurity =
+        searchLower === "" ||
         "security".includes(searchLower) ||
         "login".includes(searchLower) ||
         "sessions".includes(searchLower) ||
         "alerts".includes(searchLower);
-    
-    const showActivities = searchLower === "" ||
+
+    const showActivities =
+        searchLower === "" ||
         "activities".includes(searchLower) ||
         "activity".includes(searchLower) ||
         "history".includes(searchLower) ||
@@ -161,7 +197,7 @@ export default function SettingsPage() {
                     <SettingsIcon className="w-6 h-6 text-primary" />
                     <h1 className="text-2xl font-bold">Settings</h1>
                 </div>
-                
+
                 {/* Search Bar */}
                 <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -188,12 +224,15 @@ export default function SettingsPage() {
                                         Your Activities
                                     </h2>
                                     <p className="text-sm text-muted-foreground">
-                                        Track your account activities, logins, profile updates, and security events
+                                        Track your account activities, logins,
+                                        profile updates, and security events
                                     </p>
                                 </div>
                             </div>
                             <Button
-                                onClick={() => router.push("/settings/activities")}
+                                onClick={() =>
+                                    router.push("/settings/activities")
+                                }
                                 variant="outline"
                                 className="gap-1 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 dark:hover:bg-blue-950/20 dark:hover:text-blue-400 dark:hover:border-blue-800 transition-colors"
                             >
@@ -239,12 +278,19 @@ export default function SettingsPage() {
                         onSessionLogout={refetchSettings}
                     />
                 )}
-                
-                {!showActivities && !showPrivacy && !showNotifications && !showAppearance && !showFeed && !showSecurity && (
-                    <div className="text-center py-12">
-                        <p className="text-muted-foreground">No settings found matching "{searchQuery}"</p>
-                    </div>
-                )}
+
+                {!showActivities &&
+                    !showPrivacy &&
+                    !showNotifications &&
+                    !showAppearance &&
+                    !showFeed &&
+                    !showSecurity && (
+                        <div className="text-center py-12">
+                            <p className="text-muted-foreground">
+                                No settings found matching "{searchQuery}"
+                            </p>
+                        </div>
+                    )}
             </div>
         </div>
     );
