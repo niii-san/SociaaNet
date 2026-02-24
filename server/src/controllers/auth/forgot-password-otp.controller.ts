@@ -5,7 +5,7 @@ import { Request, Response } from "express";
 
 export const forgotPasswordOtpController = asyncHandler(
     async (req: Request, res: Response) => {
-        const email = req.params.email ?? "";
+        const email = req.params?.email ?? "";
 
         const emailAddress = email.trim();
 

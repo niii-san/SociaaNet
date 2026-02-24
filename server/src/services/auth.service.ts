@@ -218,6 +218,99 @@ class AuthService {
             );
         }
     }
+
+    async changePasswordWithOtp(
+        email: string,
+        otp: string,
+        newPassword: string
+    ) {
+        if (!email) {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                "Email is required"
+            );
+        }
+
+        if (!otp) {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                "OTP is required"
+            );
+        }
+
+        if (!newPassword) {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                "New password is required"
+            );
+        }
+
+        if (newPassword.length < UserFieldRequirements.password.minLength) {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                UserFieldRequirements.password.minErrorMessage
+            );
+        }
+
+        if (newPassword.length > UserFieldRequirements.password.maxLength) {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                UserFieldRequirements.password.maxErrorMessage
+            );
+        }
+
+        const isOtpValid = await authRepo.verifyPasswordResetOtp(email, otp);
+
+        if (!isOtpValid) {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                "Invalid or expired OTP"
+            );
+        }
+
+        const user = await userRepo.getUserByEmail(email);
+
+        if (!user) {
+            throw new HttpError(
+                404,
+                false,
+                ErrorCodes.NOT_FOUND,
+                "User with the provided email does not exist"
+            );
+        }
+
+        const salt = await genSalt(5);
+        const hashedPassword = await hash(newPassword, salt);
+
+        const pwChange = await authRepo.changePassword(
+            user._id.toString(),
+            hashedPassword
+        );
+
+        if (!pwChange) {
+            throw new HttpError(
+                500,
+                false,
+                ErrorCodes.SERVER_ERROR,
+                "Failed to change password! Please try again later."
+            );
+        }
+
+        return true;
+
+    }
 }
 
 export const authService = new AuthService();

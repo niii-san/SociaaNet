@@ -11,6 +11,8 @@ interface IAuthRepository {
         userId: string
     ): Promise<Partial<SessionDocument[]>>;
     createForgotPasswordOtp(userId: string, email: string): Promise<string>;
+    verifyPasswordResetOtp(email: string, otp: string): Promise<boolean>;
+    changePassword(userId: string, newPassword: string): Promise<boolean>;
 }
 
 class AuthRepository implements IAuthRepository {
@@ -46,6 +48,7 @@ class AuthRepository implements IAuthRepository {
         );
         return session;
     }
+
     async createForgotPasswordOtp(
         userId: string,
         email: string
@@ -62,6 +65,40 @@ class AuthRepository implements IAuthRepository {
         });
 
         return otpValue;
+    }
+
+    async verifyPasswordResetOtp(email: string, otp: string): Promise<boolean> {
+        const otpRecord = await Otp.findOne({
+            email: email,
+            otp: otp,
+            otp_type: "password_reset",
+            has_expired: false,
+            is_used: false
+        });
+        if (!otpRecord) return false;
+
+        const now = new Date();
+        if (otpRecord.expires_at < now) {
+            otpRecord.has_expired = true;
+            await otpRecord.save();
+            return false;
+        }
+
+        otpRecord.is_used = true;
+        await otpRecord.save();
+        return true;
+    }
+
+    async changePassword(
+        userId: string,
+        newPassword: string
+    ): Promise<boolean> {
+        const user = await userRepo.getUserById(userId);
+        if (!user) return false;
+
+        user.password = newPassword;
+        await user.save();
+        return true;
     }
 }
 
