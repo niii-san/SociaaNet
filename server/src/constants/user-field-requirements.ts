@@ -3,12 +3,12 @@ export const UserFieldRequirements = {
         minLength: 3,
         maxLength: 30,
         minErrorMessage: "Full name must be at least 3 characters long",
-        maxErrorMessage: "Full name must be less than 30 characters",
+        maxErrorMessage: "Full name must be less than 30 characters"
     },
     username: {
         minLength: 3,
         maxLength: 20,
-        regex: /^[a-zA-Z0-9_]+$/,
+        regex: /^[a-zA-Z0-9._]+$/,
         minErrorMessage: "Username must be at least 3 characters long",
         maxErrorMessage: "Username must be less than 20 characters"
     },

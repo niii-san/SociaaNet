@@ -54,8 +54,6 @@ class UsersService {
             dto.currentUserId
         );
 
-
-
         if (!user) {
             throw new HttpError(
                 404,
@@ -65,12 +63,10 @@ class UsersService {
             );
         }
 
-
         const avatar_url =
             user.avatar_key != null
                 ? convertImageKeyToImageUrl(user.avatar_key)
                 : null;
-
 
         return {
             user_id: user._id,
@@ -251,6 +247,15 @@ class UsersService {
                 false,
                 ErrorCodes.DUPLICATE,
                 "Username is already taken"
+            );
+        }
+
+        if (!UserFieldRequirements.username.regex.test(dto.username)) {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                "Username can only contain letters, numbers, dots and underscores"
             );
         }
 
