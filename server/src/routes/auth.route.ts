@@ -3,6 +3,7 @@ import {
     changePasswordWithOtpController,
     forgotPasswordOtpController,
     loginController,
+    logoutController,
     signupController,
     validateSessionController
 } from "../controllers";
@@ -15,5 +16,7 @@ authRouter.post("/login", loginController);
 authRouter.get("/validate-session", authenticate, validateSessionController);
 authRouter.get("/forgot-password-otp/:email", forgotPasswordOtpController);
 authRouter.post("/change-password-with-otp", changePasswordWithOtpController);
+
+authRouter.delete("/logout", authenticate, logoutController);
 
 export default authRouter;

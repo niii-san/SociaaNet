@@ -310,6 +310,14 @@ class AuthService {
 
         return true;
     }
+
+    async deleteSession(sessionId: string, userId: string): Promise<boolean> {
+        const res = await authRepo.deleteSessionBySessionIdAndUserId(
+            sessionId,
+            userId
+        );
+        return res;
+    }
 }
 
 export const authService = new AuthService();

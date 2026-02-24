@@ -16,6 +16,7 @@ import {
     updateFeedSettings,
     updateSecuritySettings
 } from "@/features/settings/settings.api";
+import { logoutUser } from "@/features/auth/auth.api";
 import { toast } from "sonner";
 import {
     PrivacySettings,
@@ -30,7 +31,8 @@ import {
     Activity,
     ChevronRight,
     History,
-    Clock
+    Clock,
+    LogOut
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -39,6 +41,7 @@ import { Card } from "@/components/ui/card";
 export default function SettingsPage() {
     const { settings, refetchSettings, invalidateCurrentUser } = useAuth();
     const [updating, setUpdating] = useState(false);
+    const [loggingOut, setLoggingOut] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const router = useRouter();
 
@@ -138,6 +141,22 @@ export default function SettingsPage() {
         }
     };
 
+    const handleLogout = async () => {
+        setLoggingOut(true);
+        try {
+            await logoutUser();
+            toast.success("Logged out successfully");
+            // Redirect to login page
+            router.push("/login");
+        } catch (error: any) {
+            toast.error(
+                error?.response?.data?.message || "Failed to logout"
+            );
+        } finally {
+            setLoggingOut(false);
+        }
+    };
+
     // Filter sections based on search query
     const searchLower = searchQuery.toLowerCase();
     const showPrivacy =
@@ -188,6 +207,12 @@ export default function SettingsPage() {
         "account".includes(searchLower) ||
         "login".includes(searchLower) ||
         "track".includes(searchLower);
+
+    const showLogout =
+        searchLower === "" ||
+        "logout".includes(searchLower) ||
+        "log out".includes(searchLower) ||
+        "sign out".includes(searchLower);
 
     return (
         <div className="min-h-screen bg-background pb-12">
@@ -279,12 +304,42 @@ export default function SettingsPage() {
                     />
                 )}
 
+                {showLogout && (
+                    <Card className="p-6 border-destructive/50">
+                        <div className="flex items-start justify-between gap-4">
+                            <div className="flex items-start gap-4 flex-1">
+                                <div className="p-3 rounded-lg bg-destructive/10">
+                                    <LogOut className="w-5 h-5 text-destructive" />
+                                </div>
+                                <div className="flex-1">
+                                    <h2 className="text-lg font-semibold mb-1">
+                                        Logout
+                                    </h2>
+                                    <p className="text-sm text-muted-foreground">
+                                        Sign out of your account on this device
+                                    </p>
+                                </div>
+                            </div>
+                            <Button
+                                onClick={handleLogout}
+                                disabled={loggingOut}
+                                variant="destructive"
+                                className="gap-2 min-w-30"
+                            >
+                                <LogOut className="w-4 h-4" />
+                                {loggingOut ? "Logging out..." : "Logout"}
+                            </Button>
+                        </div>
+                    </Card>
+                )}
+
                 {!showActivities &&
                     !showPrivacy &&
                     !showNotifications &&
                     !showAppearance &&
                     !showFeed &&
-                    !showSecurity && (
+                    !showSecurity &&
+                    !showLogout && (
                         <div className="text-center py-12">
                             <p className="text-muted-foreground">
                                 No settings found matching "{searchQuery}"
