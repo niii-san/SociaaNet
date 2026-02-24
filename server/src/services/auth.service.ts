@@ -308,8 +308,9 @@ class AuthService {
             );
         }
 
-        return true;
+        await authRepo.deleteAllSessionsByUserId(user._id.toString());
 
+        return true;
     }
 }
 

@@ -13,6 +13,7 @@ interface IAuthRepository {
     createForgotPasswordOtp(userId: string, email: string): Promise<string>;
     verifyPasswordResetOtp(email: string, otp: string): Promise<boolean>;
     changePassword(userId: string, newPassword: string): Promise<boolean>;
+    deleteAllSessionsByUserId(userId: string): Promise<boolean>;
 }
 
 class AuthRepository implements IAuthRepository {
@@ -98,6 +99,14 @@ class AuthRepository implements IAuthRepository {
 
         user.password = newPassword;
         await user.save();
+        return true;
+    }
+
+    async deleteAllSessionsByUserId(userId: string): Promise<boolean> {
+        await Session.updateMany(
+            { user_id: userId, is_deleted: false },
+            { is_deleted: true }
+        );
         return true;
     }
 }
