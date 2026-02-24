@@ -4,7 +4,7 @@ import { otpEmailTemplate } from "../utils";
 
 class MailService {
     private from = `SociaaNet <${env.gmail_address}>`;
-    private tranporter = nodemailer.createTransport({
+    private transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {
             user: env.gmail_address,
@@ -20,7 +20,14 @@ class MailService {
             html: otpEmailTemplate(otp, fullName)
         };
 
-        await this.tranporter.sendMail(mailOptions);
+        try {
+            await this.transporter.sendMail(mailOptions);
+        } catch (error) {
+            console.error("Failed to send OTP email:", error);
+            return false;
+        }
+
+        return true;
     }
 
     async sendOnBoardingEmail(to: string, fullName: string) {

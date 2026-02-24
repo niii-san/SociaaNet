@@ -1,6 +1,6 @@
 import { signupController } from "./auth/signup.controller";
 import { loginController } from "./auth/login.controller";
-import { validateSessionController } from "./auth/validate_session.controller";
+import { validateSessionController } from "./auth/validate-session.controller";
 import { uploadAvatarController } from "./users/upload-avatar.controller";
 import { getImageController } from "./files/get-image.controller";
 import { getProfileByUsernameController } from "./users/get-profile-by-username.controller";
@@ -24,6 +24,8 @@ import { getFollowRequestsController } from "./social-interactions/get-follow-re
 import { getFollowingRequests } from "./social-interactions/get-following-requests.controller";
 import { deleteFollowRequestController } from "./social-interactions/delete-follow-request.controller";
 import { removeFollowerController } from "./social-interactions/remove-follower-controller";
+import { forgotPasswordOtpController } from "./auth/forgot-password-otp.controller";
+import { changePasswordWithOtpController } from "./auth/change-password-with-otp.controller";
 
 export {
     signupController,
@@ -51,5 +53,7 @@ export {
     getFollowRequestsController,
     getFollowingRequests,
     deleteFollowRequestController,
-    removeFollowerController
+    removeFollowerController,
+    forgotPasswordOtpController,
+    changePasswordWithOtpController
 };

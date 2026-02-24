@@ -1,4 +1,6 @@
 import { Session, SessionDocument } from "../models";
+import { Otp } from "../models/otp.model";
+import { userRepo } from "./users.repository";
 
 interface IAuthRepository {
     createSession(
@@ -8,6 +10,7 @@ interface IAuthRepository {
     getAllActiveSessionsByUserId(
         userId: string
     ): Promise<Partial<SessionDocument[]>>;
+    createForgotPasswordOtp(userId: string, email: string): Promise<string>;
 }
 
 class AuthRepository implements IAuthRepository {
@@ -42,6 +45,23 @@ class AuthRepository implements IAuthRepository {
             { new: true }
         );
         return session;
+    }
+    async createForgotPasswordOtp(
+        userId: string,
+        email: string
+    ): Promise<string> {
+        const otpValue = Math.floor(100000 + Math.random() * 900000).toString();
+        const otpExpiry = new Date(Date.now() + 15 * 60 * 1000); // OTP valid for 15 minutes
+
+        await Otp.create({
+            user_id: userId,
+            otp: otpValue,
+            email: email,
+            otp_type: "password_reset",
+            expires_at: otpExpiry
+        });
+
+        return otpValue;
     }
 }
 

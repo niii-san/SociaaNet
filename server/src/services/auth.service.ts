@@ -7,6 +7,7 @@ import { env } from "../config";
 import { ErrorCodes } from "../constants/error-code";
 import { UserFieldRequirements } from "../constants";
 import { ActivityVerb } from "../types";
+import { mailService } from "./mail.service";
 
 class AuthService {
     async login(dto: LoginDto) {
@@ -175,6 +176,47 @@ class AuthService {
             username: user.username,
             created_at: user.created_at
         };
+    }
+
+    async sendOtpForPasswordReset(email: string) {
+        if (!email) {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                "Email is required"
+            );
+        }
+
+        const user = await userRepo.getUserByEmail(email);
+
+        if (!user) {
+            throw new HttpError(
+                404,
+                false,
+                ErrorCodes.NOT_FOUND,
+                "User with the provided email does not exist"
+            );
+        }
+
+        const otp = await authRepo.createForgotPasswordOtp(
+            user._id.toString(),
+            user.email_address
+        );
+        const emailSent = await mailService.sendOTP(
+            otp,
+            user.email_address,
+            user.full_name
+        );
+
+        if (!emailSent) {
+            throw new HttpError(
+                500,
+                false,
+                ErrorCodes.SERVER_ERROR,
+                "Failed to send OTP email! Please try again later."
+            );
+        }
     }
 }
 
