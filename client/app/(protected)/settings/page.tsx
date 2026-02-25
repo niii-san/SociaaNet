@@ -195,6 +195,8 @@ export default function SettingsPage() {
     const showSecurity =
         searchLower === "" ||
         "security".includes(searchLower) ||
+        "password".includes(searchLower) ||
+        "change password".includes(searchLower) ||
         "login".includes(searchLower) ||
         "sessions".includes(searchLower) ||
         "alerts".includes(searchLower);

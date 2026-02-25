@@ -26,6 +26,20 @@ export interface LogoutResponse {
     data: null;
 }
 
+export interface ChangePasswordRequest {
+    current_password: string;
+    new_password: string;
+}
+
+export interface ChangePasswordResponse {
+    status_code: number;
+    success: boolean;
+    message: string;
+    data: {
+        password_changed: boolean;
+    };
+}
+
 // Request OTP for forgot password
 export const requestForgotPasswordOtp = async (email: string): Promise<ForgotPasswordOtpResponse> => {
     const response = await api.get(`/auth/forgot-password-otp/${email}`);
@@ -43,5 +57,13 @@ export const changePasswordWithOtp = async (
 // Logout user
 export const logoutUser = async (): Promise<LogoutResponse> => {
     const response = await api.delete(`/auth/logout`);
+    return response.data;
+};
+
+// Change password (for logged in users)
+export const changePassword = async (
+    data: ChangePasswordRequest
+): Promise<ChangePasswordResponse> => {
+    const response = await api.patch(`/auth/change-password`, data);
     return response.data;
 };

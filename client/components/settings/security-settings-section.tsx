@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
 import { SecuritySettings } from "@/types";
-import { ShieldCheck, Monitor, MapPin, Clock, LogOut } from "lucide-react";
+import { ShieldCheck, Monitor, MapPin, Clock, LogOut, KeyRound, ChevronRight } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
     logoutSession,
@@ -19,6 +19,7 @@ import {
 } from "@/features/settings/settings.api";
 import { toast } from "sonner";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 interface SecuritySettingsSectionProps {
     settings: SecuritySettings;
@@ -31,6 +32,7 @@ export function SecuritySettingsSection({
     onUpdate,
     onSessionLogout
 }: SecuritySettingsSectionProps) {
+    const router = useRouter();
     const [loggingOut, setLoggingOut] = useState<number | null>(null);
     const [loggingOutAll, setLoggingOutAll] = useState(false);
 
@@ -82,6 +84,33 @@ export function SecuritySettingsSection({
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
+                {/* Change Password */}
+                <div className="flex items-start justify-between gap-4 p-4 rounded-lg border bg-card/50">
+                    <div className="flex items-start gap-3 flex-1">
+                        <div className="p-2 rounded-lg bg-primary/10">
+                            <KeyRound className="w-4 h-4 text-primary" />
+                        </div>
+                        <div className="flex-1">
+                            <h4 className="font-semibold mb-1">
+                                Change Password
+                            </h4>
+                            <p className="text-sm text-muted-foreground">
+                                Update your password to keep your account secure
+                            </p>
+                        </div>
+                    </div>
+                    <Button
+                        onClick={() => router.push("/settings/change-password")}
+                        variant="outline"
+                        size="sm"
+                        className="gap-1 hover:bg-primary/5 hover:text-primary hover:border-primary/30 transition-colors"
+                    >
+                        Change
+                        <ChevronRight className="w-4 h-4" />
+                    </Button>
+                </div>
+
+                {/* Login Alerts */}
                 <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                         <Label htmlFor="login-alerts">Login Alerts</Label>

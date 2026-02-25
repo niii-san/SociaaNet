@@ -27,6 +27,7 @@ import { removeFollowerController } from "./social-interactions/remove-follower-
 import { forgotPasswordOtpController } from "./auth/forgot-password-otp.controller";
 import { changePasswordWithOtpController } from "./auth/change-password-with-otp.controller";
 import { logoutController } from "./auth/logout.controller";
+import { changePasswordController } from "./auth/change-password.controller";
 
 export {
     signupController,
@@ -57,5 +58,6 @@ export {
     removeFollowerController,
     forgotPasswordOtpController,
     changePasswordWithOtpController,
-    logoutController
+    logoutController,
+    changePasswordController
 };

@@ -1,5 +1,6 @@
 import { Router } from "express";
 import {
+    changePasswordController,
     changePasswordWithOtpController,
     forgotPasswordOtpController,
     loginController,
@@ -17,6 +18,7 @@ authRouter.get("/validate-session", authenticate, validateSessionController);
 authRouter.get("/forgot-password-otp/:email", forgotPasswordOtpController);
 authRouter.post("/change-password-with-otp", changePasswordWithOtpController);
 
+authRouter.patch("/change-password", authenticate, changePasswordController);
 authRouter.delete("/logout", authenticate, logoutController);
 
 export default authRouter;

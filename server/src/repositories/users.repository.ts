@@ -43,7 +43,7 @@ class UserRepository implements UserDocumentRepository {
     }
 
     async getUserById(userId: string): Promise<UserDocument | null> {
-        const user = await User.findById(userId).select("-password");
+        const user = await User.findById(userId);
         return user;
     }
 
@@ -57,9 +57,9 @@ class UserRepository implements UserDocumentRepository {
 
         if (!userDoc) return null;
 
-        const user = userDoc.toObject(); 
+        const user = userDoc.toObject();
 
-        const userId = String(user._id); 
+        const userId = String(user._id);
 
         let following = false;
 

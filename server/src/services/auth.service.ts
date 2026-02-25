@@ -311,6 +311,89 @@ class AuthService {
         return true;
     }
 
+    async changePassword(
+        userId: string,
+        currentPassword: string,
+        newPassword: string
+    ) {
+        if (!currentPassword) {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                "Current password is required"
+            );
+        }
+
+        if (!newPassword) {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                "New password is required"
+            );
+        }
+
+        if (newPassword.length < UserFieldRequirements.password.minLength) {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                UserFieldRequirements.password.minErrorMessage
+            );
+        }
+
+        if (newPassword.length > UserFieldRequirements.password.maxLength) {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                UserFieldRequirements.password.maxErrorMessage
+            );
+        }
+
+        const user = await userRepo.getUserById(userId);
+
+        if (!user) {
+            throw new HttpError(
+                404,
+                false,
+                ErrorCodes.NOT_FOUND,
+                "User does not exist"
+            );
+        }
+
+        const currentPasswordHash = user.password;
+
+        const isCurrentPasswordCorrect = await bcrypt.compare(
+            currentPassword,
+            currentPasswordHash
+        );
+
+        if (!isCurrentPasswordCorrect) {
+            throw new HttpError(
+                401,
+                false,
+                ErrorCodes.UNAUTHORIZED,
+                "Incorrect current password"
+            );
+        }
+
+        const salt = await genSalt(5);
+        const newHashedPassword = await hash(newPassword, salt);
+
+        const pwChange = await authRepo.changePassword(
+            userId,
+            newHashedPassword
+        );
+
+        await authRepo.deleteAllSessionsByUserId(userId);
+
+        return {
+            password_changed: pwChange
+        };
+    }
+
     async deleteSession(sessionId: string, userId: string): Promise<boolean> {
         const res = await authRepo.deleteSessionBySessionIdAndUserId(
             sessionId,
