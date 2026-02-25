@@ -4,33 +4,42 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle
+} from "@/components/ui/card";
 import { changePassword } from "@/features/auth/auth.api";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Loader2, Lock, Eye, EyeOff, KeyRound } from "lucide-react";
 import Link from "next/link";
+import { useAuth } from "@/contexts";
 
 export default function ChangePasswordPage() {
     const router = useRouter();
     const [loading, setLoading] = useState(false);
-    
+
     // Form state
     const [currentPassword, setCurrentPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
-    
+
+    const auth = useAuth();
+
     // Password visibility state
     const [showCurrentPassword, setShowCurrentPassword] = useState(false);
     const [showNewPassword, setShowNewPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-    
+
     // Error state
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        
+
         // Clear previous errors
         setErrorMessage(null);
 
@@ -51,7 +60,9 @@ export default function ChangePasswordPage() {
         }
 
         if (currentPassword === newPassword) {
-            setErrorMessage("New password must be different from current password");
+            setErrorMessage(
+                "New password must be different from current password"
+            );
             return;
         }
 
@@ -59,21 +70,18 @@ export default function ChangePasswordPage() {
         try {
             const response = await changePassword({
                 current_password: currentPassword,
-                new_password: newPassword,
+                new_password: newPassword
             });
             toast.success(response.message);
-            
+
             // Clear form
             setCurrentPassword("");
             setNewPassword("");
             setConfirmPassword("");
-            
-            // Redirect back to settings after 1.5 seconds
-            setTimeout(() => {
-                router.push("/settings");
-            }, 1500);
+            await auth.invalidateCurrentUser();
         } catch (error: any) {
-            const errorMsg = error?.response?.data?.message || "Failed to change password";
+            const errorMsg =
+                error?.response?.data?.message || "Failed to change password";
             setErrorMessage(errorMsg);
         } finally {
             setLoading(false);
@@ -87,12 +95,18 @@ export default function ChangePasswordPage() {
                 <div className="container max-w-2xl mx-auto">
                     <div className="flex items-center gap-3">
                         <Link href="/settings">
-                            <Button variant="ghost" size="icon" className="h-9 w-9">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-9 w-9"
+                            >
                                 <ArrowLeft className="h-5 w-5" />
                             </Button>
                         </Link>
                         <div>
-                            <h1 className="text-xl font-bold">Change Password</h1>
+                            <h1 className="text-xl font-bold">
+                                Change Password
+                            </h1>
                             <p className="text-sm text-muted-foreground">
                                 Update your account password
                             </p>
@@ -111,7 +125,12 @@ export default function ChangePasswordPage() {
                             <div>
                                 <CardTitle>Password Settings</CardTitle>
                                 <CardDescription>
-                                    Change your password to keep your account secure
+                                    Change your password to keep your account
+                                    secure.
+                                    <p className="mt-1 text-xs text-muted-foreground">
+                                        You'll be logged out from all devices
+                                        after changing your password.
+                                    </p>
                                 </CardDescription>
                             </div>
                         </div>
@@ -120,22 +139,34 @@ export default function ChangePasswordPage() {
                         <form onSubmit={handleSubmit} className="space-y-5">
                             {/* Current Password */}
                             <div className="space-y-2">
-                                <Label htmlFor="current-password">Current Password</Label>
+                                <Label htmlFor="current-password">
+                                    Current Password
+                                </Label>
                                 <div className="relative">
                                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                     <Input
                                         id="current-password"
-                                        type={showCurrentPassword ? "text" : "password"}
+                                        type={
+                                            showCurrentPassword
+                                                ? "text"
+                                                : "password"
+                                        }
                                         placeholder="Enter current password"
                                         value={currentPassword}
-                                        onChange={(e) => setCurrentPassword(e.target.value)}
+                                        onChange={(e) =>
+                                            setCurrentPassword(e.target.value)
+                                        }
                                         className="pl-10 pr-11"
                                         required
                                         disabled={loading}
                                     />
                                     <button
                                         type="button"
-                                        onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                                        onClick={() =>
+                                            setShowCurrentPassword(
+                                                !showCurrentPassword
+                                            )
+                                        }
                                         className="absolute right-0 top-0 h-full w-11 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
                                     >
                                         {showCurrentPassword ? (
@@ -149,22 +180,32 @@ export default function ChangePasswordPage() {
 
                             {/* New Password */}
                             <div className="space-y-2">
-                                <Label htmlFor="new-password">New Password</Label>
+                                <Label htmlFor="new-password">
+                                    New Password
+                                </Label>
                                 <div className="relative">
                                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                     <Input
                                         id="new-password"
-                                        type={showNewPassword ? "text" : "password"}
+                                        type={
+                                            showNewPassword
+                                                ? "text"
+                                                : "password"
+                                        }
                                         placeholder="Enter new password"
                                         value={newPassword}
-                                        onChange={(e) => setNewPassword(e.target.value)}
+                                        onChange={(e) =>
+                                            setNewPassword(e.target.value)
+                                        }
                                         className="pl-10 pr-11"
                                         required
                                         disabled={loading}
                                     />
                                     <button
                                         type="button"
-                                        onClick={() => setShowNewPassword(!showNewPassword)}
+                                        onClick={() =>
+                                            setShowNewPassword(!showNewPassword)
+                                        }
                                         className="absolute right-0 top-0 h-full w-11 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
                                     >
                                         {showNewPassword ? (
@@ -181,22 +222,34 @@ export default function ChangePasswordPage() {
 
                             {/* Confirm Password */}
                             <div className="space-y-2">
-                                <Label htmlFor="confirm-password">Confirm New Password</Label>
+                                <Label htmlFor="confirm-password">
+                                    Confirm New Password
+                                </Label>
                                 <div className="relative">
                                     <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                     <Input
                                         id="confirm-password"
-                                        type={showConfirmPassword ? "text" : "password"}
+                                        type={
+                                            showConfirmPassword
+                                                ? "text"
+                                                : "password"
+                                        }
                                         placeholder="Confirm new password"
                                         value={confirmPassword}
-                                        onChange={(e) => setConfirmPassword(e.target.value)}
+                                        onChange={(e) =>
+                                            setConfirmPassword(e.target.value)
+                                        }
                                         className="pl-10 pr-11"
                                         required
                                         disabled={loading}
                                     />
                                     <button
                                         type="button"
-                                        onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        onClick={() =>
+                                            setShowConfirmPassword(
+                                                !showConfirmPassword
+                                            )
+                                        }
                                         className="absolute right-0 top-0 h-full w-11 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
                                     >
                                         {showConfirmPassword ? (
@@ -226,8 +279,8 @@ export default function ChangePasswordPage() {
                                 >
                                     Cancel
                                 </Button>
-                                <Button 
-                                    type="submit" 
+                                <Button
+                                    type="submit"
                                     disabled={loading}
                                     className="flex-1"
                                 >
