@@ -16,7 +16,6 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { ArrowLeft, Loader2, Lock, Eye, EyeOff, KeyRound } from "lucide-react";
 import Link from "next/link";
-import { useAuth } from "@/contexts";
 
 export default function ChangePasswordPage() {
     const router = useRouter();
@@ -26,8 +25,6 @@ export default function ChangePasswordPage() {
     const [currentPassword, setCurrentPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
-
-    const auth = useAuth();
 
     // Password visibility state
     const [showCurrentPassword, setShowCurrentPassword] = useState(false);
@@ -78,7 +75,7 @@ export default function ChangePasswordPage() {
             setCurrentPassword("");
             setNewPassword("");
             setConfirmPassword("");
-            await auth.invalidateCurrentUser();
+            router.refresh();
         } catch (error: any) {
             const errorMsg =
                 error?.response?.data?.message || "Failed to change password";
