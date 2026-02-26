@@ -16,6 +16,7 @@ const postSchema = new Schema<PostEntity>(
         },
         is_sensitive_content: { type: Boolean, default: false },
         is_removed_by_moderator: { type: Boolean, default: false },
+        deleted_at: { type: Date, default: null },
         media_keys: { type: [String], default: [] }
     },
     { timestamps: { createdAt: "created_at", updatedAt: "updated_at" } }

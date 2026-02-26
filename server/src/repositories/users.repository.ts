@@ -6,6 +6,7 @@ import {
     User,
     UserSettings
 } from "../models";
+import { Post, PostDocument } from "../models/post.model";
 import { UserEntity } from "../types";
 import { HttpError } from "../utils";
 import { filesRepo } from "./files.repository";
@@ -28,6 +29,9 @@ interface UserDocumentRepository {
         users: UserDocument[];
         pagination: { current_page: number; has_next_page: boolean };
     }>;
+    changeUserPublicPostsToFollowers(userId: string): Promise<boolean>;
+    changeUserFollowersPostsToPublic(userId: string): Promise<boolean>;
+    getAllUserPosts(userId: string): Promise<PostDocument[]>;
 }
 
 class UserRepository implements UserDocumentRepository {
@@ -213,6 +217,48 @@ class UserRepository implements UserDocumentRepository {
                 has_next_page: users.length === limit
             }
         };
+    }
+
+    async changeUserPublicPostsToFollowers(userId: string): Promise<boolean> {
+        const posts = await Post.find({
+            author: userId,
+            visibility: "public",
+            is_deleted: false,
+            is_removed_by_moderator: false
+        });
+
+        for (const post of posts) {
+            post.visibility = "followers";
+            await post.save();
+        }
+
+        return true;
+    }
+
+    async changeUserFollowersPostsToPublic(userId: string): Promise<boolean> {
+        const posts = await Post.find({
+            author: userId,
+            visibility: "followers",
+            is_deleted: false,
+            is_removed_by_moderator: false
+        });
+
+        for (const post of posts) {
+            post.visibility = "public";
+            await post.save();
+        }
+
+        return true;
+    }
+
+    async getAllUserPosts(userId: string): Promise<PostDocument[]> {
+        const posts = await Post.find({
+            userId,
+            is_deleted: false,
+            is_removed_by_moderator: false
+        }).sort({ created_at: -1 });
+
+        return posts;
     }
 }
 

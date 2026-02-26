@@ -60,6 +60,21 @@ class FilesRepository implements IFilesRepository {
 
         return post;
     }
+
+    async deletePost(postId: string): Promise<boolean> {
+        const post = await Post.findById(postId);
+
+        if (!post) {
+            return false;
+        }
+
+        post.is_deleted = true;
+        post.deleted_at = new Date();
+
+        await post.save();
+
+        return true;
+    }
 }
 
 export const filesRepo = new FilesRepository();

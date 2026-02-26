@@ -12,6 +12,7 @@ export interface PostEntity {
     is_sensitive_content: boolean;
     is_removed_by_moderator: boolean;
     media_keys: string[];
+    deleted_at: Date | null;
     created_at: Date;
     updated_at: Date;
 }
