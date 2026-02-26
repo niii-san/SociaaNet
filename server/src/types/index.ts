@@ -6,6 +6,11 @@ import { UserSettingsEntity } from "./user-settings.type";
 import { ActivityEntity, ActivityVerb } from "./activity.type";
 import { FollowEntity } from "./follow.type";
 import { OtpEntity } from "./otp.type";
+import { PostEntity } from "./post.type";
+import { ReelEntity } from "./reel.type";
+import { CommentEntity } from "./comment.type";
+import { LikeEntity } from "./like.type";
+import { WatchHistoryEntity } from "./watch-history.type";
 
 export {
     UserEntity,
@@ -16,5 +21,10 @@ export {
     ActivityEntity,
     ActivityVerb,
     FollowEntity,
-    OtpEntity
+    OtpEntity,
+    PostEntity,
+    ReelEntity,
+    CommentEntity,
+    LikeEntity,
+    WatchHistoryEntity
 };

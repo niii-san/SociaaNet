@@ -35,7 +35,8 @@ import {
     usersRouter,
     filesRouter,
     moderatorsRouter,
-    settingsRouter
+    settingsRouter,
+    mediaRouter
 } from "./routes";
 
 // Auth Routes
@@ -49,6 +50,9 @@ app.use("/api/v1/users", usersRouter);
 
 // Settings Routes
 app.use("/api/v1/users/me/settings", settingsRouter);
+
+// Media routes
+app.use("/api/v1/media", mediaRouter);
 
 // Moderators Routes
 app.use("/api/v1/moderators", moderatorsRouter);
