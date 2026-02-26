@@ -63,7 +63,7 @@ class FileServiceClient {
         const form = new FormData();
 
         buffers.forEach((buffer, index) => {
-            form.append(`image${index}`, buffer, {
+            form.append("images", buffer, {
                 filename: `upload${index}.png`,
                 contentType: "image/png"
             });
@@ -83,6 +83,7 @@ class FileServiceClient {
 
             return res.data;
         } catch (error) {
+            console.log(error);
             throw new Error(
                 "Failed to upload images to file service: " +
                 (error as Error).message

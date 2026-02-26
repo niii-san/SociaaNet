@@ -12,7 +12,8 @@ import {
     Settings,
     MessageCircle,
     MoreHorizontal,
-    Clapperboard
+    Clapperboard,
+    PlusSquare
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -104,10 +105,13 @@ export function AppSidebar() {
                 ))}
             </nav>
 
-            {/* Post Button */}
-            <Button className="w-full h-12 rounded-xl text-base font-semibold mb-4 shadow-lg shadow-primary/20">
-                Post
-            </Button>
+            {/* Create Post Button */}
+            <Link href="/create-post">
+                <Button className="w-full h-12 rounded-xl text-base font-semibold mb-4 shadow-lg shadow-primary/20 gap-2">
+                    <PlusSquare className="w-5 h-5" />
+                    Create Post
+                </Button>
+            </Link>
 
             {/* User Profile */}
             {user && (
