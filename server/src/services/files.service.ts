@@ -1,7 +1,7 @@
 import { fileServiceClient } from "../clients";
 import { ErrorCodes } from "../constants/error-code";
 import { GetImageDto, UploadPostDto } from "../dtos";
-import { filesRepo } from "../repositories";
+import { filesRepo, userRepo } from "../repositories";
 import { convertImageKeyToImageUrl, HttpError } from "../utils";
 import { extractHashtags } from "../utils/extract-hashtags";
 
@@ -27,6 +27,7 @@ class FilesService {
 
     async uploadPost(dto: UploadPostDto) {
         const { userId, files, caption, visibility } = dto;
+        let visibilityValue = visibility;
 
         if (!files || files.length === 0) {
             throw new HttpError(
@@ -46,6 +47,31 @@ class FilesService {
                 ErrorCodes.INVALID_INPUT,
                 "Invalid visibility value"
             );
+        }
+
+        const user = await userRepo.getUserById(userId);
+        if (!user) {
+            throw new HttpError(
+                404,
+                false,
+                ErrorCodes.NOT_FOUND,
+                "User not found"
+            );
+        }
+
+        const isUserAccountPrivate = user.is_private_account;
+
+        if (visibility === "public" && isUserAccountPrivate) {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                "Cannot set visibility to public for a private account"
+            );
+        }
+
+        if (visibility === "followers" && !isUserAccountPrivate) {
+            visibilityValue = "public";
         }
 
         const buffers = files.map((file) => file.buffer);

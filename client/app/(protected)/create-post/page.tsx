@@ -31,13 +31,17 @@ export default function CreatePostPage() {
     
     const [loading, setLoading] = useState(false);
     const [caption, setCaption] = useState("");
-    const [visibility, setVisibility] = useState<Visibility>("public");
     const [selectedImages, setSelectedImages] = useState<File[]>([]);
     const [previewUrls, setPreviewUrls] = useState<string[]>([]);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     // Check if user's account is private
     const isPrivateAccount = user?.is_private_account || false;
+    
+    // Set default visibility based on account type
+    const [visibility, setVisibility] = useState<Visibility>(
+        isPrivateAccount ? "followers" : "public"
+    );
 
     const handleImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         const files = Array.from(e.target.files || []);
@@ -86,11 +90,6 @@ export default function CreatePostPage() {
             return;
         }
 
-        if (!caption.trim()) {
-            setErrorMessage("Please add a caption");
-            return;
-        }
-
         setLoading(true);
         try {
             const response = await createPost({
@@ -114,29 +113,36 @@ export default function CreatePostPage() {
         }
     };
 
-    const visibilityOptions = [
-        {
-            value: "public" as Visibility,
-            label: "Public",
-            description: "Anyone can see this post",
-            icon: Globe,
-            disabled: isPrivateAccount,
-        },
-        {
-            value: "followers" as Visibility,
-            label: "Followers",
-            description: "Only your followers can see",
-            icon: Users,
-            disabled: false,
-        },
-        {
-            value: "private" as Visibility,
-            label: "Private",
-            description: "Only you can see this post",
-            icon: Lock,
-            disabled: false,
-        },
-    ];
+    // Visibility options based on account type
+    const visibilityOptions = isPrivateAccount
+        ? [
+              {
+                  value: "followers" as Visibility,
+                  label: "Followers",
+                  description: "Only your followers can see",
+                  icon: Users,
+              },
+              {
+                  value: "private" as Visibility,
+                  label: "Private",
+                  description: "Only you can see this post",
+                  icon: Lock,
+              },
+          ]
+        : [
+              {
+                  value: "public" as Visibility,
+                  label: "Public",
+                  description: "Anyone can see this post",
+                  icon: Globe,
+              },
+              {
+                  value: "private" as Visibility,
+                  label: "Private",
+                  description: "Only you can see this post",
+                  icon: Lock,
+              },
+          ];
 
     return (
         <div className="min-h-screen bg-background">
@@ -281,11 +287,6 @@ export default function CreatePostPage() {
                             <CardTitle>Visibility</CardTitle>
                             <CardDescription>
                                 Choose who can see your post
-                                {isPrivateAccount && (
-                                    <span className="block mt-1 text-amber-600 dark:text-amber-500">
-                                        Public option is disabled for private accounts
-                                    </span>
-                                )}
                             </CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-3">
@@ -297,16 +298,12 @@ export default function CreatePostPage() {
                                     <button
                                         key={option.value}
                                         type="button"
-                                        onClick={() => !option.disabled && setVisibility(option.value)}
-                                        disabled={option.disabled || loading}
-                                        className={`w-full flex items-start gap-3 p-4 rounded-lg border-2 transition-all ${
+                                        onClick={() => setVisibility(option.value)}
+                                        disabled={loading}
+                                        className={`w-full flex items-start gap-3 p-4 rounded-lg border-2 transition-all cursor-pointer ${
                                             isSelected
                                                 ? "border-primary bg-primary/5"
                                                 : "border-border hover:border-primary/50 hover:bg-muted/50"
-                                        } ${
-                                            option.disabled
-                                                ? "opacity-50 cursor-not-allowed"
-                                                : "cursor-pointer"
                                         }`}
                                     >
                                         <div className={`p-2 rounded-lg ${
