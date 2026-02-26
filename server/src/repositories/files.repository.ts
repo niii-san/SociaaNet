@@ -1,10 +1,18 @@
 import { ImageMetaData, ImageMetaDataDocument } from "../models";
+import { Post, PostDocument } from "../models/post.model";
 
 interface IFilesRepository {
     getImageMetaDataByKey(key: string): Promise<ImageMetaDataDocument | null>;
     deleteImageMetaDataByImageKey(
         imageKey: string
     ): Promise<Partial<ImageMetaDataDocument | null>>;
+    createPost(
+        userId: string,
+        image_keys: string[],
+        caption: string,
+        hashtags: string[],
+        visibility: "public" | "private" | "followers"
+    ): Promise<PostDocument>;
 }
 
 class FilesRepository implements IFilesRepository {
@@ -33,6 +41,24 @@ class FilesRepository implements IFilesRepository {
         return {
             image_key: data?.image_key.toString() || ""
         };
+    }
+
+    async createPost(
+        userId: string,
+        image_keys: string[],
+        caption: string,
+        hashtags: string[],
+        visibility: "public" | "private" | "followers"
+    ): Promise<PostDocument> {
+        const post = await Post.create({
+            author: userId,
+            media_keys: image_keys,
+            caption,
+            hashtags,
+            visibility
+        });
+
+        return post;
     }
 }
 

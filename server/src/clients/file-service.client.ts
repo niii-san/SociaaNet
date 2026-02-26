@@ -2,6 +2,15 @@ import axios, { AxiosInstance } from "axios";
 import FormData from "form-data";
 import { env } from "../config";
 
+type UploadMultipleImagesResponse = {
+    data: {
+        images: {
+            image_key: string;
+            image_id: string;
+        }[];
+    };
+};
+
 class FileServiceClient {
     private baseUrl = env.file_service_url;
     private internalApiKey = env.file_service_internal_api_key;
@@ -48,9 +57,9 @@ class FileServiceClient {
         }
     }
 
-    async uploadMultipleImages(buffers: Buffer[]): Promise<{
-        data: { images: { image_key: string; image_id: string }[] };
-    }> {
+    async uploadMultipleImages(
+        buffers: Buffer[]
+    ): Promise<UploadMultipleImagesResponse> {
         const form = new FormData();
 
         buffers.forEach((buffer, index) => {

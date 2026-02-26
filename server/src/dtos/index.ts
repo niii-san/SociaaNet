@@ -26,6 +26,7 @@ import { SearchUsersDto } from "./users/search-users.dto";
 import { FollowUserDTO } from "./social/follow-user.dto";
 import { UnfollowUserDTO } from "./social/unfollow-user.dto";
 import { GetUserProfileDto } from "./users/get-user-profile.dto";
+import { UploadPostDto } from "./media/upload-post.dto";
 
 export {
     CreateUserDto,
@@ -55,5 +56,6 @@ export {
     SearchUsersDto,
     FollowUserDTO,
     UnfollowUserDTO,
-    GetUserProfileDto
+    GetUserProfileDto,
+    UploadPostDto
 };
