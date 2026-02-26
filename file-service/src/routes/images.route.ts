@@ -3,7 +3,8 @@ import multer from "multer";
 import { authenticate } from "../middlewares";
 import {
     uploadSingleImageController,
-    getSingleImageController
+    getSingleImageController,
+    uploadMultipleImagesController
 } from "../controllers";
 
 export const imagesRouter = express.Router();
@@ -16,5 +17,10 @@ imagesRouter.post(
     "/upload-single-image",
     upload.single("image"),
     uploadSingleImageController
+);
+imagesRouter.post(
+    "/upload-multiple-images",
+    upload.array("images"),
+    uploadMultipleImagesController
 );
 imagesRouter.get("/:imageKey", getSingleImageController);
