@@ -2,6 +2,7 @@ import express from "express";
 import { imagesRouter, videoRouter } from "./routes";
 import { errorMiddleware } from "./utils";
 import { requestLogger } from "./middlewares/request-logger";
+import { thumbnailRouter } from "./routes/thumbnail.route";
 
 export const app = express();
 app.use(express.json());
@@ -17,6 +18,7 @@ app.get("/", (_, res) => {
 
 app.use("/images", imagesRouter);
 app.use("/videos", videoRouter);
+app.use("/thumbnails", thumbnailRouter);
 
 // Error handling middleware
 app.use(errorMiddleware);

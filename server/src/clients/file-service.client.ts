@@ -140,6 +140,12 @@ class FileServiceClient {
         }); 
     }
 
+    getThumbnailStream(thumbnailKey: string) {
+        return this.client.get(`/thumbnails/${thumbnailKey}`, {
+            responseType: "stream"
+        });
+    }
+
 
 
 }
