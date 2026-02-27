@@ -2,7 +2,7 @@ import { fileServiceClient } from "../clients";
 import { ErrorCodes } from "../constants/error-code";
 import { GetImageDto, UploadPostDto, UploadReelDto } from "../dtos";
 import { filesRepo, userRepo } from "../repositories";
-import { convertImageKeyToImageUrl, HttpError } from "../utils";
+import { convertImageKeyToImageUrl, convertThumbnailKeytoThumbnailUrl, convertVideoKeyToVideoUrl, HttpError } from "../utils";
 import { extractHashtags } from "../utils/extract-hashtags";
 
 class FilesService {
@@ -176,8 +176,8 @@ class FilesService {
 
         return {
             reel_id: reel._id,
-            video_url: convertImageKeyToImageUrl(reel.media_key),
-            thumbnail_url: convertImageKeyToImageUrl(reel.thumbnail_key),
+            video_url: convertVideoKeyToVideoUrl(reel.media_key),
+            thumbnail_url: convertThumbnailKeytoThumbnailUrl(reel.thumbnail_key),
             caption: reel.caption,
             hashtags: reel.hashtags,
             visibility: reel.visibility,

@@ -86,7 +86,7 @@ class FileServiceClient {
             console.log(error);
             throw new Error(
                 "Failed to upload images to file service: " +
-                (error as Error).message
+                    (error as Error).message
             );
         }
     }
@@ -122,7 +122,7 @@ class FileServiceClient {
             contentType: "video/" + extension.replace(".", "") || "video/mp4"
         });
 
-        const res = await this.client.post("/videos/upload-video", form, {
+        const res = await this.client.post("/videos", form, {
             headers: {
                 ...form.getHeaders(),
                 "x-internal-api-key": this.internalApiKey

@@ -1,6 +1,8 @@
 import { asyncHandler } from "./async-handler";
 import { connectMongoDB } from "./connect-mongodb";
 import { convertImageKeyToImageUrl } from "./convert-imagekey-imageurl";
+import { convertThumbnailKeytoThumbnailUrl } from "./convert-thumbnailkey-thumbnailurl";
+import { convertVideoKeyToVideoUrl } from "./convert-videokey-videourl";
 import { extractHashtags } from "./extract-hashtags";
 import { generateUniqueUsername } from "./generate-unique-username";
 import { errorMiddleware, HttpError } from "./HttpError";
@@ -17,5 +19,8 @@ export {
     generateUniqueUsername,
     convertImageKeyToImageUrl,
     logger,
-    otpEmailTemplate
+    otpEmailTemplate,
+    convertThumbnailKeytoThumbnailUrl,
+    convertVideoKeyToVideoUrl,
+    extractHashtags
 };

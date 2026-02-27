@@ -21,7 +21,7 @@ const generateThumbnail = (
     return new Promise((resolve, reject) => {
         ffmpeg(videoPath)
             .screenshots({
-                timestamps: ["1"], 
+                timestamps: ["1"],
                 filename: path.basename(thumbnailPath),
                 folder: path.dirname(thumbnailPath),
                 size: "320x?"
@@ -70,7 +70,7 @@ export const uploadVideoController = asyncHandler(
         const newFilePath = path.join(videoDir, newFileName);
 
         // Move uploaded file
-        fs.renameSync(videoFile.path, newFilePath);
+        fs.writeFileSync(newFilePath, videoFile.buffer);
 
         // 1️⃣ Get duration
         const duration = await getVideoDuration(newFilePath);
@@ -85,7 +85,7 @@ export const uploadVideoController = asyncHandler(
             new HttpSuccess(true, 201, "Video uploaded successfully", {
                 video_id: fileId,
                 video_key: newFileName,
-                duration, 
+                duration,
                 thumbnail_key: thumbnailName
             })
         );

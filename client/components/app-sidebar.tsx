@@ -13,7 +13,8 @@ import {
     MessageCircle,
     MoreHorizontal,
     Clapperboard,
-    PlusSquare
+    PlusSquare,
+    Film
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -105,13 +106,21 @@ export function AppSidebar() {
                 ))}
             </nav>
 
-            {/* Create Post Button */}
-            <Link href="/create-post">
-                <Button className="w-full h-12 rounded-xl text-base font-semibold mb-4 shadow-lg shadow-primary/20 gap-2">
-                    <PlusSquare className="w-5 h-5" />
-                    Create Post
-                </Button>
-            </Link>
+            {/* Create Buttons */}
+            <div className="space-y-2 mb-4">
+                <Link href="/create-post">
+                    <Button className="w-full h-11 rounded-xl text-base font-semibold shadow-lg shadow-primary/20 gap-2">
+                        <PlusSquare className="w-5 h-5" />
+                        Create Post
+                    </Button>
+                </Link>
+                <Link href="/create-reel">
+                    <Button variant="outline" className="w-full h-11 rounded-xl text-base font-semibold gap-2 hover:bg-primary/5 hover:text-primary hover:border-primary/50">
+                        <Film className="w-5 h-5" />
+                        Create Reel
+                    </Button>
+                </Link>
+            </div>
 
             {/* User Profile */}
             {user && (
