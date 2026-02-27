@@ -25,6 +25,7 @@ interface IFilesRepository {
         visibility: "public" | "private" | "followers",
         duration_seconds: number
     ): Promise<ReelDocument>;
+    getReelByVideoKey(videoKey: string): Promise<ReelDocument | null>;
 }
 
 class FilesRepository implements IFilesRepository {
@@ -106,6 +107,16 @@ class FilesRepository implements IFilesRepository {
             thumbnail_key,
             duration_seconds
         });
+        return reel;
+    }
+
+    async getReelByVideoKey(videoKey: string): Promise<ReelDocument | null> {
+        const reel = await Reel.findOne({
+            media_key: videoKey,
+            is_deleted: false,
+            is_removed_by_moderator: false
+        });
+
         return reel;
     }
 }

@@ -133,6 +133,15 @@ class FileServiceClient {
 
         return res.data;
     }
+
+    getVideoStream(videoKey: string) {
+        return this.client.get(`/videos/${videoKey}`, {
+            responseType: "stream"
+        }); 
+    }
+
+
+
 }
 
 export const fileServiceClient = new FileServiceClient();
