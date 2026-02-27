@@ -1,2 +1,3 @@
 import { imagesRouter } from "./images.route";
-export { imagesRouter };
+import { videoRouter } from "./video.route";
+export { imagesRouter, videoRouter };

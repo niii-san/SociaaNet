@@ -1,5 +1,5 @@
 import express from "express";
-import { imagesRouter } from "./routes";
+import { imagesRouter, videoRouter } from "./routes";
 import { errorMiddleware } from "./utils";
 import { requestLogger } from "./middlewares/request-logger";
 
@@ -16,6 +16,7 @@ app.get("/", (_, res) => {
 });
 
 app.use("/images", imagesRouter);
+app.use("/videos", videoRouter);
 
 // Error handling middleware
 app.use(errorMiddleware);
