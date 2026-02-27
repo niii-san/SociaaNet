@@ -122,7 +122,7 @@ class FileServiceClient {
             contentType: "video/" + extension.replace(".", "") || "video/mp4"
         });
 
-        const res = await this.client.post("/videos", form, {
+        const res = await this.client.post("/videos/upload-video", form, {
             headers: {
                 ...form.getHeaders(),
                 "x-internal-api-key": this.internalApiKey

@@ -13,8 +13,7 @@ import {
     MessageCircle,
     MoreHorizontal,
     Clapperboard,
-    PlusSquare,
-    Film
+    PlusSquare
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -106,25 +105,17 @@ export function AppSidebar() {
                 ))}
             </nav>
 
-            {/* Create Buttons */}
-            <div className="space-y-2">
-                <Link href="/create-post">
-                    <Button className="w-full h-11 rounded-xl text-base font-semibold shadow-lg shadow-primary/20 gap-2">
-                        <PlusSquare className="w-5 h-5" />
-                        Create Post
-                    </Button>
-                </Link>
-                <Link href="/create-reel">
-                    <Button variant="outline" className="w-full h-11 rounded-xl text-base font-semibold gap-2 hover:bg-primary/5 hover:text-primary hover:border-primary/50">
-                        <Film className="w-5 h-5" />
-                        Create Reel
-                    </Button>
-                </Link>
-            </div>
+            {/* Create Post Button */}
+            <Link href="/create-post">
+                <Button className="w-full h-12 rounded-xl text-base font-semibold mb-4 shadow-lg shadow-primary/20 gap-2">
+                    <PlusSquare className="w-5 h-5" />
+                    Create Post
+                </Button>
+            </Link>
 
             {/* User Profile */}
             {user && (
-                <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted transition-colors cursor-pointer mt-4 border border-transparent hover:border-border">
+                <div className="flex items-center gap-3 p-3 rounded-xl hover:bg-muted transition-colors cursor-pointer mt-auto border border-transparent hover:border-border">
                     <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden">
                         {user.avatar_url ? (
                             <img
