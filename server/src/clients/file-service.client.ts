@@ -96,6 +96,36 @@ class FileServiceClient {
             responseType: "stream"
         });
     }
+
+    async uploadVideo(
+        buffer: Buffer,
+        originalName: string
+    ): Promise<{ data: { video_key: string; video_id: string } }> {
+        const form = new FormData();
+
+        // Extract extension safely
+        const extension = originalName.includes(".")
+            ? originalName.substring(originalName.lastIndexOf("."))
+            : "";
+
+        const filename = `upload${extension}`;
+
+        form.append("video", buffer, {
+            filename,
+            contentType: "video/" + extension.replace(".", "") || "video/mp4"
+        });
+
+        const res = await this.client.post("/videos/upload-video", form, {
+            headers: {
+                ...form.getHeaders(),
+                "x-internal-api-key": this.internalApiKey
+            },
+            maxBodyLength: Infinity,
+            maxContentLength: Infinity
+        });
+
+        return res.data;
+    }
 }
 
 export const fileServiceClient = new FileServiceClient();
