@@ -1,5 +1,6 @@
 import { ImageMetaData, ImageMetaDataDocument } from "../models";
 import { Post, PostDocument } from "../models/post.model";
+import { Reel, ReelDocument } from "../models/reel.model";
 
 interface IFilesRepository {
     getImageMetaDataByKey(key: string): Promise<ImageMetaDataDocument | null>;
@@ -13,6 +14,17 @@ interface IFilesRepository {
         hashtags: string[],
         visibility: "public" | "private" | "followers"
     ): Promise<PostDocument>;
+
+    deletePost(postId: string): Promise<boolean>;
+    createReel(
+        userId: string,
+        media_key: string,
+        thumbnail_key: string,
+        caption: string,
+        hashtags: string[],
+        visibility: "public" | "private" | "followers",
+        duration_seconds: number
+    ): Promise<ReelDocument>;
 }
 
 class FilesRepository implements IFilesRepository {
@@ -74,6 +86,27 @@ class FilesRepository implements IFilesRepository {
         await post.save();
 
         return true;
+    }
+
+    async createReel(
+        userId: string,
+        media_key: string,
+        thumbnail_key: string,
+        caption: string,
+        hashtags: string[],
+        visibility: "public" | "private" | "followers",
+        duration_seconds: number
+    ): Promise<ReelDocument> {
+        const reel = await Reel.create({
+            author: userId,
+            media_key,
+            caption,
+            hashtags,
+            visibility,
+            thumbnail_key,
+            duration_seconds
+        });
+        return reel;
     }
 }
 

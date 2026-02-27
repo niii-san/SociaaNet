@@ -27,6 +27,7 @@ import { FollowUserDTO } from "./social/follow-user.dto";
 import { UnfollowUserDTO } from "./social/unfollow-user.dto";
 import { GetUserProfileDto } from "./users/get-user-profile.dto";
 import { UploadPostDto } from "./media/upload-post.dto";
+import { UploadReelDto } from "./media/upload-reel.dto";
 
 export {
     CreateUserDto,
@@ -57,5 +58,6 @@ export {
     FollowUserDTO,
     UnfollowUserDTO,
     GetUserProfileDto,
-    UploadPostDto
+    UploadPostDto,
+    UploadReelDto
 };

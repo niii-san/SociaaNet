@@ -100,7 +100,14 @@ class FileServiceClient {
     async uploadVideo(
         buffer: Buffer,
         originalName: string
-    ): Promise<{ data: { video_key: string; video_id: string } }> {
+    ): Promise<{
+        data: {
+            video_key: string;
+            video_id: string;
+            thumbnail_key: string;
+            duration: number;
+        };
+    }> {
         const form = new FormData();
 
         // Extract extension safely

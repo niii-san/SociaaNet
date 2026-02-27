@@ -29,6 +29,7 @@ import { changePasswordWithOtpController } from "./auth/change-password-with-otp
 import { logoutController } from "./auth/logout.controller";
 import { changePasswordController } from "./auth/change-password.controller";
 import { uploadPostController } from "./medias/upload-post.controller";
+import { uploadReelController } from "./medias/upload-reel.controller";
 
 export {
     signupController,
@@ -61,5 +62,6 @@ export {
     changePasswordWithOtpController,
     logoutController,
     changePasswordController,
-    uploadPostController
+    uploadPostController,
+    uploadReelController
 };

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authenticate } from "../middlewares";
-import { uploadPostController } from "../controllers";
+import { uploadPostController, uploadReelController } from "../controllers";
 import multer from "multer";
 
 export const mediaRouter = Router();
@@ -15,3 +15,4 @@ const upload = multer({
 mediaRouter.use(authenticate);
 
 mediaRouter.post("/post", upload.array("images"), uploadPostController);
+mediaRouter.post("/reel", upload.single("video"), uploadReelController);
