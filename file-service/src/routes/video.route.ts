@@ -1,6 +1,6 @@
 import { Router } from "express";
 import multer from "multer";
-import { uploadVideoController } from "../controllers";
+import { getVideoController, uploadVideoController } from "../controllers";
 import { authenticate } from "../middlewares";
 
 export const videoRouter = Router();
@@ -11,3 +11,4 @@ const upload = multer({
 
 videoRouter.use(authenticate);
 videoRouter.post("/", upload.single("video"), uploadVideoController);
+videoRouter.get("/:videoKey", getVideoController);
