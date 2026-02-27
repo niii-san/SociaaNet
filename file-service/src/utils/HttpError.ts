@@ -41,6 +41,7 @@ export const errorMiddleware = (
     next: NextFunction
 ) => {
     if (err instanceof HttpError) {
+        console.log(err)
         res.status(err.status_code).json(err.toJSON());
     } else {
         console.log(err)
