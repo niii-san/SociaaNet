@@ -40,7 +40,8 @@ import {
     postsRouter,
     reelsRouter,
     commentsRouter,
-    chatRouter
+    chatRouter,
+    notificationsRouter
 } from "./routes";
 
 // Auth Routes
@@ -69,6 +70,9 @@ app.use("/api/v1/comments", commentsRouter);
 
 // Chat Routes
 app.use("/api/v1/chat", chatRouter);
+
+// Notification Routes
+app.use("/api/v1/notifications", notificationsRouter);
 
 // Moderators Routes
 app.use("/api/v1/moderators", moderatorsRouter);

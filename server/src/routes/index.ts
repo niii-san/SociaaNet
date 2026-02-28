@@ -8,6 +8,7 @@ import { postsRouter } from "./posts.router";
 import { reelsRouter } from "./reels.router";
 import { commentsRouter } from "./comments.router";
 import { chatRouter } from "./chat.route";
+import { notificationsRouter } from "./notifications.route";
 
 export {
     authRouter,
@@ -19,5 +20,6 @@ export {
     postsRouter,
     reelsRouter,
     commentsRouter,
-    chatRouter
+    chatRouter,
+    notificationsRouter
 };
