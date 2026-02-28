@@ -15,7 +15,8 @@ import {
     removeParticipantController,
     updateGroupNameController,
     getFriendsController,
-    getUsersActivityController
+    getUsersActivityController,
+    deleteConversationController
 } from "../controllers/chat/chat.controller";
 import { uploadChatMediaController } from "../controllers/chat/upload-chat-media.controller";
 import multer from "multer";
@@ -36,6 +37,7 @@ chatRouter.post("/upload", upload.array("files", 10), uploadChatMediaController)
 chatRouter.get("/conversations", getConversationsController);
 chatRouter.post("/conversations/direct", createDirectConversationController);
 chatRouter.post("/conversations/group", createGroupConversationController);
+chatRouter.delete("/conversations/:conversationId", deleteConversationController);
 
 // Messages
 chatRouter.get(

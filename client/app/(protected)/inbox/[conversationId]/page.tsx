@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/contexts";
 import { useChat } from "@/contexts/chat.context";
 import { ChatConversation, ChatMessage } from "@/types";
@@ -15,6 +15,7 @@ import { toast } from "sonner";
 
 export default function Page() {
     const params = useParams();
+    const router = useRouter();
     const conversationId = params.conversationId as string;
     const { data: currentUser } = useAuth();
     const {
@@ -35,6 +36,7 @@ export default function Page() {
         onMessageReacted,
         onMessageUnreacted,
         onMessageDeleted,
+        onConversationDeleted,
         refreshConversations
     } = useChat();
 
@@ -279,6 +281,15 @@ export default function Page() {
             }
         );
 
+        const unsubConvDeleted = onConversationDeleted(
+            (data: { conversationId: string }) => {
+                if (data.conversationId === conversationId) {
+                    toast.info("This conversation was deleted");
+                    router.push("/inbox");
+                }
+            }
+        );
+
         return () => {
             unsubNewMessage();
             unsubTypingStart();
@@ -287,6 +298,7 @@ export default function Page() {
             unsubReacted();
             unsubUnreacted();
             unsubDeleted();
+            unsubConvDeleted();
         };
     }, [conversationId, currentUser?.user_id]);
 

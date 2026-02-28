@@ -82,6 +82,13 @@ export async function deleteMessage(messageId: string): Promise<void> {
     await api.delete(`/chat/messages/${messageId}`);
 }
 
+// Delete a conversation
+export async function deleteConversation(
+    conversationId: string
+): Promise<void> {
+    await api.delete(`/chat/conversations/${conversationId}`);
+}
+
 // Get unread count
 export async function getUnreadCount(): Promise<number> {
     const res = await api.get("/chat/unread-count");

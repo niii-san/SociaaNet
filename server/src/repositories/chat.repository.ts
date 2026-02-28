@@ -629,6 +629,15 @@ class ChatRepository {
                 : null
         }));
     }
+    // Delete a conversation and all its messages
+    async deleteConversation(conversationId: string): Promise<boolean> {
+        const convOid = new mongoose.Types.ObjectId(conversationId);
+        // Delete all messages in this conversation
+        await Message.deleteMany({ conversation_id: convOid });
+        // Delete the conversation itself
+        const result = await Conversation.deleteOne({ _id: convOid });
+        return result.deletedCount > 0;
+    }
 }
 
 export const chatRepo = new ChatRepository();

@@ -85,12 +85,15 @@ interface ChatContextType {
             conversationId: string;
         }) => void
     ) => () => void;
+    onConversationDeleted: (
+        cb: (data: { conversationId: string }) => void
+    ) => () => void;
 }
 
 const ChatContext = createContext<ChatContextType | null>(null);
 
 export function ChatProvider({ children }: { children: React.ReactNode }) {
-    const { isLoggedIn, data: user } = useAuth();
+    const { isLoggedIn, isLoading, data: user } = useAuth();
     const [socket, setSocket] = useState<Socket | null>(null);
     const [isConnected, setIsConnected] = useState(false);
     const [conversations, setConversations] = useState<ChatConversation[]>([]);
@@ -100,15 +103,24 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     >(null);
     const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
     const listenersRef = useRef<Map<string, Set<Function>>>(new Map());
+    const socketRef = useRef<Socket | null>(null);
 
-    // Socket connection
+    // Socket connection — wait until auth is fully loaded and user is logged in
     useEffect(() => {
+        if (isLoading) return; // wait for auth to finish
         if (!isLoggedIn || !user) return;
 
         const s = io("http://localhost:8000", {
             withCredentials: true,
-            transports: ["websocket", "polling"]
+            transports: ["websocket", "polling"],
+            reconnection: true,
+            reconnectionAttempts: 10,
+            reconnectionDelay: 1000,
+            reconnectionDelayMax: 5000,
+            timeout: 10000
         });
+
+        socketRef.current = s;
 
         s.on("connect", () => {
             setIsConnected(true);
@@ -116,6 +128,13 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
 
         s.on("disconnect", () => {
             setIsConnected(false);
+        });
+
+        s.on("reconnect", () => {
+            setIsConnected(true);
+            // Re-fetch data after reconnection
+            refreshConversations();
+            refreshUnreadCount();
         });
 
         // Online/offline tracking
@@ -134,7 +153,6 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         // New message
         s.on("message:new", (message: ChatMessage) => {
             emitEvent("message:new", message);
-            // Refresh conversations list
             refreshConversations();
         });
 
@@ -170,28 +188,36 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
             emitEvent("message:unreacted", data);
         });
 
-        // Deleted
+        // Deleted message
         s.on("message:deleted", (data: any) => {
             emitEvent("message:deleted", data);
         });
 
+        // Conversation deleted
+        s.on("conversation:deleted", (data: { conversationId: string }) => {
+            emitEvent("conversation:deleted", data);
+            // Remove from local state
+            setConversations((prev) =>
+                prev.filter((c) => c.conversation_id !== data.conversationId)
+            );
+            refreshUnreadCount();
+        });
+
         // Conversation updated (new message in another conversation)
-        s.on(
-            "conversation:updated",
-            () => {
-                refreshConversations();
-                refreshUnreadCount();
-            }
-        );
+        s.on("conversation:updated", () => {
+            refreshConversations();
+            refreshUnreadCount();
+        });
 
         setSocket(s);
 
         return () => {
             s.disconnect();
+            socketRef.current = null;
             setSocket(null);
             setIsConnected(false);
         };
-    }, [isLoggedIn, user]);
+    }, [isLoading, isLoggedIn, user?.user_id]);
 
     // Load conversations on connect
     useEffect(() => {
@@ -359,7 +385,9 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
                 onMessageUnreacted: (cb) =>
                     addEventListener("message:unreacted", cb),
                 onMessageDeleted: (cb) =>
-                    addEventListener("message:deleted", cb)
+                    addEventListener("message:deleted", cb),
+                onConversationDeleted: (cb) =>
+                    addEventListener("conversation:deleted", cb)
             }}
         >
             {children}

@@ -338,6 +338,58 @@ class ChatService {
     async getFriends(userId: string) {
         return chatRepo.getFriends(userId);
     }
+
+    // Delete a conversation
+    async deleteConversation(conversationId: string, userId: string) {
+        const conv = await chatRepo.getConversationById(conversationId);
+        if (!conv) {
+            throw new HttpError(
+                404,
+                false,
+                ErrorCodes.NOT_FOUND,
+                "Conversation not found"
+            );
+        }
+
+        // Check if user is a participant
+        const isParticipant = conv.participants.some(
+            (p) => p.toString() === userId
+        );
+        if (!isParticipant) {
+            throw new HttpError(
+                403,
+                false,
+                ErrorCodes.FORBIDDEN,
+                "You are not a participant of this conversation"
+            );
+        }
+
+        // For groups, only admin can delete
+        if (
+            conv.type === "group" &&
+            conv.group_admin?.toString() !== userId
+        ) {
+            throw new HttpError(
+                403,
+                false,
+                ErrorCodes.FORBIDDEN,
+                "Only group admin can delete the group"
+            );
+        }
+
+        const deleted = await chatRepo.deleteConversation(conversationId);
+        if (!deleted) {
+            throw new HttpError(
+                500,
+                false,
+                ErrorCodes.SERVER_ERROR,
+                "Failed to delete conversation"
+            );
+        }
+
+        // Return participant IDs for notifying them via socket
+        return conv.participants.map((p) => p.toString());
+    }
 }
 
 export const chatService = new ChatService();

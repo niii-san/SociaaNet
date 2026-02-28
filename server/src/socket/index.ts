@@ -8,6 +8,15 @@ import { chatRepo } from "../repositories";
 // Map userId -> Set of socketIds
 const onlineUsers = new Map<string, Set<string>>();
 
+let ioInstance: SocketIOServer | null = null;
+
+export function getIO(): SocketIOServer {
+    if (!ioInstance) {
+        throw new Error("Socket.IO not initialized");
+    }
+    return ioInstance;
+}
+
 export function setupSocketIO(httpServer: http.Server): SocketIOServer {
     const io = new SocketIOServer(httpServer, {
         cors: {
@@ -16,6 +25,8 @@ export function setupSocketIO(httpServer: http.Server): SocketIOServer {
         },
         transports: ["websocket", "polling"]
     });
+
+    ioInstance = io;
 
     // Auth middleware - validate session cookie
     io.use(async (socket, next) => {

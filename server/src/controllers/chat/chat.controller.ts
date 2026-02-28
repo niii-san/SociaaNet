@@ -3,6 +3,7 @@ import { RequestWithUserContext } from "../../types";
 import { asyncHandler, HttpSuccess } from "../../utils";
 import { chatService } from "../../services";
 import { User, UserSettings } from "../../models";
+import { getIO } from "../../socket";
 
 // GET /api/v1/chat/conversations
 export const getConversationsController = asyncHandler(
@@ -321,6 +322,44 @@ export const getUsersActivityController = asyncHandler(
             .status(200)
             .json(
                 new HttpSuccess(200, true, "Activity status fetched", activity)
+            );
+    }
+);
+
+// DELETE /api/v1/chat/conversations/:conversationId
+export const deleteConversationController = asyncHandler(
+    async (req: RequestWithUserContext, res: Response) => {
+        const { conversationId } = req.params;
+        const userId = req.user._id.toString();
+
+        const participantIds = await chatService.deleteConversation(
+            conversationId,
+            userId
+        );
+
+        // Notify all participants via socket
+        try {
+            const io = getIO();
+            participantIds.forEach((pid) => {
+                if (pid !== userId) {
+                    io.to(`user:${pid}`).emit("conversation:deleted", {
+                        conversationId
+                    });
+                }
+            });
+        } catch {
+            // Socket not available, skip notification
+        }
+
+        return res
+            .status(200)
+            .json(
+                new HttpSuccess(
+                    200,
+                    true,
+                    "Conversation deleted",
+                    null
+                )
             );
     }
 );

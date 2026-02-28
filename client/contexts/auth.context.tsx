@@ -6,7 +6,6 @@ import { usePathname, useRouter } from "next/navigation";
 import { api } from "@/lib/axios-instance";
 import { getCurrentUser } from "@/features";
 import { getUserSettings } from "@/features/settings/settings.api";
-import { useUI } from "./ui.context";
 import { useTheme } from "./theme.context";
 
 type AuthContextType = {
@@ -28,7 +27,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
-    const { showLoader, hideLoader } = useUI();
     const { setTheme } = useTheme();
 
     const pathname = usePathname();
@@ -41,13 +39,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const validateSession = async () => {
         try {
-            showLoader();
             await api.get("/auth/validate-session");
 
             // session valid → fetch user and settings
-            const userData = await getCurrentUser();
-            const userSettings = await getUserSettings();
-            console.log("auth.context", userData);
+            const [userData, userSettings] = await Promise.all([
+                getCurrentUser(),
+                getUserSettings()
+            ]);
 
             setUser(userData);
             setSettings(userSettings);
@@ -62,8 +60,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             }
         } finally {
             setIsLoading(false);
-            hideLoader();
-            console.log("Session validated");
         }
     };
     const logout = async () => {
@@ -78,7 +74,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             const userData = await getCurrentUser();
             setUser(userData);
             setIsLoggedIn(true);
-            console.log("Current user refetched:", userData);
         } catch (err) {
             console.error("Failed to refetch current user:", err);
         }
@@ -89,7 +84,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             const userSettings = await getUserSettings();
             setSettings(userSettings);
             syncThemeFromSettings(userSettings);
-            console.log("Settings refetched:", userSettings);
         } catch (err) {
             console.error("Failed to refetch settings:", err);
         }

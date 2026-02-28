@@ -16,7 +16,9 @@ import {
     getFriends,
     addParticipant,
     removeParticipant,
-    updateGroupName
+    updateGroupName,
+    getUsersActivity,
+    deleteConversation as deleteConversationAPI
 } from "@/features/chat/chat.api";
 import {
     Users,
@@ -27,9 +29,27 @@ import {
     Check,
     X,
     Loader2,
-    Search
+    Search,
+    Trash2
 } from "lucide-react";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
+
+function formatLastActive(dateStr: string | null): string {
+    if (!dateStr) return "";
+    const date = new Date(dateStr);
+    const now = new Date();
+    const diffMs = now.getTime() - date.getTime();
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+
+    if (diffMins < 1) return "Active just now";
+    if (diffMins < 60) return `Active ${diffMins}m ago`;
+    if (diffHours < 24) return `Active ${diffHours}h ago`;
+    if (diffDays < 7) return `Active ${diffDays}d ago`;
+    return `Active ${date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`;
+}
 
 interface GroupInfoDialogProps {
     open: boolean;
@@ -46,15 +66,52 @@ export function GroupInfoDialog({
 }: GroupInfoDialogProps) {
     const { data: currentUser } = useAuth();
     const { onlineUsers } = useChat();
+    const router = useRouter();
     const [editingName, setEditingName] = useState(false);
     const [newName, setNewName] = useState(conversation.group_name || "");
     const [showAddMember, setShowAddMember] = useState(false);
     const [friends, setFriends] = useState<ChatFriend[]>([]);
     const [friendSearch, setFriendSearch] = useState("");
     const [loading, setLoading] = useState(false);
+    const [deleting, setDeleting] = useState(false);
+    const [activityData, setActivityData] = useState<
+        Record<
+            string,
+            {
+                is_online: boolean;
+                last_active_at: string | null;
+                show_activity_status: boolean;
+            }
+        >
+    >({});
 
     const isAdmin = conversation.group_admin === currentUser?.user_id;
     const isGroup = conversation.type === "group";
+
+    // Fetch activity status for all participants when dialog opens
+    useEffect(() => {
+        if (!open) return;
+        const userIds = conversation.participants
+            .filter((p) => p.user_id !== currentUser?.user_id)
+            .map((p) => p.user_id);
+        if (userIds.length === 0) return;
+        getUsersActivity(userIds)
+            .then(setActivityData)
+            .catch(() => {});
+    }, [open, conversation.participants, currentUser?.user_id]);
+
+    const isParticipantOnline = (userId: string): boolean => {
+        const activity = activityData[userId];
+        if (!activity) return onlineUsers.has(userId);
+        if (!activity.show_activity_status) return false;
+        return activity.is_online || onlineUsers.has(userId);
+    };
+
+    const showParticipantActivity = (userId: string): boolean => {
+        const activity = activityData[userId];
+        if (!activity) return true;
+        return activity.show_activity_status;
+    };
 
     useEffect(() => {
         if (showAddMember) {
@@ -124,9 +181,23 @@ export function GroupInfoDialog({
             );
             toast.success("Left group");
             onOpenChange(false);
-            window.location.href = "/inbox";
+            router.push("/inbox");
         } catch {
             toast.error("Failed to leave group");
+        }
+    };
+
+    const handleDeleteChat = async () => {
+        try {
+            setDeleting(true);
+            await deleteConversationAPI(conversation.conversation_id);
+            toast.success("Chat deleted");
+            onOpenChange(false);
+            router.push("/inbox");
+        } catch {
+            toast.error("Failed to delete chat");
+        } finally {
+            setDeleting(false);
         }
     };
 
@@ -307,9 +378,8 @@ export function GroupInfoDialog({
                                         conversation.group_admin;
                                     const isMe =
                                         p.user_id === currentUser?.user_id;
-                                    const participantOnline = onlineUsers.has(
-                                        p.user_id
-                                    );
+                                    const participantOnline = !isMe && isParticipantOnline(p.user_id);
+                                    const showActivity = isMe || showParticipantActivity(p.user_id);
 
                                     return (
                                         <div
@@ -330,7 +400,7 @@ export function GroupInfoDialog({
                                                         </span>
                                                     )}
                                                 </div>
-                                                {participantOnline && (
+                                                {participantOnline && showActivity && (
                                                     <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-green-500 border-2 border-background rounded-full" />
                                                 )}
                                             </div>
@@ -386,6 +456,23 @@ export function GroupInfoDialog({
                                 Leave Group
                             </Button>
                         )}
+
+                        {/* Delete group (admin only) */}
+                        {isAdmin && (
+                            <Button
+                                variant="ghost"
+                                className="w-full gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                onClick={handleDeleteChat}
+                                disabled={deleting}
+                            >
+                                {deleting ? (
+                                    <Loader2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                    <Trash2 className="w-4 h-4" />
+                                )}
+                                Delete Group
+                            </Button>
+                        )}
                     </div>
                 )}
 
@@ -396,44 +483,69 @@ export function GroupInfoDialog({
                             .filter(
                                 (p) => p.user_id !== currentUser?.user_id
                             )
-                            .map((p) => (
-                                <div
-                                    key={p.user_id}
-                                    className="flex flex-col items-center gap-3 py-4"
-                                >
-                                    <div className="relative">
-                                        <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center overflow-hidden">
-                                            {p.avatar_url ? (
-                                                <img
-                                                    src={p.avatar_url}
-                                                    alt=""
-                                                    className="w-full h-full object-cover"
-                                                />
-                                            ) : (
-                                                <span className="text-2xl font-bold text-primary">
-                                                    {p.full_name[0]?.toUpperCase()}
-                                                </span>
+                            .map((p) => {
+                                const online = isParticipantOnline(p.user_id);
+                                const showAct = showParticipantActivity(p.user_id);
+                                const activity = activityData[p.user_id];
+
+                                return (
+                                    <div
+                                        key={p.user_id}
+                                        className="flex flex-col items-center gap-3 py-4"
+                                    >
+                                        <div className="relative">
+                                            <div className="w-20 h-20 rounded-full bg-muted flex items-center justify-center overflow-hidden">
+                                                {p.avatar_url ? (
+                                                    <img
+                                                        src={p.avatar_url}
+                                                        alt=""
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <span className="text-2xl font-bold text-primary">
+                                                        {p.full_name[0]?.toUpperCase()}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            {online && showAct && (
+                                                <span className="absolute bottom-1 right-1 w-4 h-4 bg-green-500 border-2 border-background rounded-full" />
                                             )}
                                         </div>
-                                        {onlineUsers.has(p.user_id) && (
-                                            <span className="absolute bottom-1 right-1 w-4 h-4 bg-green-500 border-2 border-background rounded-full" />
-                                        )}
+                                        <div className="text-center">
+                                            <h3 className="font-semibold text-lg">
+                                                {p.full_name}
+                                            </h3>
+                                            <p className="text-sm text-muted-foreground">
+                                                @{p.username}
+                                            </p>
+                                            {showAct && (
+                                                <p className="text-xs text-muted-foreground mt-1">
+                                                    {online
+                                                        ? "Active now"
+                                                        : activity?.last_active_at
+                                                          ? formatLastActive(activity.last_active_at)
+                                                          : "Offline"}
+                                                </p>
+                                            )}
+                                        </div>
                                     </div>
-                                    <div className="text-center">
-                                        <h3 className="font-semibold text-lg">
-                                            {p.full_name}
-                                        </h3>
-                                        <p className="text-sm text-muted-foreground">
-                                            @{p.username}
-                                        </p>
-                                        <p className="text-xs text-muted-foreground mt-1">
-                                            {onlineUsers.has(p.user_id)
-                                                ? "Active now"
-                                                : "Offline"}
-                                        </p>
-                                    </div>
-                                </div>
-                            ))}
+                                );
+                            })}
+
+                        {/* Delete chat */}
+                        <Button
+                            variant="ghost"
+                            className="w-full gap-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+                            onClick={handleDeleteChat}
+                            disabled={deleting}
+                        >
+                            {deleting ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                                <Trash2 className="w-4 h-4" />
+                            )}
+                            Delete Chat
+                        </Button>
                     </div>
                 )}
             </DialogContent>

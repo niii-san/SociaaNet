@@ -4,12 +4,13 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts";
 import { useChat } from "@/contexts/chat.context";
 import { ChatConversation } from "@/types";
-import { Mail, Plus, Users, Search, MessageCircle } from "lucide-react";
+import { Mail, Plus, Users, Search, MessageCircle, Trash2, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { NewChatDialog } from "@/components/chat/new-chat-dialog";
-import { getUsersActivity } from "@/features/chat/chat.api";
+import { getUsersActivity, deleteConversation as deleteConversationAPI } from "@/features/chat/chat.api";
+import { toast } from "sonner";
 
 function getConversationName(
     conv: ChatConversation,
@@ -56,9 +57,10 @@ function getLastMessagePreview(conv: ChatConversation): string {
 
 export default function Page() {
     const { data: currentUser } = useAuth();
-    const { conversations, onlineUsers } = useChat();
+    const { conversations, onlineUsers, refreshConversations } = useChat();
     const [searchQuery, setSearchQuery] = useState("");
     const [showNewChat, setShowNewChat] = useState(false);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
     const [activityData, setActivityData] = useState<
         Record<
             string,
@@ -88,6 +90,24 @@ export default function Page() {
             .then(setActivityData)
             .catch(() => {});
     }, [conversations, currentUser]);
+
+    const handleDeleteConversation = async (
+        e: React.MouseEvent,
+        convId: string
+    ) => {
+        e.preventDefault();
+        e.stopPropagation();
+        try {
+            setDeletingId(convId);
+            await deleteConversationAPI(convId);
+            toast.success("Chat deleted");
+            refreshConversations();
+        } catch {
+            toast.error("Failed to delete chat");
+        } finally {
+            setDeletingId(null);
+        }
+    };
 
     const filteredConversations = conversations.filter((conv) => {
         if (!searchQuery) return true;
@@ -181,7 +201,7 @@ export default function Page() {
                             <Link
                                 key={conv.conversation_id}
                                 href={`/inbox/${conv.conversation_id}`}
-                                className="flex items-center gap-3 p-4 hover:bg-muted/50 transition-colors"
+                                className="group flex items-center gap-3 p-4 hover:bg-muted/50 transition-colors relative"
                             >
                                 <div className="relative shrink-0">
                                     <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center overflow-hidden">
@@ -210,12 +230,31 @@ export default function Page() {
                                         <h3 className="font-semibold truncate">
                                             {name}
                                         </h3>
-                                        <span className="text-xs text-muted-foreground shrink-0">
-                                            {formatTime(
-                                                conv.last_message?.created_at ||
-                                                    conv.last_message_at
-                                            )}
-                                        </span>
+                                        <div className="flex items-center gap-1.5 shrink-0">
+                                            <span className="text-xs text-muted-foreground">
+                                                {formatTime(
+                                                    conv.last_message?.created_at ||
+                                                        conv.last_message_at
+                                                )}
+                                            </span>
+                                            <button
+                                                onClick={(e) =>
+                                                    handleDeleteConversation(
+                                                        e,
+                                                        conv.conversation_id
+                                                    )
+                                                }
+                                                disabled={deletingId === conv.conversation_id}
+                                                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
+                                                title="Delete chat"
+                                            >
+                                                {deletingId === conv.conversation_id ? (
+                                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                                ) : (
+                                                    <Trash2 className="w-3.5 h-3.5" />
+                                                )}
+                                            </button>
+                                        </div>
                                     </div>
                                     <p className="text-sm text-muted-foreground truncate mt-0.5">
                                         {conv.type === "group" &&
