@@ -2,6 +2,7 @@ import { Response } from "express";
 import { RequestWithUserContext } from "../../types";
 import { asyncHandler, HttpSuccess } from "../../utils";
 import { chatService } from "../../services";
+import { User, UserSettings } from "../../models";
 
 // GET /api/v1/chat/conversations
 export const getConversationsController = asyncHandler(
@@ -262,5 +263,64 @@ export const getFriendsController = asyncHandler(
         return res
             .status(200)
             .json(new HttpSuccess(200, true, "Friends fetched", friends));
+    }
+);
+
+// POST /api/v1/chat/users/activity - Get activity status for given user IDs
+export const getUsersActivityController = asyncHandler(
+    async (req: RequestWithUserContext, res: Response) => {
+        const { user_ids } = req.body;
+        if (!user_ids || !Array.isArray(user_ids)) {
+            return res
+                .status(400)
+                .json(new HttpSuccess(400, false, "user_ids required", null));
+        }
+
+        // Fetch users and their settings
+        const [users, settings] = await Promise.all([
+            User.find(
+                { _id: { $in: user_ids } },
+                { _id: 1, last_active_at: 1, is_online: 1 }
+            ).lean(),
+            UserSettings.find(
+                { user_id: { $in: user_ids } },
+                { user_id: 1, "privacy.show_activity_status": 1 }
+            ).lean()
+        ]);
+
+        const settingsMap = new Map<string, boolean>();
+        settings.forEach((s: any) => {
+            settingsMap.set(
+                s.user_id.toString(),
+                s.privacy?.show_activity_status !== false
+            );
+        });
+
+        const activity: Record<
+            string,
+            {
+                is_online: boolean;
+                last_active_at: string | null;
+                show_activity_status: boolean;
+            }
+        > = {};
+
+        users.forEach((u: any) => {
+            const uid = u._id.toString();
+            const showActivity = settingsMap.get(uid) !== false;
+            activity[uid] = {
+                is_online: showActivity ? !!u.is_online : false,
+                last_active_at: showActivity
+                    ? u.last_active_at?.toISOString() || null
+                    : null,
+                show_activity_status: showActivity
+            };
+        });
+
+        return res
+            .status(200)
+            .json(
+                new HttpSuccess(200, true, "Activity status fetched", activity)
+            );
     }
 );

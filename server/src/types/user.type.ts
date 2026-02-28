@@ -16,4 +16,6 @@ export interface UserEntity {
     updated_at: Date;
     role: "user" | "moderator" | "system_admin";
     is_disabled: boolean;
+    last_active_at: Date | null;
+    is_online: boolean;
 }

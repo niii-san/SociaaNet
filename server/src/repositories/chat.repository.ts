@@ -162,28 +162,38 @@ class ChatRepository {
                     },
                     unread_count: {
                         $cond: {
-                            if: "$last_message_data",
-                            then: {
-                                $size: {
-                                    $filter: {
-                                        input: {
-                                            $ifNull: [
-                                                "$last_message_data.read_by",
-                                                []
-                                            ]
-                                        },
-                                        as: "r",
-                                        cond: {
-                                            $eq: [
-                                                "$$r.user_id",
-                                                new mongoose.Types.ObjectId(
-                                                    userId
-                                                )
-                                            ]
-                                        }
+                            if: {
+                                $and: [
+                                    { $ne: ["$last_message_data", null] },
+                                    {
+                                        $eq: [
+                                            {
+                                                $size: {
+                                                    $filter: {
+                                                        input: {
+                                                            $ifNull: [
+                                                                "$last_message_data.read_by",
+                                                                []
+                                                            ]
+                                                        },
+                                                        as: "r",
+                                                        cond: {
+                                                            $eq: [
+                                                                "$$r.user_id",
+                                                                new mongoose.Types.ObjectId(
+                                                                    userId
+                                                                )
+                                                            ]
+                                                        }
+                                                    }
+                                                }
+                                            },
+                                            0
+                                        ]
                                     }
-                                }
+                                ]
                             },
+                            then: 1,
                             else: 0
                         }
                     }

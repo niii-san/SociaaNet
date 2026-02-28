@@ -49,6 +49,14 @@ const userSchema = new mongoose.Schema<UserEntity>(
             type: String,
             enum: ["user", "moderator", "system_admin"],
             default: "user"
+        },
+        last_active_at: {
+            type: Date,
+            default: null
+        },
+        is_online: {
+            type: Boolean,
+            default: false
         }
     },
     { timestamps: { createdAt: "created_at", updatedAt: "updated_at" } }

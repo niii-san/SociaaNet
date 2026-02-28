@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts";
 import { useChat } from "@/contexts/chat.context";
 import { ChatConversation } from "@/types";
@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { NewChatDialog } from "@/components/chat/new-chat-dialog";
+import { getUsersActivity } from "@/features/chat/chat.api";
 
 function getConversationName(
     conv: ChatConversation,
@@ -58,6 +59,35 @@ export default function Page() {
     const { conversations, onlineUsers } = useChat();
     const [searchQuery, setSearchQuery] = useState("");
     const [showNewChat, setShowNewChat] = useState(false);
+    const [activityData, setActivityData] = useState<
+        Record<
+            string,
+            {
+                is_online: boolean;
+                last_active_at: string | null;
+                show_activity_status: boolean;
+            }
+        >
+    >({});
+
+    // Fetch activity status for all DM participants
+    useEffect(() => {
+        if (!currentUser || conversations.length === 0) return;
+        const otherUserIds = conversations
+            .filter((c) => c.type === "direct")
+            .map((c) => {
+                const other = c.participants.find(
+                    (p) => p.user_id !== currentUser.user_id
+                );
+                return other?.user_id;
+            })
+            .filter(Boolean) as string[];
+
+        if (otherUserIds.length === 0) return;
+        getUsersActivity(otherUserIds)
+            .then(setActivityData)
+            .catch(() => {});
+    }, [conversations, currentUser]);
 
     const filteredConversations = conversations.filter((conv) => {
         if (!searchQuery) return true;
@@ -135,10 +165,17 @@ export default function Page() {
                         const otherUser = conv.participants.find(
                             (p) => p.user_id !== currentUser?.user_id
                         );
+                        const otherActivity = otherUser
+                            ? activityData[otherUser.user_id]
+                            : null;
+                        const showActivity =
+                            otherActivity?.show_activity_status !== false;
                         const isOnline =
                             conv.type === "direct" &&
-                            otherUser &&
-                            onlineUsers.has(otherUser.user_id);
+                            showActivity &&
+                            (otherActivity?.is_online ||
+                                (otherUser &&
+                                    onlineUsers.has(otherUser.user_id)));
 
                         return (
                             <Link

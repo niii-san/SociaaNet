@@ -1,6 +1,7 @@
 import { Server as SocketIOServer, Socket } from "socket.io";
 import http from "http";
-import { Session } from "../models";
+import mongoose from "mongoose";
+import { Session, User, UserSettings } from "../models";
 import { chatService } from "../services";
 import { chatRepo } from "../repositories";
 
@@ -27,7 +28,8 @@ export function setupSocketIO(httpServer: http.Server): SocketIOServer {
                 return next(new Error("Authentication required"));
             }
 
-            const session = await Session.findById(sessionId).lean();
+            // Use session_id field, NOT _id
+            const session = await Session.findOne({ session_id: sessionId }).lean();
             if (
                 !session ||
                 session.has_expired ||
@@ -49,8 +51,14 @@ export function setupSocketIO(httpServer: http.Server): SocketIOServer {
         }
     });
 
-    io.on("connection", (socket: Socket) => {
+    io.on("connection", async (socket: Socket) => {
         const userId = (socket as any).userId as string;
+
+        // Update last_active_at on connect
+        await User.findByIdAndUpdate(userId, {
+            last_active_at: new Date(),
+            is_online: true
+        });
 
         // Track online status
         if (!onlineUsers.has(userId)) {
@@ -61,8 +69,16 @@ export function setupSocketIO(httpServer: http.Server): SocketIOServer {
         // Join user's personal room for targeted events
         socket.join(`user:${userId}`);
 
-        // Broadcast online status
-        socket.broadcast.emit("user:online", { userId });
+        // Only broadcast online status if user has show_activity_status enabled
+        const settings = await UserSettings.findOne(
+            { user_id: userId },
+            { "privacy.show_activity_status": 1 }
+        ).lean();
+        const showActivity = settings?.privacy?.show_activity_status !== false;
+
+        if (showActivity) {
+            socket.broadcast.emit("user:online", { userId });
+        }
 
         // === Join conversation rooms ===
         socket.on("conversation:join", async (conversationId: string) => {
@@ -286,25 +302,65 @@ export function setupSocketIO(httpServer: http.Server): SocketIOServer {
         // === Online status check ===
         socket.on(
             "user:check-online",
-            (data: { userIds: string[] }) => {
+            async (data: { userIds: string[] }) => {
                 const statuses: Record<string, boolean> = {};
+
+                // Batch check activity settings
+                const settingsList = await UserSettings.find(
+                    {
+                        user_id: {
+                            $in: data.userIds.map(
+                                (id) => new mongoose.Types.ObjectId(id)
+                            )
+                        }
+                    },
+                    { user_id: 1, "privacy.show_activity_status": 1 }
+                ).lean();
+
+                const settingsMap = new Map<string, boolean>();
+                settingsList.forEach((s: any) => {
+                    settingsMap.set(
+                        s.user_id.toString(),
+                        s.privacy?.show_activity_status !== false
+                    );
+                });
+
                 data.userIds.forEach((uid) => {
-                    statuses[uid] =
+                    const isOnline =
                         onlineUsers.has(uid) &&
                         onlineUsers.get(uid)!.size > 0;
+                    const showStatus = settingsMap.get(uid) !== false;
+                    statuses[uid] = isOnline && showStatus;
                 });
                 socket.emit("user:online-status", statuses);
             }
         );
 
         // === Disconnect ===
-        socket.on("disconnect", () => {
+        socket.on("disconnect", async () => {
             const userSockets = onlineUsers.get(userId);
             if (userSockets) {
                 userSockets.delete(socket.id);
                 if (userSockets.size === 0) {
                     onlineUsers.delete(userId);
-                    socket.broadcast.emit("user:offline", { userId });
+
+                    // Update last_active_at on last socket disconnect
+                    await User.findByIdAndUpdate(userId, {
+                        last_active_at: new Date(),
+                        is_online: false
+                    });
+
+                    // Only broadcast offline if user has show_activity_status enabled
+                    const settings = await UserSettings.findOne(
+                        { user_id: userId },
+                        { "privacy.show_activity_status": 1 }
+                    ).lean();
+                    const showActivity =
+                        settings?.privacy?.show_activity_status !== false;
+
+                    if (showActivity) {
+                        socket.broadcast.emit("user:offline", { userId });
+                    }
                 }
             }
         });

@@ -125,6 +125,25 @@ export async function getFriends(): Promise<ChatFriend[]> {
     return res.data.data;
 }
 
+// Get user activity status (online, last_active_at, show_activity_status)
+export async function getUsersActivity(
+    userIds: string[]
+): Promise<
+    Record<
+        string,
+        {
+            is_online: boolean;
+            last_active_at: string | null;
+            show_activity_status: boolean;
+        }
+    >
+> {
+    const res = await api.post("/chat/users/activity", {
+        user_ids: userIds
+    });
+    return res.data.data;
+}
+
 // Upload chat media (images/videos)
 export async function uploadChatMedia(
     files: File[]

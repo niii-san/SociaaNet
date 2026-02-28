@@ -14,7 +14,8 @@ import {
     addParticipantController,
     removeParticipantController,
     updateGroupNameController,
-    getFriendsController
+    getFriendsController,
+    getUsersActivityController
 } from "../controllers/chat/chat.controller";
 import { uploadChatMediaController } from "../controllers/chat/upload-chat-media.controller";
 import multer from "multer";
@@ -74,3 +75,4 @@ chatRouter.patch(
 // Utility
 chatRouter.get("/unread-count", getUnreadCountController);
 chatRouter.get("/friends", getFriendsController);
+chatRouter.post("/users/activity", getUsersActivityController);
