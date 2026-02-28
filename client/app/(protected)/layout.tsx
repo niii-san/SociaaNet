@@ -1,5 +1,5 @@
 import { AppSidebar } from "@/components/app-sidebar";
-import { AuthProvider, FollowProvider, ChatProvider } from "@/contexts";
+import { AuthProvider, FollowProvider, ChatProvider, NotificationProvider } from "@/contexts";
 import { ProtectedShell } from "@/components/protected-shell";
 import { validateSessionServer } from "@/lib/auth.server";
 import { redirect } from "next/navigation";
@@ -18,6 +18,7 @@ export default async function Layout({
         <AuthProvider>
             <FollowProvider>
                 <ChatProvider>
+                    <NotificationProvider>
                     <ProtectedShell>
                         <div className="min-h-screen bg-background">
                             <div className="max-w-7xl mx-auto flex">
@@ -29,6 +30,7 @@ export default async function Layout({
                             </div>
                         </div>
                     </ProtectedShell>
+                    </NotificationProvider>
                 </ChatProvider>
             </FollowProvider>
         </AuthProvider>
