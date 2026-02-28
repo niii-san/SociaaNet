@@ -11,6 +11,7 @@ import {
 import { activityRepo } from "../repositories";
 import { ActivityVerb } from "../types";
 import { Types } from "mongoose";
+import { notificationService } from "./notification.service";
 
 class LikesService {
     async likePost(postId: string, userId: string) {
@@ -60,6 +61,15 @@ class LikesService {
                 post_id: post._id
             },
             visibility: "public"
+        });
+
+        // Notify post author
+        await notificationService.notify({
+            recipientId: post.author.toString(),
+            senderId: userId,
+            type: "like_post",
+            targetId: postId,
+            targetType: "post"
         });
 
         return {
@@ -119,6 +129,14 @@ class LikesService {
             visibility: "private"
         });
 
+        // Remove like notification
+        await notificationService.removeNotification({
+            senderId: userId,
+            recipientId: post.author.toString(),
+            type: "like_post",
+            targetId: postId
+        });
+
         return {
             target_id: postId,
             target_type: "post",
@@ -173,6 +191,15 @@ class LikesService {
                 reel_id: reel._id
             },
             visibility: "public"
+        });
+
+        // Notify reel author
+        await notificationService.notify({
+            recipientId: reel.author.toString(),
+            senderId: userId,
+            type: "like_reel",
+            targetId: reelId,
+            targetType: "reel"
         });
 
         return {
@@ -230,6 +257,14 @@ class LikesService {
                 reel_id: reel._id
             },
             visibility: "private"
+        });
+
+        // Remove like notification
+        await notificationService.removeNotification({
+            senderId: userId,
+            recipientId: reel.author.toString(),
+            type: "like_reel",
+            targetId: reelId
         });
 
         return {

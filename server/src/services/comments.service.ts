@@ -9,6 +9,7 @@ import {
     convertImageKeyToImageUrl,
     convertThumbnailKeytoThumbnailUrl
 } from "../utils";
+import { notificationService } from "./notification.service";
 
 class CommentsService {
     async addComment(
@@ -84,6 +85,15 @@ class CommentsService {
         const populated = await commentsRepo.getCommentById(
             comment._id.toString()
         );
+
+        // Notify the post/reel author about the comment
+        await notificationService.notify({
+            recipientId: target.author.toString(),
+            senderId: userId,
+            type: targetType === "post" ? "comment_post" : "comment_reel",
+            targetId: targetId,
+            targetType: targetType
+        });
 
         return this.formatCommentWithReplies(
             populated!,
@@ -166,6 +176,15 @@ class CommentsService {
         const populated = await commentsRepo.getCommentById(
             reply._id.toString()
         );
+
+        // Notify the parent comment author about the reply
+        await notificationService.notify({
+            recipientId: parentComment.author.toString(),
+            senderId: userId,
+            type: "reply_comment",
+            targetId: parentComment.target_id.toString(),
+            targetType: parentComment.target_type
+        });
 
         // Get target author for author label
         const target =
@@ -423,6 +442,15 @@ class CommentsService {
 
         const like = await likesRepo.likeTarget(userId, commentId, "comment");
 
+        // Notify comment author
+        await notificationService.notify({
+            recipientId: comment.author.toString(),
+            senderId: userId,
+            type: "like_comment",
+            targetId: comment.target_id.toString(),
+            targetType: comment.target_type
+        });
+
         return {
             like_id: like._id.toString(),
             comment_id: commentId,
@@ -467,6 +495,14 @@ class CommentsService {
         }
 
         await likesRepo.unlikeTarget(userId, commentId, "comment");
+
+        // Remove like notification
+        await notificationService.removeNotification({
+            senderId: userId,
+            recipientId: comment.author.toString(),
+            type: "like_comment",
+            targetId: comment.target_id.toString()
+        });
 
         return {
             comment_id: commentId,

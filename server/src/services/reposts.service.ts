@@ -8,6 +8,7 @@ import {
     convertVideoKeyToVideoUrl
 } from "../utils";
 import { ActivityVerb } from "../types";
+import { notificationService } from "./notification.service";
 
 class RepostsService {
     async repostPost(postId: string, userId: string) {
@@ -68,6 +69,15 @@ class RepostsService {
             visibility: "public"
         });
 
+        // Notify post author
+        await notificationService.notify({
+            recipientId: post.author.toString(),
+            senderId: userId,
+            type: "repost_post",
+            targetId: postId,
+            targetType: "post"
+        });
+
         return {
             repost_id: repost._id.toString(),
             target_id: postId,
@@ -123,6 +133,14 @@ class RepostsService {
                 post_id: post._id
             },
             visibility: "private"
+        });
+
+        // Remove repost notification
+        await notificationService.removeNotification({
+            senderId: userId,
+            recipientId: post.author.toString(),
+            type: "repost_post",
+            targetId: postId
         });
 
         return {
@@ -190,6 +208,15 @@ class RepostsService {
             visibility: "public"
         });
 
+        // Notify reel author
+        await notificationService.notify({
+            recipientId: reel.author.toString(),
+            senderId: userId,
+            type: "repost_reel",
+            targetId: reelId,
+            targetType: "reel"
+        });
+
         return {
             repost_id: repost._id.toString(),
             target_id: reelId,
@@ -245,6 +272,14 @@ class RepostsService {
                 reel_id: reel._id
             },
             visibility: "private"
+        });
+
+        // Remove repost notification
+        await notificationService.removeNotification({
+            senderId: userId,
+            recipientId: reel.author.toString(),
+            type: "repost_reel",
+            targetId: reelId
         });
 
         return {

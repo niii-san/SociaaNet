@@ -4,6 +4,7 @@ import { FollowUserDTO, UnfollowUserDTO } from "../dtos";
 import { userRepo } from "../repositories";
 import { HttpError } from "../utils";
 import { socialsRepo } from "../repositories/socials.repository";
+import { notificationService } from "./notification.service";
 
 class SocialService {
     async followUser(dto: FollowUserDTO) {
@@ -73,6 +74,15 @@ class SocialService {
                 followeeId
             );
 
+            // Notify: follow request
+            await notificationService.notify({
+                recipientId: followeeId,
+                senderId: followerId,
+                type: "follow_request",
+                targetId: followerId,
+                targetType: "user"
+            });
+
             return {
                 followerId: followRequest.follower.toString(),
                 followeeId: followRequest.following.toString(),
@@ -80,6 +90,15 @@ class SocialService {
             };
         } else {
             const result = await socialsRepo.followUser(followerId, followeeId);
+
+            // Notify: new follower
+            await notificationService.notify({
+                recipientId: followeeId,
+                senderId: followerId,
+                type: "follow",
+                targetId: followerId,
+                targetType: "user"
+            });
 
             return {
                 followerId: result.follower.toString(),
@@ -198,6 +217,15 @@ class SocialService {
                 followerId,
                 userId
             );
+
+        // Notify the follower that their request was accepted
+        await notificationService.notify({
+            recipientId: followerId,
+            senderId: userId,
+            type: "follow_request_accepted",
+            targetId: userId,
+            targetType: "user"
+        });
 
         return {
             followerId: result.follower.toString(),
