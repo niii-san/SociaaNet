@@ -92,9 +92,19 @@ class UsersService {
         const posts = await filesRepo.getUserPostsByUserId(user._id.toString());
         const reels = await filesRepo.getUserReelsByUserId(user._id.toString());
 
+        const isOwnProfile = dto.currentUserId === user._id.toString();
+
+        // Filter out private posts/reels when viewing someone else's profile
+        const filteredPosts = isOwnProfile
+            ? posts
+            : posts.filter((post) => post.visibility !== "private");
+        const filteredReels = isOwnProfile
+            ? reels
+            : reels.filter((reel) => reel.visibility !== "private");
+
         
 
-        const reelsPayload = reels.map((reel) => ({
+        const reelsPayload = filteredReels.map((reel) => ({
             reel_id: reel._id,
             media_url: convertVideoKeyToVideoUrl(reel.media_key),
             thumbnail_url: convertThumbnailKeytoThumbnailUrl(
@@ -110,7 +120,7 @@ class UsersService {
             created_at: reel.created_at
         }));
 
-        const postsPayload = posts.map((post) => ({
+        const postsPayload = filteredPosts.map((post) => ({
             post_id: post._id,
             media_urls: post.media_keys.map((key) =>
                 convertImageKeyToImageUrl(key)
@@ -133,11 +143,11 @@ class UsersService {
             bio: user.bio,
             avatar_url: avatar_url,
             created_at: user.created_at,
-            posts_count: posts.length,
-            reels_count: reels.length,
+            posts_count: filteredPosts.length,
+            reels_count: filteredReels.length,
             posts: postsPayload,
             reels: reelsPayload,
-            is_own_profile: dto.currentUserId === user._id.toString(),
+            is_own_profile: isOwnProfile,
             is_following: user.is_following
         };
     }
