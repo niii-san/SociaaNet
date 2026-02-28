@@ -155,6 +155,30 @@ class LikesRepository implements ILikesRepository {
 
         return count;
     }
+
+    async getLikesByUser(
+        userId: string,
+        page: number = 1,
+        limit: number = 20
+    ): Promise<{ likes: LikeDocument[]; total: number }> {
+        const skip = (page - 1) * limit;
+
+        const [likes, total] = await Promise.all([
+            Like.find({
+                user: userId,
+                target_type: { $in: ["post", "reel"] }
+            })
+                .sort({ created_at: -1 })
+                .skip(skip)
+                .limit(limit),
+            Like.countDocuments({
+                user: userId,
+                target_type: { $in: ["post", "reel"] }
+            })
+        ]);
+
+        return { likes, total };
+    }
 }
 
 export const likesRepo = new LikesRepository();
