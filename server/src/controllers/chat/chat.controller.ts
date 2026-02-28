@@ -290,6 +290,43 @@ export const getUsersActivityController = asyncHandler(
                 .json(new HttpSuccess(400, false, "user_ids required", null));
         }
 
+        // Check if the requesting user has their own activity status enabled
+        const requesterSettings = await UserSettings.findOne(
+            { user_id: req.user._id },
+            { "privacy.show_activity_status": 1 }
+        ).lean() as any;
+        const requesterShowActivity =
+            requesterSettings?.privacy?.show_activity_status !== false;
+
+        // If requester has activity status off, they can't see others' activity
+        if (!requesterShowActivity) {
+            const activity: Record<
+                string,
+                {
+                    is_online: boolean;
+                    last_active_at: string | null;
+                    show_activity_status: boolean;
+                }
+            > = {};
+            user_ids.forEach((uid: string) => {
+                activity[uid] = {
+                    is_online: false,
+                    last_active_at: null,
+                    show_activity_status: false
+                };
+            });
+            return res
+                .status(200)
+                .json(
+                    new HttpSuccess(
+                        200,
+                        true,
+                        "Activity status fetched",
+                        activity
+                    )
+                );
+        }
+
         // Fetch users and their settings
         const [users, settings] = await Promise.all([
             User.find(

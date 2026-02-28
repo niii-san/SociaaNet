@@ -37,8 +37,11 @@ export function ChatHeader({
     onInfoClick
 }: ChatHeaderProps) {
     const router = useRouter();
-    const { data: currentUser } = useAuth();
+    const { data: currentUser, settings: userSettings } = useAuth();
     const { onlineUsers } = useChat();
+
+    const myActivityOff =
+        userSettings?.privacy?.show_activity_status === false;
 
     const [activityData, setActivityData] = useState<Record<
         string,
@@ -71,9 +74,12 @@ export function ChatHeader({
     const otherActivity = otherUser
         ? activityData[otherUser.user_id]
         : null;
-    const isOnline = otherActivity?.is_online ||
-        (otherUser ? onlineUsers.has(otherUser.user_id) : false);
-    const showActivity = otherActivity?.show_activity_status !== false;
+    const showActivity =
+        !myActivityOff && otherActivity?.show_activity_status !== false;
+    const isOnline =
+        showActivity &&
+        (otherActivity?.is_online ||
+            (otherUser ? onlineUsers.has(otherUser.user_id) : false));
 
     const getTypingText = () => {
         if (typingUsers.size === 0) return null;

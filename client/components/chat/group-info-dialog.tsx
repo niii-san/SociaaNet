@@ -64,9 +64,11 @@ export function GroupInfoDialog({
     conversation,
     onConversationUpdate
 }: GroupInfoDialogProps) {
-    const { data: currentUser } = useAuth();
+    const { data: currentUser, settings: userSettings } = useAuth();
     const { onlineUsers } = useChat();
     const router = useRouter();
+    const myActivityOff =
+        userSettings?.privacy?.show_activity_status === false;
     const [editingName, setEditingName] = useState(false);
     const [newName, setNewName] = useState(conversation.group_name || "");
     const [showAddMember, setShowAddMember] = useState(false);
@@ -101,6 +103,7 @@ export function GroupInfoDialog({
     }, [open, conversation.participants, currentUser?.user_id]);
 
     const isParticipantOnline = (userId: string): boolean => {
+        if (myActivityOff) return false;
         const activity = activityData[userId];
         if (!activity) return onlineUsers.has(userId);
         if (!activity.show_activity_status) return false;
@@ -108,6 +111,7 @@ export function GroupInfoDialog({
     };
 
     const showParticipantActivity = (userId: string): boolean => {
+        if (myActivityOff) return false;
         const activity = activityData[userId];
         if (!activity) return true;
         return activity.show_activity_status;

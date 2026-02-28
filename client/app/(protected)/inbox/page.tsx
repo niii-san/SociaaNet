@@ -56,8 +56,10 @@ function getLastMessagePreview(conv: ChatConversation): string {
 }
 
 export default function Page() {
-    const { data: currentUser } = useAuth();
+    const { data: currentUser, settings: userSettings } = useAuth();
     const { conversations, onlineUsers, refreshConversations } = useChat();
+    const myActivityOff =
+        userSettings?.privacy?.show_activity_status === false;
     const [searchQuery, setSearchQuery] = useState("");
     const [showNewChat, setShowNewChat] = useState(false);
     const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -189,6 +191,7 @@ export default function Page() {
                             ? activityData[otherUser.user_id]
                             : null;
                         const showActivity =
+                            !myActivityOff &&
                             otherActivity?.show_activity_status !== false;
                         const isOnline =
                             conv.type === "direct" &&

@@ -316,6 +316,24 @@ export function setupSocketIO(httpServer: http.Server): SocketIOServer {
             async (data: { userIds: string[] }) => {
                 const statuses: Record<string, boolean> = {};
 
+                // Check if the requesting user has their own activity status on
+                const requesterSettings = await UserSettings.findOne(
+                    { user_id: userId },
+                    { "privacy.show_activity_status": 1 }
+                ).lean();
+                const requesterShowActivity =
+                    (requesterSettings as any)?.privacy
+                        ?.show_activity_status !== false;
+
+                // If requester has activity off, return all as offline
+                if (!requesterShowActivity) {
+                    data.userIds.forEach((uid) => {
+                        statuses[uid] = false;
+                    });
+                    socket.emit("user:online-status", statuses);
+                    return;
+                }
+
                 // Batch check activity settings
                 const settingsList = await UserSettings.find(
                     {
