@@ -548,19 +548,21 @@ export default function Page() {
                         </Button>
                     </div>
                 </div>
-            ) : isSenderPending ? (
-                <div className="border-t border-border bg-muted/30 p-4 text-center">
-                    <p className="text-sm text-muted-foreground">
-                        Waiting for{" "}
-                        <span className="font-medium text-foreground">
-                            {conversation?.participants.find(
-                                (p) => p.user_id !== currentUser?.user_id
-                            )?.full_name || "this user"}
-                        </span>{" "}
-                        to accept your message request
-                    </p>
-                </div>
             ) : (
+                <>
+                {isSenderPending && (
+                    <div className="border-t border-border bg-muted/30 px-4 py-2 text-center">
+                        <p className="text-xs text-muted-foreground">
+                            Waiting for{" "}
+                            <span className="font-medium text-foreground">
+                                {conversation?.participants.find(
+                                    (p) => p.user_id !== currentUser?.user_id
+                                )?.full_name || "this user"}
+                            </span>{" "}
+                            to accept your message request
+                        </p>
+                    </div>
+                )}
                 <ChatInput
                     onSend={handleSend}
                     replyTo={replyTo}
@@ -568,6 +570,7 @@ export default function Page() {
                     onTypingStart={() => startTyping(conversationId)}
                     onTypingStop={() => stopTyping(conversationId)}
                 />
+                </>
             )}
 
             {/* Group Info / Chat Info Dialog */}

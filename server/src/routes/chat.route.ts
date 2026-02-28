@@ -17,7 +17,11 @@ import {
     updateGroupNameController,
     getFriendsController,
     getUsersActivityController,
-    deleteConversationController
+    deleteConversationController,
+    getMessageRequestsController,
+    getRequestCountController,
+    acceptMessageRequestController,
+    rejectMessageRequestController
 } from "../controllers/chat/chat.controller";
 import { uploadChatMediaController } from "../controllers/chat/upload-chat-media.controller";
 import multer from "multer";
@@ -80,3 +84,9 @@ chatRouter.patch(
 chatRouter.get("/unread-count", getUnreadCountController);
 chatRouter.get("/friends", getFriendsController);
 chatRouter.post("/users/activity", getUsersActivityController);
+
+// Message requests
+chatRouter.get("/message-requests", getMessageRequestsController);
+chatRouter.get("/message-requests/count", getRequestCountController);
+chatRouter.post("/message-requests/:conversationId/accept", acceptMessageRequestController);
+chatRouter.post("/message-requests/:conversationId/reject", rejectMessageRequestController);

@@ -5,6 +5,8 @@ export interface ConversationDeleteRecord {
     deleted_at: Date;
 }
 
+export type MessageRequestStatus = "none" | "pending" | "accepted" | "rejected";
+
 export interface ConversationEntity {
     type: "direct" | "group";
     participants: mongoose.Types.ObjectId[];
@@ -15,6 +17,7 @@ export interface ConversationEntity {
     last_message_at?: Date;
     created_by: mongoose.Types.ObjectId;
     deleted_by: ConversationDeleteRecord[];
+    request_status: MessageRequestStatus;
     created_at?: Date;
     updated_at?: Date;
 }

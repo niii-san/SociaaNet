@@ -33,6 +33,19 @@ export const createDirectConversationController = asyncHandler(
                 req.user._id.toString(),
                 target_user_id
             );
+
+        // If it's a message request, notify the recipient via socket
+        if (conversation.request_status === "pending") {
+            try {
+                const io = getIO();
+                io.to(`user:${target_user_id}`).emit("message-request:new", {
+                    conversationId: conversation._id.toString()
+                });
+            } catch {
+                // socket not initialized, ignore
+            }
+        }
+
         return res
             .status(200)
             .json(
@@ -396,6 +409,82 @@ export const deleteConversationController = asyncHandler(
                     "Conversation deleted",
                     null
                 )
+            );
+    }
+);
+
+// GET /api/v1/chat/message-requests
+export const getMessageRequestsController = asyncHandler(
+    async (req: RequestWithUserContext, res: Response) => {
+        const requests = await chatService.getMessageRequests(
+            req.user._id.toString()
+        );
+        return res
+            .status(200)
+            .json(
+                new HttpSuccess(200, true, "Message requests fetched", requests)
+            );
+    }
+);
+
+// GET /api/v1/chat/message-requests/count
+export const getRequestCountController = asyncHandler(
+    async (req: RequestWithUserContext, res: Response) => {
+        const count = await chatService.getRequestCount(
+            req.user._id.toString()
+        );
+        return res
+            .status(200)
+            .json(
+                new HttpSuccess(200, true, "Request count", { count })
+            );
+    }
+);
+
+// POST /api/v1/chat/message-requests/:conversationId/accept
+export const acceptMessageRequestController = asyncHandler(
+    async (req: RequestWithUserContext, res: Response) => {
+        const { conversationId } = req.params;
+        const userId = req.user._id.toString();
+
+        const conv = await chatService.acceptMessageRequest(conversationId, userId);
+
+        // Notify the sender that their request was accepted
+        if (conv) {
+            try {
+                const io = getIO();
+                const senderId = conv.created_by.toString();
+                io.to(`user:${senderId}`).emit("message-request:accepted", {
+                    conversationId
+                });
+                // Refresh conversations for both users
+                io.to(`user:${senderId}`).emit("conversation:updated", { conversationId });
+                io.to(`user:${userId}`).emit("conversation:updated", { conversationId });
+            } catch {
+                // socket not initialized, ignore
+            }
+        }
+
+        return res
+            .status(200)
+            .json(
+                new HttpSuccess(200, true, "Message request accepted", null)
+            );
+    }
+);
+
+// POST /api/v1/chat/message-requests/:conversationId/reject
+export const rejectMessageRequestController = asyncHandler(
+    async (req: RequestWithUserContext, res: Response) => {
+        const { conversationId } = req.params;
+        const userId = req.user._id.toString();
+
+        await chatService.rejectMessageRequest(conversationId, userId);
+
+        return res
+            .status(200)
+            .json(
+                new HttpSuccess(200, true, "Message request rejected", null)
             );
     }
 );

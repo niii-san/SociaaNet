@@ -54,7 +54,12 @@ const conversationSchema = new mongoose.Schema<ConversationEntity>(
                 },
                 _id: false
             }
-        ]
+        ],
+        request_status: {
+            type: String,
+            enum: ["none", "pending", "accepted", "rejected"],
+            default: "none"
+        }
     },
     { timestamps: { createdAt: "created_at", updatedAt: "updated_at" } }
 );

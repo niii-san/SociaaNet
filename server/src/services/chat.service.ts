@@ -17,30 +17,65 @@ class ChatService {
             );
         }
 
-        // Check if users are friends (mutual followers)
-        const friends = await chatRepo.areFriends(userId, targetUserId);
-        if (!friends) {
-            throw new HttpError(
-                403,
-                false,
-                ErrorCodes.FORBIDDEN,
-                "You can only message users who follow you back"
-            );
-        }
-
-        // Check for existing conversation
+        // Check for existing conversation first
         const existing = await chatRepo.findDirectConversation(
             userId,
             targetUserId
         );
-        if (existing) return existing;
+        if (existing) {
+            // If it was rejected, check if the original sender is trying again
+            if (existing.request_status === "rejected") {
+                if (existing.created_by.toString() === userId) {
+                    throw new HttpError(
+                        403,
+                        false,
+                        ErrorCodes.FORBIDDEN,
+                        "Your message request was declined"
+                    );
+                }
+                // The recipient is now initiating — auto-accept
+                await chatRepo.updateRequestStatus(
+                    existing._id.toString(),
+                    "accepted"
+                );
+                existing.request_status = "accepted" as any;
+                return existing;
+            }
+            return existing;
+        }
 
-        // Create new
-        return chatRepo.createConversation({
+        // No existing conversation — check if messaging is allowed
+        const { allowed, isRequest } = await chatRepo.canMessageUser(
+            userId,
+            targetUserId
+        );
+
+        if (!allowed) {
+            throw new HttpError(
+                403,
+                false,
+                ErrorCodes.FORBIDDEN,
+                "This user does not allow messages from you"
+            );
+        }
+
+        // Create new conversation
+        const conversation = await chatRepo.createConversation({
             type: "direct",
             participants: [userId, targetUserId],
             created_by: userId
         });
+
+        // If it's a message request (not friends), set status to pending
+        if (isRequest) {
+            await chatRepo.updateRequestStatus(
+                conversation._id.toString(),
+                "pending"
+            );
+            conversation.request_status = "pending" as any;
+        }
+
+        return conversation;
     }
 
     // Create group conversation
@@ -147,7 +182,29 @@ class ChatService {
         replyTo?: string;
     }) {
         // Verify sender is in conversation
-        await this.getConversation(data.conversationId, data.senderId);
+        const conversation = await this.getConversation(data.conversationId, data.senderId);
+
+        // Check message request status
+        if (conversation.request_status === "rejected") {
+            throw new HttpError(
+                403,
+                false,
+                ErrorCodes.FORBIDDEN,
+                "This message request was declined"
+            );
+        }
+
+        if (conversation.request_status === "pending") {
+            // Only the sender (creator) can send messages while pending
+            if (conversation.created_by.toString() !== data.senderId) {
+                throw new HttpError(
+                    403,
+                    false,
+                    ErrorCodes.FORBIDDEN,
+                    "Accept the message request before replying"
+                );
+            }
+        }
 
         if (
             data.messageType === "text" &&
@@ -380,6 +437,108 @@ class ChatService {
         }
 
         return true;
+    }
+
+    // Get pending message requests for a user
+    async getMessageRequests(userId: string) {
+        return chatRepo.getMessageRequests(userId);
+    }
+
+    // Get count of pending message requests
+    async getRequestCount(userId: string) {
+        return chatRepo.getRequestCount(userId);
+    }
+
+    // Accept a message request
+    async acceptMessageRequest(conversationId: string, userId: string) {
+        const conv = await chatRepo.getConversationById(conversationId);
+        if (!conv) {
+            throw new HttpError(
+                404,
+                false,
+                ErrorCodes.NOT_FOUND,
+                "Conversation not found"
+            );
+        }
+
+        if (conv.request_status !== "pending") {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                "This is not a pending message request"
+            );
+        }
+
+        // Only the recipient (non-creator) can accept
+        if (conv.created_by.toString() === userId) {
+            throw new HttpError(
+                403,
+                false,
+                ErrorCodes.FORBIDDEN,
+                "You cannot accept your own message request"
+            );
+        }
+
+        const isParticipant = conv.participants.some(
+            (p) => p.toString() === userId
+        );
+        if (!isParticipant) {
+            throw new HttpError(
+                403,
+                false,
+                ErrorCodes.FORBIDDEN,
+                "You are not part of this conversation"
+            );
+        }
+
+        return chatRepo.updateRequestStatus(conversationId, "accepted");
+    }
+
+    // Reject a message request
+    async rejectMessageRequest(conversationId: string, userId: string) {
+        const conv = await chatRepo.getConversationById(conversationId);
+        if (!conv) {
+            throw new HttpError(
+                404,
+                false,
+                ErrorCodes.NOT_FOUND,
+                "Conversation not found"
+            );
+        }
+
+        if (conv.request_status !== "pending") {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                "This is not a pending message request"
+            );
+        }
+
+        // Only the recipient (non-creator) can reject
+        if (conv.created_by.toString() === userId) {
+            throw new HttpError(
+                403,
+                false,
+                ErrorCodes.FORBIDDEN,
+                "You cannot reject your own message request"
+            );
+        }
+
+        const isParticipant = conv.participants.some(
+            (p) => p.toString() === userId
+        );
+        if (!isParticipant) {
+            throw new HttpError(
+                403,
+                false,
+                ErrorCodes.FORBIDDEN,
+                "You are not part of this conversation"
+            );
+        }
+
+        return chatRepo.updateRequestStatus(conversationId, "rejected");
     }
 }
 

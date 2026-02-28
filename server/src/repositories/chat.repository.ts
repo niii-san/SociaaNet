@@ -4,9 +4,11 @@ import {
     ConversationDocument,
     Message,
     MessageDocument,
-    Follow
+    Follow,
+    UserSettings
 } from "../models";
 import { convertImageKeyToImageUrl } from "../utils";
+import { MessageRequestStatus } from "../types/conversation.type";
 
 class ChatRepository {
     // Check if two users are mutual followers (friends)
@@ -85,7 +87,13 @@ class ChatRepository {
         const conversations = await Conversation.aggregate([
             {
                 $match: {
-                    participants: userObjectId
+                    participants: userObjectId,
+                    // Exclude rejected requests and pending requests where user is the recipient
+                    $or: [
+                        { request_status: { $in: ["none", "accepted"] } },
+                        { request_status: "pending", created_by: userObjectId },
+                        { type: "group" }
+                    ]
                 }
             },
             // Filter out conversations that user has deleted and no new messages since
@@ -210,6 +218,8 @@ class ChatRepository {
                     group_admin: 1,
                     last_message_at: 1,
                     created_at: 1,
+                    request_status: 1,
+                    created_by: 1,
                     participants: {
                         $map: {
                             input: "$participants_data",
@@ -578,6 +588,8 @@ class ChatRepository {
             {
                 $match: {
                     "conv.participants": userObjectId,
+                    // Only count unread from accepted/none conversations (not pending requests)
+                    "conv.request_status": { $in: ["none", "accepted"] },
                     sender_id: { $ne: userObjectId },
                     "read_by.user_id": { $ne: userObjectId },
                     // Exclude messages from before user's deletion time
@@ -777,6 +789,183 @@ class ChatRepository {
             { "deleted_by.$": 1 }
         );
         return conv?.deleted_by?.[0]?.deleted_at || null;
+    }
+
+    // Update message request status
+    async updateRequestStatus(
+        conversationId: string,
+        status: MessageRequestStatus
+    ): Promise<ConversationDocument | null> {
+        return Conversation.findByIdAndUpdate(
+            conversationId,
+            { request_status: status },
+            { new: true }
+        );
+    }
+
+    // Get pending message requests for a user (conversations where they are the recipient)
+    async getMessageRequests(userId: string): Promise<any[]> {
+        const userObjectId = new mongoose.Types.ObjectId(userId);
+
+        const conversations = await Conversation.aggregate([
+            {
+                $match: {
+                    participants: userObjectId,
+                    type: "direct",
+                    request_status: "pending",
+                    // Only show to the recipient (not the sender)
+                    created_by: { $ne: userObjectId }
+                }
+            },
+            { $sort: { created_at: -1 } },
+            // Lookup last message
+            {
+                $lookup: {
+                    from: "messages",
+                    localField: "last_message",
+                    foreignField: "_id",
+                    as: "last_message_data"
+                }
+            },
+            { $unwind: { path: "$last_message_data", preserveNullAndEmptyArrays: true } },
+            // Lookup participants
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "participants",
+                    foreignField: "_id",
+                    as: "participants_data"
+                }
+            },
+            // Lookup last message sender
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "last_message_data.sender_id",
+                    foreignField: "_id",
+                    as: "last_message_sender"
+                }
+            },
+            {
+                $unwind: {
+                    path: "$last_message_sender",
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $project: {
+                    _id: 1,
+                    type: 1,
+                    last_message_at: 1,
+                    created_at: 1,
+                    request_status: 1,
+                    created_by: 1,
+                    participants: {
+                        $map: {
+                            input: "$participants_data",
+                            as: "p",
+                            in: {
+                                user_id: "$$p._id",
+                                username: "$$p.username",
+                                full_name: "$$p.full_name",
+                                avatar_key: "$$p.avatar_key"
+                            }
+                        }
+                    },
+                    last_message: {
+                        $cond: {
+                            if: "$last_message_data",
+                            then: {
+                                _id: "$last_message_data._id",
+                                content: "$last_message_data.content",
+                                message_type: "$last_message_data.message_type",
+                                is_deleted: "$last_message_data.is_deleted",
+                                created_at: "$last_message_data.created_at",
+                                sender: {
+                                    user_id: "$last_message_sender._id",
+                                    username: "$last_message_sender.username",
+                                    full_name: "$last_message_sender.full_name"
+                                }
+                            },
+                            else: null
+                        }
+                    },
+                    unread_count: 0
+                }
+            }
+        ]);
+
+        return conversations.map((conv) => ({
+            ...conv,
+            conversation_id: conv._id,
+            participants: conv.participants.map((p: any) => ({
+                ...p,
+                avatar_url: p.avatar_key
+                    ? convertImageKeyToImageUrl(p.avatar_key)
+                    : null
+            }))
+        }));
+    }
+
+    // Get count of pending message requests for a user
+    async getRequestCount(userId: string): Promise<number> {
+        const userObjectId = new mongoose.Types.ObjectId(userId);
+        return Conversation.countDocuments({
+            participants: userObjectId,
+            type: "direct",
+            request_status: "pending",
+            created_by: { $ne: userObjectId }
+        });
+    }
+
+    // Check if a user can message another based on their settings and follow status
+    async canMessageUser(
+        senderId: string,
+        recipientId: string
+    ): Promise<{ allowed: boolean; isRequest: boolean }> {
+        const recipientOid = new mongoose.Types.ObjectId(recipientId);
+        const senderOid = new mongoose.Types.ObjectId(senderId);
+
+        // Check recipient's messaging settings
+        const recipientSettings = await UserSettings.findOne(
+            { user_id: recipientOid },
+            { "privacy.allow_messages_from": 1 }
+        ).lean() as any;
+
+        const allowFrom = recipientSettings?.privacy?.allow_messages_from || "everyone";
+
+        if (allowFrom === "no_one") {
+            return { allowed: false, isRequest: false };
+        }
+
+        // Check if they are mutual followers (friends)
+        const areFriends = await this.areFriends(senderId, recipientId);
+
+        if (areFriends) {
+            // Friends can always message each other
+            return { allowed: true, isRequest: false };
+        }
+
+        if (allowFrom === "followers_only") {
+            // Not friends and setting is followers_only
+            // Check if sender follows recipient
+            const senderFollows = await Follow.findOne({
+                follower: senderOid,
+                following: recipientOid,
+                status: "accepted",
+                is_removed: false
+            });
+
+            if (senderFollows) {
+                // Sender follows recipient - allow as message request
+                return { allowed: true, isRequest: true };
+            }
+            return { allowed: false, isRequest: false };
+        }
+
+        // allow_messages_from === "everyone"
+        // Allow as message request since they're not friends
+        return { allowed: true, isRequest: true };
     }
 }
 

@@ -230,6 +230,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
 
         s.on("message-request:accepted", () => {
             refreshConversations();
+            refreshMessageRequests();
         });
 
         setSocket(s);
