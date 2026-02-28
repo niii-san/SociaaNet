@@ -96,6 +96,8 @@ const formatDate = (date: string) => {
 };
 
 const getMetadataDisplay = (verb: string, metadata: Record<string, any>) => {
+    if (!metadata || typeof metadata !== "object") return null;
+
     switch (verb) {
         case "logged_in":
         case "logged_out":
@@ -161,8 +163,13 @@ const getMetadataDisplay = (verb: string, metadata: Record<string, any>) => {
             }
 
         default:
-            const key = Object.keys(metadata)[0];
+            const keys = Object.keys(metadata);
+            if (keys.length === 0) return null;
+
+            const key = keys[0];
             const value = metadata[key];
+
+            if (value === undefined || value === null) return null;
 
             const displayValue =
                 typeof value === "boolean"
@@ -175,7 +182,7 @@ const getMetadataDisplay = (verb: string, metadata: Record<string, any>) => {
                             : formatText(value)
                         : String(value);
 
-            if (Object.keys(metadata).length > 1) {
+            if (keys.length > 1) {
                 return null;
             } else if (key.endsWith("key")) {
                 return null;
