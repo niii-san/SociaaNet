@@ -113,3 +113,36 @@ export const getRepostHistory = async (
     const res = await api.get(`/users/me/history/reposts?page=${page}&limit=${limit}`);
     return res.data?.data as PaginatedResponse<RepostHistoryItem>;
 };
+
+// Saved Items
+export interface SavedPost {
+    post_id: string;
+    caption: string;
+    media_url: string | null;
+    likes_count: number;
+    comments_count: number;
+}
+
+export interface SavedReel {
+    reel_id: string;
+    caption: string;
+    thumbnail_url: string;
+    likes_count: number;
+    comments_count: number;
+    views_count: number;
+}
+
+export interface SavedHistoryItem {
+    type: "post" | "reel";
+    saved_at: string;
+    post?: SavedPost;
+    reel?: SavedReel;
+}
+
+export const getSavedItems = async (
+    page: number = 1,
+    limit: number = 20
+): Promise<PaginatedResponse<SavedHistoryItem>> => {
+    const res = await api.get(`/users/me/saved?page=${page}&limit=${limit}`);
+    return res.data?.data as PaginatedResponse<SavedHistoryItem>;
+};

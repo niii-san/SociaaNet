@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { getReelById, updateReelVisibility, ReelDetail, likeReel, unlikeReel, viewReel, repostReel, unrepostReel } from "@/features/posts/posts.api";
+import { getReelById, updateReelVisibility, ReelDetail, likeReel, unlikeReel, viewReel, repostReel, unrepostReel, saveReel, unsaveReel } from "@/features/posts/posts.api";
 import { useAuth } from "@/contexts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -54,6 +54,8 @@ export default function ReelDetailPage() {
     const [isReposted, setIsReposted] = useState(false);
     const [repostsCount, setRepostsCount] = useState(0);
     const [repostingInProgress, setRepostingInProgress] = useState(false);
+    const [isSaved, setIsSaved] = useState(false);
+    const [savingInProgress, setSavingInProgress] = useState(false);
 
     useEffect(() => {
         const fetchReel = async () => {
@@ -69,6 +71,7 @@ export default function ReelDetailPage() {
                 setViewsCount(data.views_count);
                 setIsReposted(data.is_reel_reposted_by_current_user);
                 setRepostsCount(data.reposts_count);
+                setIsSaved(data.is_reel_saved_by_current_user);
 
                 // Record view and update count
                 try {
@@ -187,6 +190,27 @@ export default function ReelDetailPage() {
             toast.error(error.response?.data?.message || "Failed to update repost");
         } finally {
             setRepostingInProgress(false);
+        }
+    };
+
+    const handleSaveToggle = async () => {
+        if (!reel || savingInProgress) return;
+
+        setSavingInProgress(true);
+        const previousIsSaved = isSaved;
+        setIsSaved(!isSaved);
+
+        try {
+            if (previousIsSaved) {
+                await unsaveReel(reel.reel_id);
+            } else {
+                await saveReel(reel.reel_id);
+            }
+        } catch (error: any) {
+            setIsSaved(previousIsSaved);
+            toast.error(error.response?.data?.message || "Failed to update save");
+        } finally {
+            setSavingInProgress(false);
         }
     };
 
@@ -415,8 +439,21 @@ export default function ReelDetailPage() {
                                         />
                                     </Button>
                                 </div>
-                                <Button variant="ghost" size="icon">
-                                    <Bookmark className="w-6 h-6" />
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="hover:text-amber-500"
+                                    onClick={handleSaveToggle}
+                                    disabled={savingInProgress}
+                                    title={isSaved ? "Remove from saved" : "Save reel"}
+                                >
+                                    <Bookmark
+                                        className={`w-6 h-6 transition-colors ${
+                                            isSaved
+                                                ? "fill-amber-500 text-amber-500"
+                                                : ""
+                                        }`}
+                                    />
                                 </Button>
                             </div>
 

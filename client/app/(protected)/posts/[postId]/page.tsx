@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { getPostById, updatePostVisibility, PostDetail, likePost, unlikePost, viewPost, repostPost, unrepostPost } from "@/features/posts/posts.api";
+import { getPostById, updatePostVisibility, PostDetail, likePost, unlikePost, viewPost, repostPost, unrepostPost, savePost, unsavePost } from "@/features/posts/posts.api";
 import { useAuth } from "@/contexts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -48,6 +48,8 @@ export default function PostDetailPage() {
     const [isReposted, setIsReposted] = useState(false);
     const [repostsCount, setRepostsCount] = useState(0);
     const [repostingInProgress, setRepostingInProgress] = useState(false);
+    const [isSaved, setIsSaved] = useState(false);
+    const [savingInProgress, setSavingInProgress] = useState(false);
 
     useEffect(() => {
         const fetchPost = async () => {
@@ -62,6 +64,7 @@ export default function PostDetailPage() {
                 setCommentsCount(data.comments_count);
                 setIsReposted(data.is_post_reposted_by_current_user);
                 setRepostsCount(data.reposts_count);
+                setIsSaved(data.is_post_saved_by_current_user);
 
                 // Record view silently (for history/algo, no UI update needed)
                 viewPost(postId).catch(() => {});
@@ -153,6 +156,27 @@ export default function PostDetailPage() {
             toast.error(error.response?.data?.message || "Failed to update repost");
         } finally {
             setRepostingInProgress(false);
+        }
+    };
+
+    const handleSaveToggle = async () => {
+        if (!post || savingInProgress) return;
+
+        setSavingInProgress(true);
+        const previousIsSaved = isSaved;
+        setIsSaved(!isSaved);
+
+        try {
+            if (previousIsSaved) {
+                await unsavePost(post.post_id);
+            } else {
+                await savePost(post.post_id);
+            }
+        } catch (error: any) {
+            setIsSaved(previousIsSaved);
+            toast.error(error.response?.data?.message || "Failed to update save");
+        } finally {
+            setSavingInProgress(false);
         }
     };
 
@@ -377,8 +401,21 @@ export default function PostDetailPage() {
                                         />
                                     </Button>
                                 </div>
-                                <Button variant="ghost" size="icon">
-                                    <Bookmark className="w-6 h-6" />
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="hover:text-amber-500"
+                                    onClick={handleSaveToggle}
+                                    disabled={savingInProgress}
+                                    title={isSaved ? "Remove from saved" : "Save post"}
+                                >
+                                    <Bookmark
+                                        className={`w-6 h-6 transition-colors ${
+                                            isSaved
+                                                ? "fill-amber-500 text-amber-500"
+                                                : ""
+                                        }`}
+                                    />
                                 </Button>
                             </div>
 

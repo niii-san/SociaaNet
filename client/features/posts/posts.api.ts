@@ -109,6 +109,7 @@ export interface PostDetail {
     is_post_author: boolean;
     is_post_liked_by_current_user: boolean;
     is_post_reposted_by_current_user: boolean;
+    is_post_saved_by_current_user: boolean;
     likes_count: number;
     comments_count: number;
     reposts_count: number;
@@ -152,6 +153,7 @@ export interface ReelDetail {
     is_reel_author: boolean;
     is_reel_liked_by_current_user: boolean;
     is_reel_reposted_by_current_user: boolean;
+    is_reel_saved_by_current_user: boolean;
     likes_count: number;
     comments_count: number;
     reposts_count: number;
@@ -277,5 +279,37 @@ export const repostReel = async (reelId: string): Promise<RepostResponse> => {
 // Unrepost a reel
 export const unrepostReel = async (reelId: string): Promise<RepostResponse> => {
     const response = await api.delete(`/reels/${reelId}/repost`);
+    return response.data;
+};
+
+// Save / Unsave
+export interface SaveResponse {
+    status_code: number;
+    success: boolean;
+    message: string;
+    data: {
+        saved_item_id?: string;
+        target_id: string;
+        target_type: "post" | "reel";
+    };
+}
+
+export const savePost = async (postId: string): Promise<SaveResponse> => {
+    const response = await api.post(`/posts/${postId}/save`);
+    return response.data;
+};
+
+export const unsavePost = async (postId: string): Promise<SaveResponse> => {
+    const response = await api.delete(`/posts/${postId}/save`);
+    return response.data;
+};
+
+export const saveReel = async (reelId: string): Promise<SaveResponse> => {
+    const response = await api.post(`/reels/${reelId}/save`);
+    return response.data;
+};
+
+export const unsaveReel = async (reelId: string): Promise<SaveResponse> => {
+    const response = await api.delete(`/reels/${reelId}/save`);
     return response.data;
 };

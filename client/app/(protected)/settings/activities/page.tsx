@@ -3,7 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Activity } from "lucide-react";
 import Link from "next/link";
-import { ChevronRight, Heart, MessageSquare, Repeat2, History, ShieldCheck } from "lucide-react";
+import { ChevronRight, Heart, MessageSquare, Repeat2, History, ShieldCheck, Bookmark } from "lucide-react";
 
 const activityOptions = [
     {
@@ -29,6 +29,14 @@ const activityOptions = [
         href: "/settings/activities/reposts",
         iconColor: "text-green-500",
         bgColor: "bg-green-500/10"
+    },
+    {
+        title: "Saved",
+        description: "Posts and reels you've saved",
+        icon: Bookmark,
+        href: "/settings/activities/saved",
+        iconColor: "text-amber-500",
+        bgColor: "bg-amber-500/10"
     },
     {
         title: "Watch History",
