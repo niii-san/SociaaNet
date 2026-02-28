@@ -16,6 +16,7 @@ import {
     updateGroupNameController,
     getFriendsController
 } from "../controllers/chat/chat.controller";
+import { uploadChatMediaController } from "../controllers/chat/upload-chat-media.controller";
 import multer from "multer";
 
 export const chatRouter = Router();
@@ -26,6 +27,9 @@ const upload = multer({
 });
 
 chatRouter.use(authenticate);
+
+// Media upload
+chatRouter.post("/upload", upload.array("files", 10), uploadChatMediaController);
 
 // Conversations
 chatRouter.get("/conversations", getConversationsController);

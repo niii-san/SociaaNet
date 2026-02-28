@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts";
+import { useChat } from "@/contexts/chat.context";
 import {
     Bookmark,
     Home,
@@ -23,6 +24,13 @@ import { cn } from "@/lib/utils";
 export function AppSidebar() {
     const { data: user } = useAuth();
     const pathname = usePathname();
+    let unreadTotal = 0;
+    try {
+        const chat = useChat();
+        unreadTotal = chat.unreadTotal;
+    } catch {
+        // ChatProvider might not be available
+    }
 
     const navItems = [
         {
@@ -101,6 +109,11 @@ export function AppSidebar() {
                         <span>{item.label}</span>
                         {item.label === "Notifications" && (
                             <span className="absolute left-7 top-2 w-2 h-2 bg-accent rounded-full" />
+                        )}
+                        {item.label === "Inbox" && unreadTotal > 0 && (
+                            <span className="ml-auto bg-primary text-primary-foreground text-xs font-bold rounded-full min-w-5 h-5 flex items-center justify-center px-1.5">
+                                {unreadTotal > 99 ? "99+" : unreadTotal}
+                            </span>
                         )}
                     </Link>
                 ))}

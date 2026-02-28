@@ -1,0 +1,376 @@
+"use client";
+
+import React, {
+    createContext,
+    useContext,
+    useEffect,
+    useState,
+    useCallback,
+    useRef
+} from "react";
+import { io, Socket } from "socket.io-client";
+import { ChatConversation, ChatMessage } from "@/types";
+import { getConversations, getUnreadCount } from "@/features/chat/chat.api";
+import { useAuth } from "./auth.context";
+
+interface ChatContextType {
+    socket: Socket | null;
+    isConnected: boolean;
+    conversations: ChatConversation[];
+    unreadTotal: number;
+    activeConversationId: string | null;
+    setActiveConversationId: (id: string | null) => void;
+    refreshConversations: () => Promise<void>;
+    refreshUnreadCount: () => Promise<void>;
+    sendMessage: (data: {
+        conversationId: string;
+        content?: string;
+        messageType?: "text" | "image" | "video" | "mixed";
+        mediaUrls?: string[];
+        mediaKeys?: string[];
+        replyTo?: string;
+        tempId?: string;
+    }) => void;
+    joinConversation: (conversationId: string) => void;
+    leaveConversation: (conversationId: string) => void;
+    startTyping: (conversationId: string) => void;
+    stopTyping: (conversationId: string) => void;
+    reactToMessage: (
+        messageId: string,
+        conversationId: string,
+        emoji: string
+    ) => void;
+    unreactToMessage: (
+        messageId: string,
+        conversationId: string
+    ) => void;
+    deleteMessage: (
+        messageId: string,
+        conversationId: string
+    ) => void;
+    markAsRead: (conversationId: string) => void;
+    onlineUsers: Set<string>;
+
+    // Event listeners
+    onNewMessage: (
+        cb: (message: ChatMessage) => void
+    ) => () => void;
+    onTypingStart: (
+        cb: (data: { conversationId: string; userId: string }) => void
+    ) => () => void;
+    onTypingStop: (
+        cb: (data: { conversationId: string; userId: string }) => void
+    ) => () => void;
+    onMessagesRead: (
+        cb: (data: { conversationId: string; userId: string }) => void
+    ) => () => void;
+    onMessageReacted: (
+        cb: (data: {
+            messageId: string;
+            conversationId: string;
+            userId: string;
+            emoji: string;
+        }) => void
+    ) => () => void;
+    onMessageUnreacted: (
+        cb: (data: {
+            messageId: string;
+            conversationId: string;
+            userId: string;
+        }) => void
+    ) => () => void;
+    onMessageDeleted: (
+        cb: (data: {
+            messageId: string;
+            conversationId: string;
+        }) => void
+    ) => () => void;
+}
+
+const ChatContext = createContext<ChatContextType | null>(null);
+
+export function ChatProvider({ children }: { children: React.ReactNode }) {
+    const { isLoggedIn, data: user } = useAuth();
+    const [socket, setSocket] = useState<Socket | null>(null);
+    const [isConnected, setIsConnected] = useState(false);
+    const [conversations, setConversations] = useState<ChatConversation[]>([]);
+    const [unreadTotal, setUnreadTotal] = useState(0);
+    const [activeConversationId, setActiveConversationId] = useState<
+        string | null
+    >(null);
+    const [onlineUsers, setOnlineUsers] = useState<Set<string>>(new Set());
+    const listenersRef = useRef<Map<string, Set<Function>>>(new Map());
+
+    // Socket connection
+    useEffect(() => {
+        if (!isLoggedIn || !user) return;
+
+        const s = io("http://localhost:8000", {
+            withCredentials: true,
+            transports: ["websocket", "polling"]
+        });
+
+        s.on("connect", () => {
+            setIsConnected(true);
+        });
+
+        s.on("disconnect", () => {
+            setIsConnected(false);
+        });
+
+        // Online/offline tracking
+        s.on("user:online", ({ userId }: { userId: string }) => {
+            setOnlineUsers((prev) => new Set([...prev, userId]));
+        });
+
+        s.on("user:offline", ({ userId }: { userId: string }) => {
+            setOnlineUsers((prev) => {
+                const next = new Set(prev);
+                next.delete(userId);
+                return next;
+            });
+        });
+
+        // New message
+        s.on("message:new", (message: ChatMessage) => {
+            emitEvent("message:new", message);
+            // Refresh conversations list
+            refreshConversations();
+        });
+
+        // Typing
+        s.on(
+            "typing:start",
+            (data: { conversationId: string; userId: string }) => {
+                emitEvent("typing:start", data);
+            }
+        );
+
+        s.on(
+            "typing:stop",
+            (data: { conversationId: string; userId: string }) => {
+                emitEvent("typing:stop", data);
+            }
+        );
+
+        // Read receipts
+        s.on(
+            "messages:read",
+            (data: { conversationId: string; userId: string }) => {
+                emitEvent("messages:read", data);
+            }
+        );
+
+        // Reactions
+        s.on("message:reacted", (data: any) => {
+            emitEvent("message:reacted", data);
+        });
+
+        s.on("message:unreacted", (data: any) => {
+            emitEvent("message:unreacted", data);
+        });
+
+        // Deleted
+        s.on("message:deleted", (data: any) => {
+            emitEvent("message:deleted", data);
+        });
+
+        // Conversation updated (new message in another conversation)
+        s.on(
+            "conversation:updated",
+            () => {
+                refreshConversations();
+                refreshUnreadCount();
+            }
+        );
+
+        setSocket(s);
+
+        return () => {
+            s.disconnect();
+            setSocket(null);
+            setIsConnected(false);
+        };
+    }, [isLoggedIn, user]);
+
+    // Load conversations on connect
+    useEffect(() => {
+        if (isConnected) {
+            refreshConversations();
+            refreshUnreadCount();
+        }
+    }, [isConnected]);
+
+    const emitEvent = (event: string, data: any) => {
+        const listeners = listenersRef.current.get(event);
+        if (listeners) {
+            listeners.forEach((cb) => cb(data));
+        }
+    };
+
+    const addEventListener = (event: string, cb: Function) => {
+        if (!listenersRef.current.has(event)) {
+            listenersRef.current.set(event, new Set());
+        }
+        listenersRef.current.get(event)!.add(cb);
+        return () => {
+            listenersRef.current.get(event)?.delete(cb);
+        };
+    };
+
+    const refreshConversations = useCallback(async () => {
+        try {
+            const convs = await getConversations();
+            setConversations(convs);
+        } catch {
+            // silently fail
+        }
+    }, []);
+
+    const refreshUnreadCount = useCallback(async () => {
+        try {
+            const count = await getUnreadCount();
+            setUnreadTotal(count);
+        } catch {
+            // silently fail
+        }
+    }, []);
+
+    const sendMessage = useCallback(
+        (data: {
+            conversationId: string;
+            content?: string;
+            messageType?: "text" | "image" | "video" | "mixed";
+            mediaUrls?: string[];
+            mediaKeys?: string[];
+            replyTo?: string;
+            tempId?: string;
+        }) => {
+            if (!socket) return;
+            socket.emit("message:send", data);
+        },
+        [socket]
+    );
+
+    const joinConversation = useCallback(
+        (conversationId: string) => {
+            if (!socket) return;
+            socket.emit("conversation:join", conversationId);
+        },
+        [socket]
+    );
+
+    const leaveConversation = useCallback(
+        (conversationId: string) => {
+            if (!socket) return;
+            socket.emit("conversation:leave", conversationId);
+        },
+        [socket]
+    );
+
+    const startTyping = useCallback(
+        (conversationId: string) => {
+            if (!socket) return;
+            socket.emit("typing:start", { conversationId });
+        },
+        [socket]
+    );
+
+    const stopTyping = useCallback(
+        (conversationId: string) => {
+            if (!socket) return;
+            socket.emit("typing:stop", { conversationId });
+        },
+        [socket]
+    );
+
+    const reactToMsg = useCallback(
+        (messageId: string, conversationId: string, emoji: string) => {
+            if (!socket) return;
+            socket.emit("message:react", {
+                messageId,
+                conversationId,
+                emoji
+            });
+        },
+        [socket]
+    );
+
+    const unreactToMsg = useCallback(
+        (messageId: string, conversationId: string) => {
+            if (!socket) return;
+            socket.emit("message:unreact", {
+                messageId,
+                conversationId
+            });
+        },
+        [socket]
+    );
+
+    const deleteMsg = useCallback(
+        (messageId: string, conversationId: string) => {
+            if (!socket) return;
+            socket.emit("message:delete", {
+                messageId,
+                conversationId
+            });
+        },
+        [socket]
+    );
+
+    const markRead = useCallback(
+        (conversationId: string) => {
+            if (!socket) return;
+            socket.emit("messages:read", { conversationId });
+        },
+        [socket]
+    );
+
+    return (
+        <ChatContext.Provider
+            value={{
+                socket,
+                isConnected,
+                conversations,
+                unreadTotal,
+                activeConversationId,
+                setActiveConversationId,
+                refreshConversations,
+                refreshUnreadCount,
+                sendMessage,
+                joinConversation,
+                leaveConversation,
+                startTyping,
+                stopTyping,
+                reactToMessage: reactToMsg,
+                unreactToMessage: unreactToMsg,
+                deleteMessage: deleteMsg,
+                markAsRead: markRead,
+                onlineUsers,
+                onNewMessage: (cb) => addEventListener("message:new", cb),
+                onTypingStart: (cb) =>
+                    addEventListener("typing:start", cb),
+                onTypingStop: (cb) =>
+                    addEventListener("typing:stop", cb),
+                onMessagesRead: (cb) =>
+                    addEventListener("messages:read", cb),
+                onMessageReacted: (cb) =>
+                    addEventListener("message:reacted", cb),
+                onMessageUnreacted: (cb) =>
+                    addEventListener("message:unreacted", cb),
+                onMessageDeleted: (cb) =>
+                    addEventListener("message:deleted", cb)
+            }}
+        >
+            {children}
+        </ChatContext.Provider>
+    );
+}
+
+export function useChat() {
+    const ctx = useContext(ChatContext);
+    if (!ctx) {
+        throw new Error("useChat must be used within ChatProvider");
+    }
+    return ctx;
+}
