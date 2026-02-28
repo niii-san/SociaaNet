@@ -6,4 +6,5 @@ import { usersService } from "./users.service";
 import { likesService } from "./likes.service";
 import { commentsService } from "./comments.service";
 import { viewsService } from "./views.service";
-export { authService, usersService, filesService, mailService, postsService, likesService, commentsService, viewsService };
+import { repostsService } from "./reposts.service";
+export { authService, usersService, filesService, mailService, postsService, likesService, commentsService, viewsService, repostsService };

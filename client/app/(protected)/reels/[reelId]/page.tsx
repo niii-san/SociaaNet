@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { getReelById, updateReelVisibility, ReelDetail, likeReel, unlikeReel, viewReel } from "@/features/posts/posts.api";
+import { getReelById, updateReelVisibility, ReelDetail, likeReel, unlikeReel, viewReel, repostReel, unrepostReel } from "@/features/posts/posts.api";
 import { useAuth } from "@/contexts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -23,6 +23,7 @@ import {
     Volume2,
     VolumeX,
     Eye,
+    Repeat2,
 } from "lucide-react";
 import {
     DropdownMenu,
@@ -49,6 +50,9 @@ export default function ReelDetailPage() {
     const [likingInProgress, setLikingInProgress] = useState(false);
     const [commentsCount, setCommentsCount] = useState(0);
     const [viewsCount, setViewsCount] = useState(0);
+    const [isReposted, setIsReposted] = useState(false);
+    const [repostsCount, setRepostsCount] = useState(0);
+    const [repostingInProgress, setRepostingInProgress] = useState(false);
 
     useEffect(() => {
         const fetchReel = async () => {
@@ -62,6 +66,8 @@ export default function ReelDetailPage() {
                 setLikesCount(data.likes_count);
                 setCommentsCount(data.comments_count);
                 setViewsCount(data.views_count);
+                setIsReposted(data.is_reel_reposted_by_current_user);
+                setRepostsCount(data.reposts_count);
 
                 // Record view and update count
                 try {
@@ -154,6 +160,32 @@ export default function ReelDetailPage() {
             toast.error(error.response?.data?.message || "Failed to update like");
         } finally {
             setLikingInProgress(false);
+        }
+    };
+
+    const handleRepostToggle = async () => {
+        if (!reel || repostingInProgress) return;
+
+        setRepostingInProgress(true);
+        // Optimistic update
+        const previousIsReposted = isReposted;
+        const previousRepostsCount = repostsCount;
+        setIsReposted(!isReposted);
+        setRepostsCount(isReposted ? repostsCount - 1 : repostsCount + 1);
+
+        try {
+            if (previousIsReposted) {
+                await unrepostReel(reel.reel_id);
+            } else {
+                await repostReel(reel.reel_id);
+            }
+        } catch (error: any) {
+            // Revert on failure
+            setIsReposted(previousIsReposted);
+            setRepostsCount(previousRepostsCount);
+            toast.error(error.response?.data?.message || "Failed to update repost");
+        } finally {
+            setRepostingInProgress(false);
         }
     };
 
@@ -361,17 +393,41 @@ export default function ReelDetailPage() {
                                     <Button variant="ghost" size="icon">
                                         <Send className="w-7 h-7" />
                                     </Button>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="hover:text-green-500"
+                                        onClick={handleRepostToggle}
+                                        disabled={repostingInProgress || reel.is_reel_author}
+                                        title={reel.is_reel_author ? "You can't repost your own reel" : isReposted ? "Remove repost" : "Repost"}
+                                    >
+                                        <Repeat2
+                                            className={`w-7 h-7 transition-colors ${
+                                                isReposted
+                                                    ? "text-green-500"
+                                                    : ""
+                                            }`}
+                                        />
+                                    </Button>
                                 </div>
                                 <Button variant="ghost" size="icon">
                                     <Bookmark className="w-6 h-6" />
                                 </Button>
                             </div>
 
-                            {/* Likes and Views count */}
+                            {/* Likes, reposts and Views count */}
                             <div className="flex items-center gap-4 text-sm">
                                 <p className="font-semibold">
                                     {likesCount} {likesCount === 1 ? "like" : "likes"}
                                 </p>
+                                {repostsCount > 0 && (
+                                    <>
+                                        <span className="text-muted-foreground">•</span>
+                                        <p className="text-muted-foreground">
+                                            {repostsCount} {repostsCount === 1 ? "repost" : "reposts"}
+                                        </p>
+                                    </>
+                                )}
                                 <span className="text-muted-foreground">•</span>
                                 <p className="text-muted-foreground">
                                     {formatViews(viewsCount)} views

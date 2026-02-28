@@ -7,6 +7,7 @@ export interface ReelEntity {
     hashtags: string[];
     likes_count: number;
     comments_count: number;
+    reposts_count: number;
     views_count: number;
     is_deleted: boolean;
     visibility: "public" | "private" | "followers";

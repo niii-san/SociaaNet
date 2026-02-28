@@ -108,8 +108,10 @@ export interface PostDetail {
     caption: string;
     is_post_author: boolean;
     is_post_liked_by_current_user: boolean;
+    is_post_reposted_by_current_user: boolean;
     likes_count: number;
     comments_count: number;
+    reposts_count: number;
     comments: any[];
     hashtags: string[];
     visibility: "public" | "private" | "followers";
@@ -149,8 +151,10 @@ export interface ReelDetail {
     hashtags: string[];
     is_reel_author: boolean;
     is_reel_liked_by_current_user: boolean;
+    is_reel_reposted_by_current_user: boolean;
     likes_count: number;
     comments_count: number;
+    reposts_count: number;
     views_count: number;
     comments: any[];
     visibility: "public" | "private" | "followers";
@@ -236,5 +240,42 @@ export const viewPost = async (postId: string): Promise<ViewResponse> => {
 // Record a reel view (increments view count on first view)
 export const viewReel = async (reelId: string): Promise<ViewResponse> => {
     const response = await api.post(`/reels/${reelId}/view`);
+    return response.data;
+};
+
+// Repost interfaces
+export interface RepostResponse {
+    status_code: number;
+    success: boolean;
+    message: string;
+    data: {
+        repost_id?: string;
+        target_id: string;
+        target_type: "post" | "reel";
+        reposts_count: number;
+    };
+}
+
+// Repost a post
+export const repostPost = async (postId: string): Promise<RepostResponse> => {
+    const response = await api.post(`/posts/${postId}/repost`);
+    return response.data;
+};
+
+// Unrepost a post
+export const unrepostPost = async (postId: string): Promise<RepostResponse> => {
+    const response = await api.delete(`/posts/${postId}/repost`);
+    return response.data;
+};
+
+// Repost a reel
+export const repostReel = async (reelId: string): Promise<RepostResponse> => {
+    const response = await api.post(`/reels/${reelId}/repost`);
+    return response.data;
+};
+
+// Unrepost a reel
+export const unrepostReel = async (reelId: string): Promise<RepostResponse> => {
+    const response = await api.delete(`/reels/${reelId}/repost`);
     return response.data;
 };

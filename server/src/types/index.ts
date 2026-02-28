@@ -11,6 +11,7 @@ import { ReelEntity } from "./reel.type";
 import { CommentEntity } from "./comment.type";
 import { LikeEntity } from "./like.type";
 import { WatchHistoryEntity } from "./watch-history.type";
+import { RepostEntity } from "./repost.type";
 
 export {
     UserEntity,
@@ -26,5 +27,6 @@ export {
     ReelEntity,
     CommentEntity,
     LikeEntity,
-    WatchHistoryEntity
+    WatchHistoryEntity,
+    RepostEntity
 };

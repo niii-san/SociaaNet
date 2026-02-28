@@ -131,7 +131,7 @@ export default function ProfilePage() {
                                     <ReelsGrid reels={profileData.reels || []} />
                                 </TabsContent>
                                 <TabsContent value="reposts" className="mt-6">
-                                    <RepostsGrid reposts={[]} />
+                                    <RepostsGrid reposts={profileData.reposts || []} />
                                 </TabsContent>
                             </Tabs>
                         )}

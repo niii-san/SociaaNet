@@ -16,6 +16,7 @@ import {
     convertVideoKeyToVideoUrl
 } from "../utils";
 import { activityRepo, authRepo, filesRepo, userRepo } from "../repositories";
+import { repostsService } from "./reposts.service";
 import { fileServiceClient } from "../clients";
 import { Types } from "mongoose";
 import { UserFieldRequirements } from "../constants";
@@ -133,6 +134,10 @@ class UsersService {
             created_at: post.created_at
         }));
 
+        const repostsPayload = await repostsService.getUserRepostsForProfile(
+            user._id.toString()
+        );
+
         return {
             user_id: user._id,
             full_name: user.full_name,
@@ -145,8 +150,10 @@ class UsersService {
             created_at: user.created_at,
             posts_count: filteredPosts.length,
             reels_count: filteredReels.length,
+            reposts_count: repostsPayload.length,
             posts: postsPayload,
             reels: reelsPayload,
+            reposts: repostsPayload,
             is_own_profile: isOwnProfile,
             is_following: user.is_following
         };

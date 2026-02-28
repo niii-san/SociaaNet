@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { getPostById, updatePostVisibility, PostDetail, likePost, unlikePost, viewPost } from "@/features/posts/posts.api";
+import { getPostById, updatePostVisibility, PostDetail, likePost, unlikePost, viewPost, repostPost, unrepostPost } from "@/features/posts/posts.api";
 import { useAuth } from "@/contexts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -20,6 +20,7 @@ import {
     Globe,
     Lock,
     Users,
+    Repeat2,
 } from "lucide-react";
 import {
     DropdownMenu,
@@ -43,6 +44,9 @@ export default function PostDetailPage() {
     const [likesCount, setLikesCount] = useState(0);
     const [likingInProgress, setLikingInProgress] = useState(false);
     const [commentsCount, setCommentsCount] = useState(0);
+    const [isReposted, setIsReposted] = useState(false);
+    const [repostsCount, setRepostsCount] = useState(0);
+    const [repostingInProgress, setRepostingInProgress] = useState(false);
 
     useEffect(() => {
         const fetchPost = async () => {
@@ -55,6 +59,8 @@ export default function PostDetailPage() {
                 setIsLiked(data.is_post_liked_by_current_user);
                 setLikesCount(data.likes_count);
                 setCommentsCount(data.comments_count);
+                setIsReposted(data.is_post_reposted_by_current_user);
+                setRepostsCount(data.reposts_count);
 
                 // Record view silently (for history/algo, no UI update needed)
                 viewPost(postId).catch(() => {});
@@ -120,6 +126,32 @@ export default function PostDetailPage() {
             toast.error(error.response?.data?.message || "Failed to update like");
         } finally {
             setLikingInProgress(false);
+        }
+    };
+
+    const handleRepostToggle = async () => {
+        if (!post || repostingInProgress) return;
+
+        setRepostingInProgress(true);
+        // Optimistic update
+        const previousIsReposted = isReposted;
+        const previousRepostsCount = repostsCount;
+        setIsReposted(!isReposted);
+        setRepostsCount(isReposted ? repostsCount - 1 : repostsCount + 1);
+
+        try {
+            if (previousIsReposted) {
+                await unrepostPost(post.post_id);
+            } else {
+                await repostPost(post.post_id);
+            }
+        } catch (error: any) {
+            // Revert on failure
+            setIsReposted(previousIsReposted);
+            setRepostsCount(previousRepostsCount);
+            toast.error(error.response?.data?.message || "Failed to update repost");
+        } finally {
+            setRepostingInProgress(false);
         }
     };
 
@@ -323,17 +355,41 @@ export default function PostDetailPage() {
                                     <Button variant="ghost" size="icon">
                                         <Send className="w-7 h-7" />
                                     </Button>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="hover:text-green-500"
+                                        onClick={handleRepostToggle}
+                                        disabled={repostingInProgress || post.is_post_author}
+                                        title={post.is_post_author ? "You can't repost your own post" : isReposted ? "Remove repost" : "Repost"}
+                                    >
+                                        <Repeat2
+                                            className={`w-7 h-7 transition-colors ${
+                                                isReposted
+                                                    ? "text-green-500"
+                                                    : ""
+                                            }`}
+                                        />
+                                    </Button>
                                 </div>
                                 <Button variant="ghost" size="icon">
                                     <Bookmark className="w-6 h-6" />
                                 </Button>
                             </div>
 
-                            {/* Likes count */}
-                            <div>
-                                <p className="font-semibold text-sm">
+                            {/* Likes and reposts count */}
+                            <div className="flex items-center gap-4 text-sm">
+                                <p className="font-semibold">
                                     {likesCount} {likesCount === 1 ? "like" : "likes"}
                                 </p>
+                                {repostsCount > 0 && (
+                                    <>
+                                        <span className="text-muted-foreground">•</span>
+                                        <p className="text-muted-foreground">
+                                            {repostsCount} {repostsCount === 1 ? "repost" : "reposts"}
+                                        </p>
+                                    </>
+                                )}
                             </div>
 
                             {/* Caption */}

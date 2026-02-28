@@ -12,6 +12,7 @@ const reelSchema = new mongoose.Schema<ReelEntity>(
         hashtags: { type: [String], default: [] },
         likes_count: { type: Number, default: 0 },
         comments_count: { type: Number, default: 0 },
+        reposts_count: { type: Number, default: 0 },
         views_count: { type: Number, default: 0 },
         is_deleted: { type: Boolean, default: false },
         visibility: {

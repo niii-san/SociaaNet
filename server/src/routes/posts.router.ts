@@ -6,6 +6,8 @@ import { unlikePostController } from "../controllers/posts/unlike-post.controlle
 import { viewPostController } from "../controllers/posts/view-post.controller";
 import { addCommentController } from "../controllers/comments/add-comment.controller";
 import { getCommentsController } from "../controllers/comments/get-comments.controller";
+import { repostPostController } from "../controllers/posts/repost-post.controller";
+import { unrepostPostController } from "../controllers/posts/unrepost-post.controller";
 
 export const postsRouter = Router();
 
@@ -22,6 +24,10 @@ postsRouter.post("/:postId/view", viewPostController);
 // Like / Unlike
 postsRouter.post("/:postId/like", likePostController);
 postsRouter.delete("/:postId/like", unlikePostController);
+
+// Repost / Unrepost
+postsRouter.post("/:postId/repost", repostPostController);
+postsRouter.delete("/:postId/repost", unrepostPostController);
 
 // Comments
 postsRouter.get("/:postId/comments", getCommentsController);

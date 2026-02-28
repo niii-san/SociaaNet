@@ -34,6 +34,31 @@ export interface IReel {
     created_at: string;
 }
 
+export interface IRepost {
+    repost_id: string;
+    type: "post" | "reel";
+    reposted_at: string;
+    post?: {
+        post_id: string;
+        caption: string;
+        media_urls: string[];
+        likes_count: number;
+        comments_count: number;
+        reposts_count: number;
+    };
+    reel?: {
+        reel_id: string;
+        caption: string;
+        thumbnail_url: string;
+        media_url: string;
+        likes_count: number;
+        comments_count: number;
+        views_count: number;
+        reposts_count: number;
+        duration_seconds: number;
+    };
+}
+
 export interface IUserProfile {
     user_id: string;
     full_name: string;
@@ -46,8 +71,10 @@ export interface IUserProfile {
     created_at: string;
     posts_count: number;
     reels_count: number;
+    reposts_count: number;
     posts: IPost[];
     reels: IReel[];
+    reposts: IRepost[];
     is_own_profile: boolean;
     is_following: boolean;
 }

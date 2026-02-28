@@ -7,6 +7,7 @@ export interface PostEntity {
     hashtags: string[];
     likes_count: number;
     comments_count: number;
+    reposts_count: number;
     is_deleted: boolean;
     visibility: "public" | "private" | "followers";
     is_sensitive_content: boolean;
