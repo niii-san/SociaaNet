@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { getReelById, updateReelVisibility, ReelDetail, likeReel, unlikeReel } from "@/features/posts/posts.api";
+import { getReelById, updateReelVisibility, ReelDetail, likeReel, unlikeReel, viewReel } from "@/features/posts/posts.api";
 import { useAuth } from "@/contexts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -48,6 +48,7 @@ export default function ReelDetailPage() {
     const [likesCount, setLikesCount] = useState(0);
     const [likingInProgress, setLikingInProgress] = useState(false);
     const [commentsCount, setCommentsCount] = useState(0);
+    const [viewsCount, setViewsCount] = useState(0);
 
     useEffect(() => {
         const fetchReel = async () => {
@@ -60,6 +61,17 @@ export default function ReelDetailPage() {
                 setIsLiked(data.is_reel_liked_by_current_user);
                 setLikesCount(data.likes_count);
                 setCommentsCount(data.comments_count);
+                setViewsCount(data.views_count);
+
+                // Record view and update count
+                try {
+                    const viewResult = await viewReel(reelId);
+                    if (viewResult.data?.views_count !== undefined) {
+                        setViewsCount(viewResult.data.views_count);
+                    }
+                } catch {
+                    // View tracking failure is non-critical
+                }
             } catch (error: any) {
                 console.error("Error fetching reel:", error);
                 toast.error(error.response?.data?.message || "Failed to load reel");
@@ -319,7 +331,7 @@ export default function ReelDetailPage() {
                                 {/* Views count */}
                                 <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-black/50 text-white px-3 py-1.5 rounded-full text-sm font-semibold">
                                     <Eye className="w-4 h-4" />
-                                    {formatViews(reel.views_count)}
+                                    {formatViews(viewsCount)}
                                 </div>
                             </div>
                         </div>
@@ -362,7 +374,7 @@ export default function ReelDetailPage() {
                                 </p>
                                 <span className="text-muted-foreground">•</span>
                                 <p className="text-muted-foreground">
-                                    {formatViews(reel.views_count)} views
+                                    {formatViews(viewsCount)} views
                                 </p>
                             </div>
 

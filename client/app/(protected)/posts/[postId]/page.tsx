@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { getPostById, updatePostVisibility, PostDetail, likePost, unlikePost } from "@/features/posts/posts.api";
+import { getPostById, updatePostVisibility, PostDetail, likePost, unlikePost, viewPost } from "@/features/posts/posts.api";
 import { useAuth } from "@/contexts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -55,6 +55,9 @@ export default function PostDetailPage() {
                 setIsLiked(data.is_post_liked_by_current_user);
                 setLikesCount(data.likes_count);
                 setCommentsCount(data.comments_count);
+
+                // Record view silently (for history/algo, no UI update needed)
+                viewPost(postId).catch(() => {});
             } catch (error: any) {
                 console.error("Error fetching post:", error);
                 toast.error(error.response?.data?.message || "Failed to load post");

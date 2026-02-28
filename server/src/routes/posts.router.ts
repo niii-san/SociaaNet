@@ -3,6 +3,7 @@ import { authenticate } from "../middlewares";
 import { getPostController, updatePostVisibilityController } from "../controllers";
 import { likePostController } from "../controllers/posts/like-post.controller";
 import { unlikePostController } from "../controllers/posts/unlike-post.controller";
+import { viewPostController } from "../controllers/posts/view-post.controller";
 import { addCommentController } from "../controllers/comments/add-comment.controller";
 import { getCommentsController } from "../controllers/comments/get-comments.controller";
 
@@ -14,6 +15,9 @@ postsRouter.get("/:postId", getPostController);
 
 // Visibility
 postsRouter.patch("/:postId/visibility", updatePostVisibilityController);
+
+// View
+postsRouter.post("/:postId/view", viewPostController);
 
 // Like / Unlike
 postsRouter.post("/:postId/like", likePostController);

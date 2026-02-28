@@ -213,3 +213,28 @@ export const unlikeReel = async (reelId: string): Promise<LikeResponse> => {
     const response = await api.delete(`/reels/${reelId}/like`);
     return response.data;
 };
+
+// View tracking
+export interface ViewResponse {
+    status_code: number;
+    success: boolean;
+    message: string;
+    data: {
+        target_id: string;
+        target_type: "post" | "reel";
+        is_new_view: boolean;
+        views_count?: number;
+    };
+}
+
+// Record a post view (silent, for history/algo tracking)
+export const viewPost = async (postId: string): Promise<ViewResponse> => {
+    const response = await api.post(`/posts/${postId}/view`);
+    return response.data;
+};
+
+// Record a reel view (increments view count on first view)
+export const viewReel = async (reelId: string): Promise<ViewResponse> => {
+    const response = await api.post(`/reels/${reelId}/view`);
+    return response.data;
+};

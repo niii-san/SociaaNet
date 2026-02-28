@@ -5,5 +5,6 @@ import { activityRepo } from "./activity.repository";
 import { settingsRepo } from "./settings.repository";
 import { likesRepo } from "./likes.repository";
 import { commentsRepo } from "./comments.repository";
+import { viewsRepo } from "./views.repository";
 
-export { authRepo, userRepo, filesRepo, activityRepo, settingsRepo, likesRepo, commentsRepo };
+export { authRepo, userRepo, filesRepo, activityRepo, settingsRepo, likesRepo, commentsRepo, viewsRepo };
