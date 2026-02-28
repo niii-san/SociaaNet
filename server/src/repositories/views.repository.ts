@@ -97,6 +97,24 @@ class ViewsRepository implements IViewsRepository {
 
         return !!exists;
     }
+
+    async getWatchHistoryByUser(
+        userId: string,
+        page: number = 1,
+        limit: number = 20
+    ): Promise<{ entries: WatchHistoryDocument[]; total: number }> {
+        const skip = (page - 1) * limit;
+
+        const [entries, total] = await Promise.all([
+            WatchHistory.find({ user: userId })
+                .sort({ created_at: -1 })
+                .skip(skip)
+                .limit(limit),
+            WatchHistory.countDocuments({ user: userId })
+        ]);
+
+        return { entries, total };
+    }
 }
 
 export const viewsRepo = new ViewsRepository();

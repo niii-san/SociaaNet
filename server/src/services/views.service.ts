@@ -1,7 +1,11 @@
 import { isValidObjectId } from "mongoose";
 import { ErrorCodes } from "../constants/error-code";
 import { filesRepo, viewsRepo } from "../repositories";
-import { HttpError } from "../utils";
+import {
+    HttpError,
+    convertImageKeyToImageUrl,
+    convertThumbnailKeytoThumbnailUrl
+} from "../utils";
 
 class ViewsService {
     async viewPost(postId: string, userId: string) {
@@ -70,6 +74,66 @@ class ViewsService {
             target_type: "reel" as const,
             is_new_view: created,
             views_count: created ? reel.views_count + 1 : reel.views_count
+        };
+    }
+
+    async getWatchHistory(userId: string, page: number, limit: number) {
+        const { entries, total } = await viewsRepo.getWatchHistoryByUser(
+            userId,
+            page,
+            limit
+        );
+
+        const items = [];
+
+        for (const entry of entries) {
+            const targetId = entry.target_id.toString();
+
+            if (entry.target_type === "post") {
+                const post = await filesRepo.getPostById(targetId);
+                if (!post) continue;
+
+                items.push({
+                    type: "post" as const,
+                    viewed_at: entry.created_at,
+                    post: {
+                        post_id: post._id.toString(),
+                        caption: post.caption,
+                        media_url:
+                            post.media_keys.length > 0
+                                ? convertImageKeyToImageUrl(post.media_keys[0])
+                                : null,
+                        likes_count: post.likes_count,
+                        comments_count: post.comments_count
+                    }
+                });
+            } else if (entry.target_type === "reel") {
+                const reel = await filesRepo.getReelById(targetId);
+                if (!reel) continue;
+
+                items.push({
+                    type: "reel" as const,
+                    viewed_at: entry.created_at,
+                    reel: {
+                        reel_id: reel._id.toString(),
+                        caption: reel.caption,
+                        thumbnail_url: convertThumbnailKeytoThumbnailUrl(
+                            reel.thumbnail_key
+                        ),
+                        likes_count: reel.likes_count,
+                        comments_count: reel.comments_count,
+                        views_count: reel.views_count
+                    }
+                });
+            }
+        }
+
+        return {
+            items,
+            total,
+            page,
+            limit,
+            total_pages: Math.ceil(total / limit)
         };
     }
 }

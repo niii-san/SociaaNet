@@ -25,6 +25,7 @@ import { getCurrentUserController } from "../controllers/users/get-current-user.
 import { getUserActivitiesController } from "../controllers/users/get-user-activities.controller";
 import { getLikeHistoryController } from "../controllers/users/get-like-history.controller";
 import { getCommentHistoryController } from "../controllers/users/get-comment-history.controller";
+import { getWatchHistoryController } from "../controllers/users/get-watch-history.controller";
 
 const usersRouter = Router();
 
@@ -67,6 +68,7 @@ usersRouter.get("/me/activities", getUserActivitiesController);
 // History
 usersRouter.get("/me/history/likes", getLikeHistoryController);
 usersRouter.get("/me/history/comments", getCommentHistoryController);
+usersRouter.get("/me/history/watches", getWatchHistoryController);
 
 usersRouter.get("/search", searchUsersController);
 
