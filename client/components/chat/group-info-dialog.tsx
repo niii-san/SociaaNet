@@ -65,7 +65,7 @@ export function GroupInfoDialog({
     onConversationUpdate
 }: GroupInfoDialogProps) {
     const { data: currentUser, settings: userSettings } = useAuth();
-    const { onlineUsers } = useChat();
+    const { onlineUsers, refreshConversations } = useChat();
     const router = useRouter();
     const myActivityOff =
         userSettings?.privacy?.show_activity_status === false;
@@ -197,6 +197,8 @@ export function GroupInfoDialog({
             await deleteConversationAPI(conversation.conversation_id);
             toast.success("Chat deleted");
             onOpenChange(false);
+            // Refresh conversations list and redirect
+            await refreshConversations();
             router.push("/inbox");
         } catch {
             toast.error("Failed to delete chat");

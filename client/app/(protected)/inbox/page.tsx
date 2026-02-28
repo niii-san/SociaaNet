@@ -103,7 +103,8 @@ export default function Page() {
             setDeletingId(convId);
             await deleteConversationAPI(convId);
             toast.success("Chat deleted");
-            refreshConversations();
+            // Refresh from server to get updated list
+            await refreshConversations();
         } catch {
             toast.error("Failed to delete chat");
         } finally {
