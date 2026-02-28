@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/contexts";
+import { useAuth, useNotifications } from "@/contexts";
 import { useChat } from "@/contexts/chat.context";
 import {
     Bookmark,
@@ -25,11 +25,18 @@ export function AppSidebar() {
     const { data: user } = useAuth();
     const pathname = usePathname();
     let unreadTotal = 0;
+    let notifUnread = 0;
     try {
         const chat = useChat();
         unreadTotal = chat.unreadTotal;
     } catch {
         // ChatProvider might not be available
+    }
+    try {
+        const notif = useNotifications();
+        notifUnread = notif.unreadCount;
+    } catch {
+        // NotificationProvider might not be available
     }
 
     const navItems = [
@@ -107,8 +114,10 @@ export function AppSidebar() {
                             )}
                         />
                         <span>{item.label}</span>
-                        {item.label === "Notifications" && (
-                            <span className="absolute left-7 top-2 w-2 h-2 bg-accent rounded-full" />
+                        {item.label === "Notifications" && notifUnread > 0 && (
+                            <span className="ml-auto bg-primary text-primary-foreground text-xs font-bold rounded-full min-w-5 h-5 flex items-center justify-center px-1.5">
+                                {notifUnread > 99 ? "99+" : notifUnread}
+                            </span>
                         )}
                         {item.label === "Inbox" && unreadTotal > 0 && (
                             <span className="ml-auto bg-primary text-primary-foreground text-xs font-bold rounded-full min-w-5 h-5 flex items-center justify-center px-1.5">
