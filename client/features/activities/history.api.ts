@@ -78,3 +78,38 @@ export const getWatchHistory = async (
     const res = await api.get(`/users/me/history/watches?page=${page}&limit=${limit}`);
     return res.data?.data as PaginatedResponse<WatchHistoryItem>;
 };
+
+// Repost History
+export interface RepostedPost {
+    post_id: string;
+    caption: string;
+    media_url: string | null;
+    likes_count: number;
+    comments_count: number;
+    reposts_count: number;
+}
+
+export interface RepostedReel {
+    reel_id: string;
+    caption: string;
+    thumbnail_url: string;
+    likes_count: number;
+    comments_count: number;
+    views_count: number;
+    reposts_count: number;
+}
+
+export interface RepostHistoryItem {
+    type: "post" | "reel";
+    reposted_at: string;
+    post?: RepostedPost;
+    reel?: RepostedReel;
+}
+
+export const getRepostHistory = async (
+    page: number = 1,
+    limit: number = 20
+): Promise<PaginatedResponse<RepostHistoryItem>> => {
+    const res = await api.get(`/users/me/history/reposts?page=${page}&limit=${limit}`);
+    return res.data?.data as PaginatedResponse<RepostHistoryItem>;
+};
