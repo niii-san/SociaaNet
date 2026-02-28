@@ -1,0 +1,413 @@
+"use client";
+
+import { useEffect, useState, useRef } from "react";
+import { useParams, useRouter } from "next/navigation";
+import { getReelById, updateReelVisibility, ReelDetail } from "@/features/posts/posts.api";
+import { useAuth } from "@/contexts";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { MiniLoader } from "@/components/ui/mini-loader";
+import {
+    Heart,
+    MessageCircle,
+    Send,
+    Bookmark,
+    MoreHorizontal,
+    Globe,
+    Lock,
+    Users,
+    Play,
+    Pause,
+    Volume2,
+    VolumeX,
+    Eye,
+} from "lucide-react";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { toast } from "sonner";
+
+export default function ReelDetailPage() {
+    const { reelId } = useParams<{ reelId: string }>();
+    const router = useRouter();
+    const { data: currentUser } = useAuth();
+    const videoRef = useRef<HTMLVideoElement>(null);
+
+    const [reel, setReel] = useState<ReelDetail | null>(null);
+    const [loading, setLoading] = useState(true);
+    const [updatingVisibility, setUpdatingVisibility] = useState(false);
+    const [isPlaying, setIsPlaying] = useState(false);
+    const [isMuted, setIsMuted] = useState(false);
+
+    useEffect(() => {
+        const fetchReel = async () => {
+            if (!reelId) return;
+
+            setLoading(true);
+            try {
+                const data = await getReelById(reelId);
+                setReel(data);
+            } catch (error: any) {
+                console.error("Error fetching reel:", error);
+                toast.error(error.response?.data?.message || "Failed to load reel");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchReel();
+    }, [reelId]);
+
+    // Auto-play video when loaded
+    useEffect(() => {
+        if (videoRef.current && reel) {
+            videoRef.current.play()
+                .then(() => {
+                    setIsPlaying(true);
+                })
+                .catch((error) => {
+                    console.log("Autoplay prevented:", error);
+                    // Autoplay was prevented, user needs to click play
+                });
+        }
+    }, [reel]);
+
+    const togglePlayPause = () => {
+        if (videoRef.current) {
+            if (isPlaying) {
+                videoRef.current.pause();
+            } else {
+                videoRef.current.play();
+            }
+            setIsPlaying(!isPlaying);
+        }
+    };
+
+    const toggleMute = () => {
+        if (videoRef.current) {
+            videoRef.current.muted = !isMuted;
+            setIsMuted(!isMuted);
+        }
+    };
+
+    const handleVisibilityChange = async (newVisibility: "public" | "private" | "followers") => {
+        if (!reel) return;
+
+        setUpdatingVisibility(true);
+        try {
+            await updateReelVisibility(reel.reel_id, newVisibility);
+            setReel({ ...reel, visibility: newVisibility });
+            toast.success("Visibility updated successfully");
+        } catch (error: any) {
+            console.error("Error updating visibility:", error);
+            toast.error(error.response?.data?.message || "Failed to update visibility");
+        } finally {
+            setUpdatingVisibility(false);
+        }
+    };
+
+    const getVisibilityIcon = (visibility: string) => {
+        switch (visibility) {
+            case "public":
+                return <Globe className="w-4 h-4" />;
+            case "followers":
+                return <Users className="w-4 h-4" />;
+            case "private":
+                return <Lock className="w-4 h-4" />;
+            default:
+                return <Globe className="w-4 h-4" />;
+        }
+    };
+
+    const getVisibilityText = (visibility: string) => {
+        switch (visibility) {
+            case "public":
+                return "Public";
+            case "followers":
+                return "Followers";
+            case "private":
+                return "Private";
+            default:
+                return visibility;
+        }
+    };
+
+    const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diffInMs = now.getTime() - date.getTime();
+        const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
+        const diffInDays = Math.floor(diffInHours / 24);
+
+        if (diffInHours < 1) {
+            const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
+            return `${diffInMinutes}m ago`;
+        } else if (diffInHours < 24) {
+            return `${diffInHours}h ago`;
+        } else if (diffInDays < 7) {
+            return `${diffInDays}d ago`;
+        } else {
+            return date.toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+                year: date.getFullYear() !== now.getFullYear() ? "numeric" : undefined,
+            });
+        }
+    };
+
+    const formatViews = (views: number): string => {
+        if (views >= 1000000) {
+            return `${(views / 1000000).toFixed(1)}M`;
+        } else if (views >= 1000) {
+            return `${(views / 1000).toFixed(1)}K`;
+        }
+        return views.toString();
+    };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-background flex items-center justify-center pt-16">
+                <MiniLoader />
+            </div>
+        );
+    }
+
+    if (!reel) {
+        return (
+            <div className="min-h-screen bg-background flex flex-col items-center justify-center pt-16 gap-4">
+                <h2 className="text-2xl font-bold">Reel Not Found</h2>
+                <p className="text-muted-foreground">This reel may have been deleted or is not available.</p>
+                <Button onClick={() => router.back()}>Go Back</Button>
+            </div>
+        );
+    }
+
+    // Get visibility options based on account type
+    const isPrivateAccount = currentUser?.is_private_account;
+    const visibilityOptions: Array<"public" | "private" | "followers"> = isPrivateAccount
+        ? ["followers", "private"]
+        : ["public", "private"];
+
+    return (
+        <div className="min-h-screen bg-background pb-12 pt-16">
+            <div className="container max-w-4xl mx-auto px-4 py-8">
+                {/* Reel Card */}
+                <Card className="overflow-hidden">
+                    <CardContent className="p-0">
+                        {/* Header */}
+                        <div className="flex items-center justify-between p-4 border-b">
+                            <div className="flex items-center gap-3">
+                                <Avatar className="w-10 h-10">
+                                    <AvatarImage src={currentUser?.avatar_url || undefined} />
+                                    <AvatarFallback>
+                                        {currentUser?.full_name?.charAt(0).toUpperCase() || "U"}
+                                    </AvatarFallback>
+                                </Avatar>
+                                <div>
+                                    <p className="font-semibold text-sm">{currentUser?.username}</p>
+                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                        <span>{formatDate(reel.created_at)}</span>
+                                        <span>•</span>
+                                        <div className="flex items-center gap-1">
+                                            {getVisibilityIcon(reel.visibility)}
+                                            <span className="capitalize">{getVisibilityText(reel.visibility)}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon">
+                                        <MoreHorizontal className="w-5 h-5" />
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    {reel.is_reel_author && (
+                                        <>
+                                            {visibilityOptions.map((vis) => (
+                                                <DropdownMenuItem
+                                                    key={vis}
+                                                    onClick={() => handleVisibilityChange(vis)}
+                                                    disabled={updatingVisibility || reel.visibility === vis}
+                                                    className="gap-2"
+                                                >
+                                                    {getVisibilityIcon(vis)}
+                                                    <span>Make {getVisibilityText(vis)}</span>
+                                                </DropdownMenuItem>
+                                            ))}
+                                            <Separator className="my-1" />
+                                        </>
+                                    )}
+                                    <DropdownMenuItem className="text-destructive">
+                                        Report
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                        </div>
+
+                        {/* Video */}
+                        <div className="relative bg-black aspect-9/16 w-full max-w-md mx-auto">
+                            <video
+                                ref={videoRef}
+                                src={reel.video_url}
+                                className="w-full h-full object-contain"
+                                loop
+                                playsInline
+                                onClick={togglePlayPause}
+                            />
+
+                            {/* Video Controls Overlay */}
+                            <div className="absolute inset-0 pointer-events-none">
+                                {/* Play/Pause button */}
+                                {!isPlaying && (
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <div className="bg-black/50 rounded-full p-4 pointer-events-auto cursor-pointer" onClick={togglePlayPause}>
+                                            <Play className="w-12 h-12 text-white fill-white" />
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Mute button */}
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="absolute bottom-4 right-4 bg-black/50 hover:bg-black/70 text-white rounded-full pointer-events-auto"
+                                    onClick={toggleMute}
+                                >
+                                    {isMuted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+                                </Button>
+
+                                {/* Views count */}
+                                <div className="absolute top-4 right-4 flex items-center gap-1.5 bg-black/50 text-white px-3 py-1.5 rounded-full text-sm font-semibold">
+                                    <Eye className="w-4 h-4" />
+                                    {formatViews(reel.views_count)}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="p-4 space-y-4">
+                            <div className="flex items-center justify-between">
+                                <div className="flex items-center gap-4">
+                                    <Button variant="ghost" size="icon" className="hover:text-red-500">
+                                        <Heart
+                                            className={`w-7 h-7 ${
+                                                reel.is_reel_liked_by_current_user
+                                                    ? "fill-red-500 text-red-500"
+                                                    : ""
+                                            }`}
+                                        />
+                                    </Button>
+                                    <Button variant="ghost" size="icon">
+                                        <MessageCircle className="w-7 h-7" />
+                                    </Button>
+                                    <Button variant="ghost" size="icon">
+                                        <Send className="w-7 h-7" />
+                                    </Button>
+                                </div>
+                                <Button variant="ghost" size="icon">
+                                    <Bookmark className="w-6 h-6" />
+                                </Button>
+                            </div>
+
+                            {/* Likes and Views count */}
+                            <div className="flex items-center gap-4 text-sm">
+                                <p className="font-semibold">
+                                    {reel.likes_count} {reel.likes_count === 1 ? "like" : "likes"}
+                                </p>
+                                <span className="text-muted-foreground">•</span>
+                                <p className="text-muted-foreground">
+                                    {formatViews(reel.views_count)} views
+                                </p>
+                            </div>
+
+                            {/* Caption */}
+                            {reel.caption && (
+                                <div>
+                                    <p className="text-sm">
+                                        <span className="font-semibold mr-2">{currentUser?.username}</span>
+                                        {reel.caption}
+                                    </p>
+                                    {reel.hashtags.length > 0 && (
+                                        <div className="flex flex-wrap gap-1.5 mt-2">
+                                            {reel.hashtags.map((tag, index) => (
+                                                <span
+                                                    key={index}
+                                                    className="text-sm text-primary cursor-pointer hover:underline"
+                                                >
+                                                    #{tag}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Comments Section */}
+                <div className="mt-6">
+                    <h3 className="text-lg font-semibold mb-4">
+                        Comments ({reel.comments_count})
+                    </h3>
+
+                    {/* Add Comment */}
+                    <Card className="mb-6">
+                        <CardContent className="p-4">
+                            <div className="flex items-start gap-3">
+                                <Avatar className="w-10 h-10">
+                                    <AvatarImage src={currentUser?.avatar_url || undefined} />
+                                    <AvatarFallback>
+                                        {currentUser?.full_name?.charAt(0).toUpperCase() || "U"}
+                                    </AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1">
+                                    <textarea
+                                        placeholder="Add a comment..."
+                                        className="w-full bg-transparent outline-none text-sm resize-none min-h-12 border rounded-lg p-3"
+                                        rows={2}
+                                    />
+                                    <div className="flex justify-end mt-2">
+                                        <Button size="sm" className="font-semibold">
+                                            Post Comment
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    {/* Comments List */}
+                    {reel.comments_count === 0 ? (
+                        <Card>
+                            <CardContent className="p-12">
+                                <div className="text-center text-muted-foreground space-y-2">
+                                    <MessageCircle className="w-12 h-12 mx-auto opacity-50" />
+                                    <p className="font-medium">No comments yet</p>
+                                    <p className="text-sm">Be the first to comment on this reel</p>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    ) : (
+                        <div className="space-y-4">
+                            {/* Comment items will be rendered here when API returns comments */}
+                            <Card>
+                                <CardContent className="p-4">
+                                    <p className="text-sm text-muted-foreground text-center">
+                                        {reel.comments_count} {reel.comments_count === 1 ? "comment" : "comments"} • Load comments feature coming soon
+                                    </p>
+                                </CardContent>
+                            </Card>
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+}

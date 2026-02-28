@@ -132,3 +132,40 @@ export const updatePostVisibility = async (
 ): Promise<void> => {
     await api.patch(`/posts/${postId}/visibility`, { visibility });
 };
+
+// Get reel by ID
+export interface ReelDetail {
+    reel_id: string;
+    author_id: string;
+    video_url: string;
+    caption: string;
+    hashtags: string[];
+    is_reel_author: boolean;
+    is_reel_liked_by_current_user: boolean;
+    likes_count: number;
+    comments_count: number;
+    views_count: number;
+    comments: any[];
+    visibility: "public" | "private" | "followers";
+    created_at: string;
+}
+
+export interface GetReelResponse {
+    status_code: number;
+    success: boolean;
+    message: string;
+    data: ReelDetail;
+}
+
+export const getReelById = async (reelId: string): Promise<ReelDetail> => {
+    const response = await api.get(`/reels/${reelId}`);
+    return response.data?.data as ReelDetail;
+};
+
+// Update reel visibility
+export const updateReelVisibility = async (
+    reelId: string,
+    visibility: "public" | "private" | "followers"
+): Promise<void> => {
+    await api.patch(`/reels/${reelId}/visibility`, { visibility });
+};

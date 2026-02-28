@@ -34,7 +34,7 @@ class PostsService {
             return convertImageKeyToImageUrl(key);
         });
 
-        //TODO: load c omments
+        //TODO: load comments
 
         const comments: any = [];
         const is_post_liked_by_current_user = false; //TODO: check if the post is liked by the current user
@@ -52,6 +52,50 @@ class PostsService {
             hashtags: post.hashtags,
             visibility: post.visibility,
             created_at: post.created_at
+        };
+    }
+
+    async getReel(reelId: string, userId: string) {
+        const reel = await filesRepo.getReelById(reelId);
+
+        if (!reel) {
+            throw new HttpError(
+                404,
+                false,
+                ErrorCodes.NOT_FOUND,
+                "Reel not found"
+            );
+        }
+
+        const isReelAuthor = reel.author.toString() === userId;
+
+        if (!isReelAuthor && reel.visibility === "private") {
+            throw new HttpError(
+                403,
+                false,
+                ErrorCodes.FORBIDDEN,
+                "You do not have permission to view this reel"
+            );
+        }
+
+        const videoUrl = convertVideoKeyToVideoUrl(reel.media_key);
+        const comments: any = []; //TODO:
+        const is_reel_liked_by_current_user = false; //TODO: check if the reel is liked by the current user
+
+        return {
+            reel_id: reel._id.toString(),
+            author_id: reel.author.toString(),
+            video_url: videoUrl,
+            caption: reel.caption,
+            hashtags: reel.hashtags,
+            is_reel_author: isReelAuthor,
+            is_reel_liked_by_current_user,
+            likes_count: reel.likes_count,
+            comments_count: reel.comments_count,
+            views_count: reel.views_count,
+            comments,
+            visibility: reel.visibility,
+            created_at: reel.created_at
         };
     }
 }
