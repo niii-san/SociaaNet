@@ -3,6 +3,8 @@ import { authenticate } from "../middlewares";
 import { getReelController } from "../controllers";
 import { likeReelController } from "../controllers/reels/like-reel.controller";
 import { unlikeReelController } from "../controllers/reels/unlike-reel.controller";
+import { addCommentController } from "../controllers/comments/add-comment.controller";
+import { getCommentsController } from "../controllers/comments/get-comments.controller";
 
 export const reelsRouter = Router();
 
@@ -13,3 +15,7 @@ reelsRouter.get("/:reelId", getReelController);
 // Like / Unlike
 reelsRouter.post("/:reelId/like", likeReelController);
 reelsRouter.delete("/:reelId/like", unlikeReelController);
+
+// Comments
+reelsRouter.get("/:reelId/comments", getCommentsController);
+reelsRouter.post("/:reelId/comments", addCommentController);

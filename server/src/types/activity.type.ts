@@ -20,6 +20,8 @@ export enum ActivityVerb {
     post_unliked = "post_unliked",
     comment_created = "comment_created",
     comment_deleted = "comment_deleted",
+    comment_liked = "comment_liked",
+    comment_unliked = "comment_unliked",
     repost_liked = "repost_liked",
     repost_unliked = "repost_unliked",
 

@@ -7,5 +7,7 @@ export interface CommentEntity {
     target_type: "post" | "reel";
     content: string;
     parent_comment_id?: Types.ObjectId;
+    likes_count: number;
     is_deleted: boolean;
+    created_at: Date;
 }

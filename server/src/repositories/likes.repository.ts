@@ -1,27 +1,28 @@
 import { Like, LikeDocument } from "../models/like.model";
 import { Post } from "../models/post.model";
 import { Reel } from "../models/reel.model";
+import { Comment } from "../models/comment.model";
 import mongoose from "mongoose";
 
 interface ILikesRepository {
     likeTarget(
         userId: string,
         targetId: string,
-        targetType: "post" | "reel"
+        targetType: "post" | "reel" | "comment"
     ): Promise<LikeDocument>;
     unlikeTarget(
         userId: string,
         targetId: string,
-        targetType: "post" | "reel"
+        targetType: "post" | "reel" | "comment"
     ): Promise<boolean>;
     isLikedByUser(
         userId: string,
         targetId: string,
-        targetType: "post" | "reel"
+        targetType: "post" | "reel" | "comment"
     ): Promise<boolean>;
     getLikesCount(
         targetId: string,
-        targetType: "post" | "reel"
+        targetType: "post" | "reel" | "comment"
     ): Promise<number>;
 }
 
@@ -29,7 +30,7 @@ class LikesRepository implements ILikesRepository {
     async likeTarget(
         userId: string,
         targetId: string,
-        targetType: "post" | "reel"
+        targetType: "post" | "reel" | "comment"
     ): Promise<LikeDocument> {
         const session = await mongoose.startSession();
         session.startTransaction();
@@ -52,8 +53,14 @@ class LikesRepository implements ILikesRepository {
                     { $inc: { likes_count: 1 } },
                     { session }
                 );
-            } else {
+            } else if (targetType === "reel") {
                 await Reel.findByIdAndUpdate(
+                    targetId,
+                    { $inc: { likes_count: 1 } },
+                    { session }
+                );
+            } else {
+                await Comment.findByIdAndUpdate(
                     targetId,
                     { $inc: { likes_count: 1 } },
                     { session }
@@ -73,7 +80,7 @@ class LikesRepository implements ILikesRepository {
     async unlikeTarget(
         userId: string,
         targetId: string,
-        targetType: "post" | "reel"
+        targetType: "post" | "reel" | "comment"
     ): Promise<boolean> {
         const session = await mongoose.startSession();
         session.startTransaction();
@@ -99,8 +106,14 @@ class LikesRepository implements ILikesRepository {
                     { $inc: { likes_count: -1 } },
                     { session }
                 );
-            } else {
+            } else if (targetType === "reel") {
                 await Reel.findByIdAndUpdate(
+                    targetId,
+                    { $inc: { likes_count: -1 } },
+                    { session }
+                );
+            } else {
+                await Comment.findByIdAndUpdate(
                     targetId,
                     { $inc: { likes_count: -1 } },
                     { session }
@@ -120,7 +133,7 @@ class LikesRepository implements ILikesRepository {
     async isLikedByUser(
         userId: string,
         targetId: string,
-        targetType: "post" | "reel"
+        targetType: "post" | "reel" | "comment"
     ): Promise<boolean> {
         const like = await Like.exists({
             user: userId,
@@ -133,7 +146,7 @@ class LikesRepository implements ILikesRepository {
 
     async getLikesCount(
         targetId: string,
-        targetType: "post" | "reel"
+        targetType: "post" | "reel" | "comment"
     ): Promise<number> {
         const count = await Like.countDocuments({
             target_id: targetId,

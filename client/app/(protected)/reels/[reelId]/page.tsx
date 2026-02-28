@@ -31,6 +31,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
+import CommentSection from "@/components/comments/comment-section";
 
 export default function ReelDetailPage() {
     const { reelId } = useParams<{ reelId: string }>();
@@ -46,6 +47,7 @@ export default function ReelDetailPage() {
     const [isLiked, setIsLiked] = useState(false);
     const [likesCount, setLikesCount] = useState(0);
     const [likingInProgress, setLikingInProgress] = useState(false);
+    const [commentsCount, setCommentsCount] = useState(0);
 
     useEffect(() => {
         const fetchReel = async () => {
@@ -57,6 +59,7 @@ export default function ReelDetailPage() {
                 setReel(data);
                 setIsLiked(data.is_reel_liked_by_current_user);
                 setLikesCount(data.likes_count);
+                setCommentsCount(data.comments_count);
             } catch (error: any) {
                 console.error("Error fetching reel:", error);
                 toast.error(error.response?.data?.message || "Failed to load reel");
@@ -389,61 +392,13 @@ export default function ReelDetailPage() {
                 </Card>
 
                 {/* Comments Section */}
-                <div className="mt-6">
-                    <h3 className="text-lg font-semibold mb-4">
-                        Comments ({reel.comments_count})
-                    </h3>
-
-                    {/* Add Comment */}
-                    <Card className="mb-6">
-                        <CardContent className="p-4">
-                            <div className="flex items-start gap-3">
-                                <Avatar className="w-10 h-10">
-                                    <AvatarImage src={currentUser?.avatar_url || undefined} />
-                                    <AvatarFallback>
-                                        {currentUser?.full_name?.charAt(0).toUpperCase() || "U"}
-                                    </AvatarFallback>
-                                </Avatar>
-                                <div className="flex-1">
-                                    <textarea
-                                        placeholder="Add a comment..."
-                                        className="w-full bg-transparent outline-none text-sm resize-none min-h-12 border rounded-lg p-3"
-                                        rows={2}
-                                    />
-                                    <div className="flex justify-end mt-2">
-                                        <Button size="sm" className="font-semibold">
-                                            Post Comment
-                                        </Button>
-                                    </div>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-
-                    {/* Comments List */}
-                    {reel.comments_count === 0 ? (
-                        <Card>
-                            <CardContent className="p-12">
-                                <div className="text-center text-muted-foreground space-y-2">
-                                    <MessageCircle className="w-12 h-12 mx-auto opacity-50" />
-                                    <p className="font-medium">No comments yet</p>
-                                    <p className="text-sm">Be the first to comment on this reel</p>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ) : (
-                        <div className="space-y-4">
-                            {/* Comment items will be rendered here when API returns comments */}
-                            <Card>
-                                <CardContent className="p-4">
-                                    <p className="text-sm text-muted-foreground text-center">
-                                        {reel.comments_count} {reel.comments_count === 1 ? "comment" : "comments"} • Load comments feature coming soon
-                                    </p>
-                                </CardContent>
-                            </Card>
-                        </div>
-                    )}
-                </div>
+                <CommentSection
+                    targetId={reel.reel_id}
+                    targetType="reel"
+                    commentsCount={commentsCount}
+                    currentUser={currentUser}
+                    onCommentsCountChange={setCommentsCount}
+                />
             </div>
         </div>
     );

@@ -16,6 +16,7 @@ const commentSchema = new mongoose.Schema<CommentEntity>(
             ref: "Comment",
             default: null
         },
+        likes_count: { type: Number, required: true, default: 0 },
         is_deleted: { type: Boolean, required: true, default: false }
     },
     { timestamps: { createdAt: "created_at", updatedAt: false } }

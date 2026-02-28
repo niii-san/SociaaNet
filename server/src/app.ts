@@ -38,7 +38,8 @@ import {
     settingsRouter,
     mediaRouter,
     postsRouter,
-    reelsRouter
+    reelsRouter,
+    commentsRouter
 } from "./routes";
 
 // Auth Routes
@@ -61,6 +62,9 @@ app.use("/api/v1/posts", postsRouter);
 
 // Reels Routes
 app.use("/api/v1/reels", reelsRouter);
+
+// Comments Routes
+app.use("/api/v1/comments", commentsRouter);
 
 // Moderators Routes
 app.use("/api/v1/moderators", moderatorsRouter);
