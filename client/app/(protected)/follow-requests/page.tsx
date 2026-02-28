@@ -8,11 +8,14 @@ import { Button } from "@/components/ui/button";
 import { UserPlus, X, Check } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 export default function FollowRequestsPage() {
     const [requests, setRequests] = useState<FollowRequest[]>([]);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState<string | null>(null);
+
+    usePageTitle("Follow Requests");
 
     useEffect(() => {
         fetchRequests();

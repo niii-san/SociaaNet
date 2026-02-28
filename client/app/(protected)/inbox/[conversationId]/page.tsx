@@ -18,6 +18,8 @@ import { GroupInfoDialog } from "@/components/chat/group-info-dialog";
 import { Loader2, MessageCircle, Check, X, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { useKeyboardShortcut } from "@/hooks/useKeyboardShortcut";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 export default function Page() {
     const params = useParams();
@@ -72,6 +74,23 @@ export default function Page() {
 
     // Use context data if available, otherwise use fetched data
     const conversation = contextConversation || fetchedConversation;
+
+    // Page title — show conversation name in browser tab
+    const chatName = conversation
+        ? conversation.type === "group"
+            ? conversation.group_name || "Group Chat"
+            : conversation.participants.find(
+                  (p) => p.user_id !== currentUser?.user_id
+              )?.full_name || "Chat"
+        : "Chat";
+    usePageTitle(chatName);
+
+    // Escape key → go back to inbox
+    useKeyboardShortcut(
+        { key: "Escape" },
+        () => router.push("/inbox"),
+        { allowInInput: true }
+    );
 
     // Fetch conversation from server if not in context
     useEffect(() => {

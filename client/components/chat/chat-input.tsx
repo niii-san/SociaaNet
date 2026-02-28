@@ -130,6 +130,11 @@ export function ChatInput({
             e.preventDefault();
             handleSend();
         }
+        // Escape to cancel reply
+        if (e.key === "Escape" && replyTo) {
+            e.preventDefault();
+            onCancelReply();
+        }
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -181,7 +186,7 @@ export function ChatInput({
         <div className="border-t border-border bg-background">
             {/* Reply preview */}
             {replyTo && (
-                <div className="flex items-center gap-2 px-4 py-2 bg-muted/50 border-b border-border">
+                <div className="flex items-center gap-2 px-4 py-2 bg-muted/50 border-b border-border animate-in slide-in-from-bottom-2 duration-150">
                     <Reply className="w-4 h-4 text-primary shrink-0" />
                     <div className="flex-1 min-w-0">
                         <p className="text-xs font-medium text-primary">
@@ -200,6 +205,7 @@ export function ChatInput({
                         size="icon"
                         className="shrink-0 h-6 w-6"
                         onClick={onCancelReply}
+                        title="Cancel reply (Esc)"
                     >
                         <X className="w-3 h-3" />
                     </Button>

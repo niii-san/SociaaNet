@@ -14,6 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { MiniLoader } from "@/components/ui/mini-loader";
 import { UserX, Lock } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 export default function ProfilePage() {
     const { username } = useParams<{ username: string }>();
@@ -23,6 +24,8 @@ export default function ProfilePage() {
 
     const [isCurrentUserProfile, setIsCurrentUserProfile] = useState(false);
     const [loading, setLoading] = useState(true);
+
+    usePageTitle(profileData ? `${profileData.full_name} (@${profileData.username})` : `@${username}`);
 
     useEffect(() => {
         const fetchProfile = async () => {

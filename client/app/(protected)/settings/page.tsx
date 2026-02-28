@@ -37,14 +37,19 @@ import {
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { usePageTitle } from "@/hooks/usePageTitle";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 export default function SettingsPage() {
     const { settings, refetchSettings, invalidateCurrentUser } = useAuth();
     const { setTheme } = useTheme();
     const [updating, setUpdating] = useState(false);
     const [loggingOut, setLoggingOut] = useState(false);
+    const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const router = useRouter();
+
+    usePageTitle("Settings");
 
     if (!settings) {
         return (
@@ -328,7 +333,7 @@ export default function SettingsPage() {
                                 </div>
                             </div>
                             <Button
-                                onClick={handleLogout}
+                                onClick={() => setShowLogoutConfirm(true)}
                                 disabled={loggingOut}
                                 variant="destructive"
                                 className="gap-2 min-w-30"
@@ -354,6 +359,17 @@ export default function SettingsPage() {
                         </div>
                     )}
             </div>
+
+            <ConfirmDialog
+                open={showLogoutConfirm}
+                onOpenChange={setShowLogoutConfirm}
+                title="Log out?"
+                description="Are you sure you want to log out of your account?"
+                confirmLabel="Log out"
+                variant="destructive"
+                onConfirm={() => { setShowLogoutConfirm(false); handleLogout(); }}
+                loading={loggingOut}
+            />
         </div>
     );
 }

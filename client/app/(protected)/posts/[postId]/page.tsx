@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { getPostById, updatePostVisibility, PostDetail, likePost, unlikePost, viewPost, repostPost, unrepostPost, savePost, unsavePost } from "@/features/posts/posts.api";
 import { useAuth } from "@/contexts";
@@ -21,6 +21,7 @@ import {
     Lock,
     Users,
     Repeat2,
+    ArrowLeft,
 } from "lucide-react";
 import {
     DropdownMenu,
@@ -31,6 +32,8 @@ import {
 import { toast } from "sonner";
 import CommentSection from "@/components/comments/comment-section";
 import Link from "next/link";
+import { useKeyboardShortcut } from "@/hooks/useKeyboardShortcut";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 export default function PostDetailPage() {
     const { postId } = useParams<{ postId: string }>();
@@ -50,6 +53,30 @@ export default function PostDetailPage() {
     const [repostingInProgress, setRepostingInProgress] = useState(false);
     const [isSaved, setIsSaved] = useState(false);
     const [savingInProgress, setSavingInProgress] = useState(false);
+    const [showLikeHeart, setShowLikeHeart] = useState(false);
+
+    usePageTitle(post ? `${post.author.username}'s post` : "Post");
+
+    // Escape → go back
+    useKeyboardShortcut({ key: "Escape" }, () => router.back());
+
+    // Left/Right arrow keys to navigate images
+    useKeyboardShortcut({ key: "ArrowLeft" }, () => {
+        if (post && post.media_urls.length > 1) handlePreviousImage();
+    });
+    useKeyboardShortcut({ key: "ArrowRight" }, () => {
+        if (post && post.media_urls.length > 1) handleNextImage();
+    });
+
+    // L key to like/unlike
+    useKeyboardShortcut({ key: "l" }, () => {
+        if (post) handleLikeToggle();
+    });
+
+    // S key to save/unsave
+    useKeyboardShortcut({ key: "s" }, () => {
+        if (post) handleSaveToggle();
+    });
 
     useEffect(() => {
         const fetchPost = async () => {
@@ -255,6 +282,21 @@ export default function PostDetailPage() {
 
     return (
         <div className="min-h-screen bg-background pb-12">
+            {/* Back button */}
+            <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border px-4 py-3">
+                <div className="flex items-center gap-3">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="shrink-0"
+                        onClick={() => router.back()}
+                    >
+                        <ArrowLeft className="w-5 h-5" />
+                    </Button>
+                    <h1 className="text-lg font-semibold">Post</h1>
+                </div>
+            </header>
+
             <div className="container max-w-4xl mx-auto px-4 py-8">
                 {/* Post Card */}
                 <Card className="overflow-hidden">
@@ -315,12 +357,27 @@ export default function PostDetailPage() {
                         </div>
 
                         {/* Images */}
-                        <div className="relative bg-black aspect-square w-full">
+                        <div
+                            className="relative bg-black aspect-square w-full select-none"
+                            onDoubleClick={() => {
+                                if (!isLiked) handleLikeToggle();
+                                setShowLikeHeart(true);
+                                setTimeout(() => setShowLikeHeart(false), 800);
+                            }}
+                        >
                             <img
                                 src={post.media_urls[currentImageIndex]}
                                 alt={`Post image ${currentImageIndex + 1}`}
                                 className="w-full h-full object-contain"
+                                draggable={false}
                             />
+
+                            {/* Double-tap like heart animation */}
+                            {showLikeHeart && (
+                                <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+                                    <Heart className="w-24 h-24 text-white fill-white drop-shadow-lg animate-ping" style={{ animationDuration: "0.6s", animationIterationCount: 1 }} />
+                                </div>
+                            )}
 
                             {/* Image navigation */}
                             {post.media_urls.length > 1 && (
@@ -366,36 +423,36 @@ export default function PostDetailPage() {
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        className="hover:text-pink-500"
+                                        className="hover:text-pink-500 active:scale-90 transition-transform"
                                         onClick={handleLikeToggle}
                                         disabled={likingInProgress}
                                     >
                                         <Heart
-                                            className={`w-7 h-7 transition-colors ${
+                                            className={`w-7 h-7 transition-all ${
                                                 isLiked
-                                                    ? "fill-pink-500 text-pink-500"
+                                                    ? "fill-pink-500 text-pink-500 scale-110"
                                                     : ""
                                             }`}
                                         />
                                     </Button>
-                                    <Button variant="ghost" size="icon">
+                                    <Button variant="ghost" size="icon" className="active:scale-90 transition-transform">
                                         <MessageCircle className="w-7 h-7" />
                                     </Button>
-                                    <Button variant="ghost" size="icon">
+                                    <Button variant="ghost" size="icon" className="active:scale-90 transition-transform">
                                         <Send className="w-7 h-7" />
                                     </Button>
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        className="hover:text-green-500"
+                                        className="hover:text-green-500 active:scale-90 transition-transform"
                                         onClick={handleRepostToggle}
                                         disabled={repostingInProgress || post.is_post_author}
                                         title={post.is_post_author ? "You can't repost your own post" : isReposted ? "Remove repost" : "Repost"}
                                     >
                                         <Repeat2
-                                            className={`w-7 h-7 transition-colors ${
+                                            className={`w-7 h-7 transition-all ${
                                                 isReposted
-                                                    ? "text-green-500"
+                                                    ? "text-green-500 scale-110"
                                                     : ""
                                             }`}
                                         />
@@ -404,15 +461,15 @@ export default function PostDetailPage() {
                                 <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="hover:text-amber-500"
+                                    className="hover:text-amber-500 active:scale-90 transition-transform"
                                     onClick={handleSaveToggle}
                                     disabled={savingInProgress}
-                                    title={isSaved ? "Remove from saved" : "Save post"}
+                                    title={isSaved ? "Remove from saved (S)" : "Save post (S)"}
                                 >
                                     <Bookmark
-                                        className={`w-6 h-6 transition-colors ${
+                                        className={`w-6 h-6 transition-all ${
                                             isSaved
-                                                ? "fill-amber-500 text-amber-500"
+                                                ? "fill-amber-500 text-amber-500 scale-110"
                                                 : ""
                                         }`}
                                     />

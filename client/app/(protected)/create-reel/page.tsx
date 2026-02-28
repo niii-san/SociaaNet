@@ -22,6 +22,7 @@ import {
     Film
 } from "lucide-react";
 import Link from "next/link";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 type Visibility = "public" | "private" | "followers";
 
@@ -29,6 +30,8 @@ export default function CreateReelPage() {
     const router = useRouter();
     const { data: user } = useAuth();
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    usePageTitle("Create Reel");
     
     const [loading, setLoading] = useState(false);
     const [caption, setCaption] = useState("");

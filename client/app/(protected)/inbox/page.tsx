@@ -17,6 +17,9 @@ import {
     rejectMessageRequest
 } from "@/features/chat/chat.api";
 import { toast } from "sonner";
+import { usePageTitle } from "@/hooks/usePageTitle";
+import { useKeyboardShortcut } from "@/hooks/useKeyboardShortcut";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 function getConversationName(
     conv: ChatConversation,
@@ -76,6 +79,7 @@ export default function Page() {
     const [searchQuery, setSearchQuery] = useState("");
     const [showNewChat, setShowNewChat] = useState(false);
     const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
     const [respondingId, setRespondingId] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState("chats");
     const [activityData, setActivityData] = useState<
@@ -88,6 +92,14 @@ export default function Page() {
             }
         >
     >({});
+
+    usePageTitle("Inbox");
+
+    // Ctrl+N to start new chat
+    useKeyboardShortcut(
+        { key: "n", ctrl: true },
+        (e) => { e.preventDefault(); setShowNewChat(true); }
+    );
 
     // Fetch activity status for all DM participants
     useEffect(() => {
@@ -114,11 +126,16 @@ export default function Page() {
     ) => {
         e.preventDefault();
         e.stopPropagation();
+        setConfirmDeleteId(convId);
+    };
+
+    const confirmDeleteConversation = async () => {
+        if (!confirmDeleteId) return;
         try {
-            setDeletingId(convId);
-            await deleteConversationAPI(convId);
+            setDeletingId(confirmDeleteId);
+            setConfirmDeleteId(null);
+            await deleteConversationAPI(confirmDeleteId);
             toast.success("Chat deleted");
-            // Refresh from server to get updated list
             await refreshConversations();
         } catch {
             toast.error("Failed to delete chat");
@@ -470,6 +487,17 @@ export default function Page() {
             <NewChatDialog
                 open={showNewChat}
                 onOpenChange={setShowNewChat}
+            />
+
+            <ConfirmDialog
+                open={!!confirmDeleteId}
+                onOpenChange={(open) => !open && setConfirmDeleteId(null)}
+                title="Delete conversation?"
+                description="This will permanently delete this conversation and all its messages for you. This action cannot be undone."
+                confirmLabel="Delete"
+                variant="destructive"
+                onConfirm={confirmDeleteConversation}
+                loading={!!deletingId}
             />
         </div>
     );

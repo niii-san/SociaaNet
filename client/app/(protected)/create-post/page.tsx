@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 type Visibility = "public" | "private" | "followers";
 
@@ -28,6 +29,8 @@ export default function CreatePostPage() {
     const router = useRouter();
     const { data: user } = useAuth();
     const fileInputRef = useRef<HTMLInputElement>(null);
+    
+    usePageTitle("Create Post");
     
     const [loading, setLoading] = useState(false);
     const [caption, setCaption] = useState("");

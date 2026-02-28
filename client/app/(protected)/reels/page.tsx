@@ -3,8 +3,11 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Plus, Clapperboard } from "lucide-react";
+import { usePageTitle } from "@/hooks/usePageTitle";
 
 export default function Page() {
+    usePageTitle("Reels");
+
     return (
         <div className="min-h-screen bg-background pb-12">
             <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border px-4 py-4">

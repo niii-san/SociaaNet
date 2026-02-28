@@ -4,9 +4,19 @@ import { useState } from "react";
 import { Search, TrendingUp, Compass } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { SearchDialog } from "@/components/explore/search-dialog";
+import { usePageTitle } from "@/hooks/usePageTitle";
+import { useKeyboardShortcut } from "@/hooks/useKeyboardShortcut";
 
 export default function ExplorePage() {
     const [searchOpen, setSearchOpen] = useState(false);
+
+    usePageTitle("Explore");
+
+    // Ctrl+K or / to open search
+    useKeyboardShortcut(
+        [{ key: "k", ctrl: true }, { key: "/" }],
+        (e) => { e.preventDefault(); setSearchOpen(true); }
+    );
 
     return (
         <div className="min-h-screen bg-background pb-12">
@@ -26,9 +36,12 @@ export default function ExplorePage() {
                     <Input
                         type="text"
                         placeholder="Search users..."
-                        className="pl-10 cursor-pointer"
+                        className="pl-10 pr-16 cursor-pointer"
                         readOnly
                     />
+                    <kbd className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none hidden sm:inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
+                        <span className="text-xs">⌘</span>K
+                    </kbd>
                 </div>
             </header>
 

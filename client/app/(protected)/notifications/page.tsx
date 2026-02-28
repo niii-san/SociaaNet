@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef, useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useNotifications } from "@/contexts";
 import { AppNotification } from "@/types";
@@ -18,6 +18,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { usePageTitle } from "@/hooks/usePageTitle";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 
 function getNotificationIcon(type: AppNotification["type"]) {
     switch (type) {
@@ -215,6 +217,9 @@ export default function NotificationsPage() {
     } = useNotifications();
 
     const observerRef = useRef<HTMLDivElement>(null);
+    const [showClearConfirm, setShowClearConfirm] = useState(false);
+
+    usePageTitle("Notifications");
 
     // Mark all as read when page is opened
     useEffect(() => {
@@ -279,7 +284,7 @@ export default function NotificationsPage() {
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                onClick={clearAll}
+                                onClick={() => setShowClearConfirm(true)}
                                 className="text-xs gap-1.5 text-destructive hover:text-destructive"
                             >
                                 <Trash2 className="w-4 h-4" />
@@ -326,6 +331,16 @@ export default function NotificationsPage() {
                     </div>
                 </div>
             )}
+
+            <ConfirmDialog
+                open={showClearConfirm}
+                onOpenChange={setShowClearConfirm}
+                title="Clear all notifications?"
+                description="This will permanently remove all your notifications. This action cannot be undone."
+                confirmLabel="Clear all"
+                variant="destructive"
+                onConfirm={() => { clearAll(); setShowClearConfirm(false); }}
+            />
         </div>
     );
 }
