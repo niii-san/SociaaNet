@@ -410,6 +410,46 @@ class ChatRepository {
         );
     }
 
+    // Get reactions for a message with populated user data
+    async getMessageReactions(messageId: string) {
+        const result = await Message.aggregate([
+            { $match: { _id: new mongoose.Types.ObjectId(messageId) } },
+            { $unwind: "$reactions" },
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "reactions.user_id",
+                    foreignField: "_id",
+                    as: "reactor"
+                }
+            },
+            { $unwind: "$reactor" },
+            {
+                $project: {
+                    _id: 0,
+                    user_id: "$reactor._id",
+                    username: "$reactor.username",
+                    full_name: "$reactor.full_name",
+                    avatar_key: "$reactor.avatar_key",
+                    emoji: "$reactions.emoji",
+                    created_at: "$reactions.created_at"
+                }
+            },
+            { $sort: { created_at: -1 } }
+        ]);
+
+        return result.map((r) => ({
+            user_id: r.user_id,
+            username: r.username,
+            full_name: r.full_name,
+            avatar_url: r.avatar_key
+                ? convertImageKeyToImageUrl(r.avatar_key)
+                : null,
+            emoji: r.emoji,
+            created_at: r.created_at
+        }));
+    }
+
     // Remove reaction from message
     async removeReaction(
         messageId: string,

@@ -77,6 +77,21 @@ export async function removeReaction(messageId: string): Promise<void> {
     await api.delete(`/chat/messages/${messageId}/react`);
 }
 
+// Get message reactions with user details
+export async function getMessageReactions(messageId: string): Promise<
+    {
+        user_id: string;
+        username: string;
+        full_name: string;
+        avatar_url: string | null;
+        emoji: string;
+        created_at: string;
+    }[]
+> {
+    const res = await api.get(`/chat/messages/${messageId}/reactions`);
+    return res.data.data;
+}
+
 // Delete a message
 export async function deleteMessage(messageId: string): Promise<void> {
     await api.delete(`/chat/messages/${messageId}`);

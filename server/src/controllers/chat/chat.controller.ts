@@ -140,6 +140,19 @@ export const removeReactionController = asyncHandler(
     }
 );
 
+// GET /api/v1/chat/messages/:messageId/reactions
+export const getMessageReactionsController = asyncHandler(
+    async (req: RequestWithUserContext, res: Response) => {
+        const { messageId } = req.params;
+
+        const reactions = await chatService.getMessageReactions(messageId);
+
+        return res
+            .status(200)
+            .json(new HttpSuccess(200, true, "Reactions fetched", reactions));
+    }
+);
+
 // POST /api/v1/chat/conversations/:conversationId/read
 export const markAsReadController = asyncHandler(
     async (req: RequestWithUserContext, res: Response) => {

@@ -197,6 +197,11 @@ class ChatService {
         return chatRepo.removeReaction(messageId, userId);
     }
 
+    // Get reactions for a message
+    async getMessageReactions(messageId: string) {
+        return chatRepo.getMessageReactions(messageId);
+    }
+
     // Mark messages as read
     async markAsRead(conversationId: string, userId: string) {
         await this.getConversation(conversationId, userId);

@@ -8,6 +8,7 @@ import {
     sendMessageController,
     reactToMessageController,
     removeReactionController,
+    getMessageReactionsController,
     markAsReadController,
     deleteMessageController,
     getUnreadCountController,
@@ -58,6 +59,7 @@ chatRouter.post(
 // Message actions
 chatRouter.post("/messages/:messageId/react", reactToMessageController);
 chatRouter.delete("/messages/:messageId/react", removeReactionController);
+chatRouter.get("/messages/:messageId/reactions", getMessageReactionsController);
 chatRouter.delete("/messages/:messageId", deleteMessageController);
 
 // Group management

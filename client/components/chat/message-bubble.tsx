@@ -5,6 +5,7 @@ import { ChatMessage } from "@/types";
 import { useAuth } from "@/contexts";
 import { SmilePlus, Reply, Trash2, Check, CheckCheck } from "lucide-react";
 import { EmojiPicker } from "./emoji-picker";
+import { ReactionDetailsDialog } from "./reaction-details-dialog";
 
 interface MessageBubbleProps {
     message: ChatMessage;
@@ -35,6 +36,7 @@ export function MessageBubble({
     const { data: currentUser } = useAuth();
     const [showActions, setShowActions] = useState(false);
     const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+    const [showReactionDetails, setShowReactionDetails] = useState(false);
 
     const isMine = message.sender.user_id === currentUser?.user_id;
     const myReaction = message.reactions?.find(
@@ -221,14 +223,10 @@ export function MessageBubble({
                         ).map(([emoji, count]) => (
                             <button
                                 key={emoji}
-                                onClick={() => {
-                                    if (myReaction?.emoji === emoji) {
-                                        onUnreact(message._id);
-                                    } else {
-                                        onReact(message._id, emoji);
-                                    }
-                                }}
-                                className={`inline-flex items-center gap-0.5 text-xs px-1.5 py-0.5 rounded-full border transition-colors ${
+                                onClick={() =>
+                                    setShowReactionDetails(true)
+                                }
+                                className={`inline-flex items-center gap-0.5 text-xs px-1.5 py-0.5 rounded-full border transition-colors cursor-pointer ${
                                     myReaction?.emoji === emoji
                                         ? "bg-primary/10 border-primary/30"
                                         : "bg-muted border-border hover:bg-muted/80"
@@ -244,6 +242,13 @@ export function MessageBubble({
                         ))}
                     </div>
                 )}
+
+                {/* Reaction details dialog */}
+                <ReactionDetailsDialog
+                    open={showReactionDetails}
+                    onOpenChange={setShowReactionDetails}
+                    messageId={message._id}
+                />
 
                 {/* Time and read status */}
                 <div
