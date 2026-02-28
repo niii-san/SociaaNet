@@ -8,5 +8,6 @@ import { commentsRepo } from "./comments.repository";
 import { viewsRepo } from "./views.repository";
 import { repostsRepo } from "./reposts.repository";
 import { savedItemsRepo } from "./saved-items.repository";
+import { chatRepo } from "./chat.repository";
 
-export { authRepo, userRepo, filesRepo, activityRepo, settingsRepo, likesRepo, commentsRepo, viewsRepo, repostsRepo, savedItemsRepo };
+export { authRepo, userRepo, filesRepo, activityRepo, settingsRepo, likesRepo, commentsRepo, viewsRepo, repostsRepo, savedItemsRepo, chatRepo };

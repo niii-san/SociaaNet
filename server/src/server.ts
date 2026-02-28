@@ -1,11 +1,17 @@
+import http from "http";
 import app from "./app";
 import { env } from "./config";
-import { mailService } from "./services";
 import { connectMongoDB } from "./utils";
+import { setupSocketIO } from "./socket";
+
+const server = http.createServer(app);
+
+// Attach Socket.IO
+setupSocketIO(server);
 
 connectMongoDB()
     .then(() => {
-        app.listen(env.port, () => {
+        server.listen(env.port, () => {
             console.log(
                 `SERVER RUNNING ON PORT: ${env.port}\nENVIRONMENT: ${env.nodeEnv}`
             );

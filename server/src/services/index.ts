@@ -8,4 +8,5 @@ import { commentsService } from "./comments.service";
 import { viewsService } from "./views.service";
 import { repostsService } from "./reposts.service";
 import { savedItemsService } from "./saved-items.service";
-export { authService, usersService, filesService, mailService, postsService, likesService, commentsService, viewsService, repostsService, savedItemsService };
+import { chatService } from "./chat.service";
+export { authService, usersService, filesService, mailService, postsService, likesService, commentsService, viewsService, repostsService, savedItemsService, chatService };

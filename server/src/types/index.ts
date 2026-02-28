@@ -13,6 +13,7 @@ import { LikeEntity } from "./like.type";
 import { WatchHistoryEntity } from "./watch-history.type";
 import { RepostEntity } from "./repost.type";
 import { SavedItemEntity } from "./saved-item.type";
+import { ConversationEntity, MessageEntity, MessageReaction, MessageReadReceipt } from "./conversation.type";
 
 export {
     UserEntity,
@@ -30,5 +31,9 @@ export {
     LikeEntity,
     WatchHistoryEntity,
     RepostEntity,
-    SavedItemEntity
+    SavedItemEntity,
+    ConversationEntity,
+    MessageEntity,
+    MessageReaction,
+    MessageReadReceipt
 };

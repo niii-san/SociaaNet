@@ -4,6 +4,8 @@ import { ImageMetaDataDocument, ImageMetaData } from "./image.model";
 import { UserSettings, UserSettingsDocument } from "./user-settings.model";
 import { Activity, ActivityDocument } from "./activity-model";
 import { Follow, FollowDocument } from "./follow.model";
+import { Conversation, ConversationDocument } from "./conversation.model";
+import { Message, MessageDocument } from "./message.model";
 
 export {
     User,
@@ -17,5 +19,9 @@ export {
     Activity,
     ActivityDocument,
     Follow,
-    FollowDocument
+    FollowDocument,
+    Conversation,
+    ConversationDocument,
+    Message,
+    MessageDocument
 };

@@ -7,6 +7,7 @@ import { mediaRouter } from "./media.route";
 import { postsRouter } from "./posts.router";
 import { reelsRouter } from "./reels.router";
 import { commentsRouter } from "./comments.router";
+import { chatRouter } from "./chat.route";
 
 export {
     authRouter,
@@ -17,5 +18,6 @@ export {
     mediaRouter,
     postsRouter,
     reelsRouter,
-    commentsRouter
+    commentsRouter,
+    chatRouter
 };
