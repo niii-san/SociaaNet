@@ -43,8 +43,8 @@ export function AppSidebar() {
         {
             icon: Home,
             label: "Home",
-            href: "/",
-            active: pathname === "/" || pathname === "/"
+            href: "/home",
+            active: pathname === "/home" || pathname === "/"
         },
         {
             icon: Search,

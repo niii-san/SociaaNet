@@ -10,5 +10,6 @@ import { repostsRepo } from "./reposts.repository";
 import { savedItemsRepo } from "./saved-items.repository";
 import { chatRepo } from "./chat.repository";
 import { notificationRepo } from "./notification.repository";
+import { feedRepo } from "./feed.repository";
 
-export { authRepo, userRepo, filesRepo, activityRepo, settingsRepo, likesRepo, commentsRepo, viewsRepo, repostsRepo, savedItemsRepo, chatRepo, notificationRepo };
+export { authRepo, userRepo, filesRepo, activityRepo, settingsRepo, likesRepo, commentsRepo, viewsRepo, repostsRepo, savedItemsRepo, chatRepo, notificationRepo, feedRepo };

@@ -9,6 +9,7 @@ import { reelsRouter } from "./reels.router";
 import { commentsRouter } from "./comments.router";
 import { chatRouter } from "./chat.route";
 import { notificationsRouter } from "./notifications.route";
+import { feedRouter } from "./feed.route";
 
 export {
     authRouter,
@@ -21,5 +22,6 @@ export {
     reelsRouter,
     commentsRouter,
     chatRouter,
-    notificationsRouter
+    notificationsRouter,
+    feedRouter
 };

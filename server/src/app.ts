@@ -41,7 +41,8 @@ import {
     reelsRouter,
     commentsRouter,
     chatRouter,
-    notificationsRouter
+    notificationsRouter,
+    feedRouter
 } from "./routes";
 
 // Auth Routes
@@ -73,6 +74,9 @@ app.use("/api/v1/chat", chatRouter);
 
 // Notification Routes
 app.use("/api/v1/notifications", notificationsRouter);
+
+// Feed Routes
+app.use("/api/v1/feed", feedRouter);
 
 // Moderators Routes
 app.use("/api/v1/moderators", moderatorsRouter);

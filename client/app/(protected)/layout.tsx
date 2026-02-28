@@ -1,4 +1,5 @@
 import { AppSidebar } from "@/components/app-sidebar";
+import { SuggestedUsersSidebar } from "@/components/feed/suggested-users-sidebar";
 import { AuthProvider, FollowProvider, ChatProvider, NotificationProvider } from "@/contexts";
 import { ProtectedShell } from "@/components/protected-shell";
 import { validateSessionServer } from "@/lib/auth.server";
@@ -26,7 +27,9 @@ export default async function Layout({
                                 <main className="flex-1 min-h-screen border-r border-border max-w-2xl">
                                     {children}
                                 </main>
-                                <aside className="hidden xl:block w-80 h-screen sticky top-0 p-4"></aside>
+                                <aside className="hidden xl:block w-80 h-screen sticky top-0 p-4 space-y-4 overflow-y-auto">
+                                    <SuggestedUsersSidebar />
+                                </aside>
                             </div>
                         </div>
                     </ProtectedShell>

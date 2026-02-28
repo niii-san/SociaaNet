@@ -10,4 +10,5 @@ import { repostsService } from "./reposts.service";
 import { savedItemsService } from "./saved-items.service";
 import { chatService } from "./chat.service";
 import { notificationService } from "./notification.service";
-export { authService, usersService, filesService, mailService, postsService, likesService, commentsService, viewsService, repostsService, savedItemsService, chatService, notificationService };
+import { feedService } from "./feed.service";
+export { authService, usersService, filesService, mailService, postsService, likesService, commentsService, viewsService, repostsService, savedItemsService, chatService, notificationService, feedService };
