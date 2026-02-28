@@ -3,6 +3,7 @@ import { AuthProvider, FollowProvider, ChatProvider } from "@/contexts";
 import { ProtectedShell } from "@/components/protected-shell";
 import { validateSessionServer } from "@/lib/auth.server";
 import { redirect } from "next/navigation";
+import React from "react";
 
 export default async function Layout({
     children
