@@ -1,7 +1,7 @@
 import { AuthHome } from "@/components/home/auth-home";
 import { UnAuthHome } from "@/components/home/unauth-home";
 import { validateSessionServer } from "@/lib/auth.server";
-import { AuthProvider } from "@/contexts";
+import { AuthProvider, FollowProvider, ChatProvider } from "@/contexts";
 import { GuestNavbar } from "@/components/guest-navbar";
 
 export default async function Page() {
@@ -18,7 +18,11 @@ export default async function Page() {
 
     return (
         <AuthProvider>
-            <AuthHome />
+            <FollowProvider>
+                <ChatProvider>
+                    <AuthHome />
+                </ChatProvider>
+            </FollowProvider>
         </AuthProvider>
     );
 }
