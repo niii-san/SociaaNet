@@ -3,5 +3,6 @@ import { filesRepo } from "./files.repository";
 import { userRepo } from "./users.repository";
 import { activityRepo } from "./activity.repository";
 import { settingsRepo } from "./settings.repository";
+import { likesRepo } from "./likes.repository";
 
-export { authRepo, userRepo, filesRepo, activityRepo, settingsRepo };
+export { authRepo, userRepo, filesRepo, activityRepo, settingsRepo, likesRepo };

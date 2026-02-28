@@ -176,3 +176,40 @@ export const updateReelVisibility = async (
 ): Promise<void> => {
     await api.patch(`/reels/${reelId}/visibility`, { visibility });
 };
+
+// Like / Unlike interfaces
+export interface LikeResponse {
+    status_code: number;
+    success: boolean;
+    message: string;
+    data: {
+        like_id?: string;
+        target_id: string;
+        target_type: "post" | "reel";
+        likes_count: number;
+    };
+}
+
+// Like a post
+export const likePost = async (postId: string): Promise<LikeResponse> => {
+    const response = await api.post(`/posts/${postId}/like`);
+    return response.data;
+};
+
+// Unlike a post
+export const unlikePost = async (postId: string): Promise<LikeResponse> => {
+    const response = await api.delete(`/posts/${postId}/like`);
+    return response.data;
+};
+
+// Like a reel
+export const likeReel = async (reelId: string): Promise<LikeResponse> => {
+    const response = await api.post(`/reels/${reelId}/like`);
+    return response.data;
+};
+
+// Unlike a reel
+export const unlikeReel = async (reelId: string): Promise<LikeResponse> => {
+    const response = await api.delete(`/reels/${reelId}/like`);
+    return response.data;
+};

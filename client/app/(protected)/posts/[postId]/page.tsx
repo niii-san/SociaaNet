@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { getPostById, updatePostVisibility, PostDetail } from "@/features/posts/posts.api";
+import { getPostById, updatePostVisibility, PostDetail, likePost, unlikePost } from "@/features/posts/posts.api";
 import { useAuth } from "@/contexts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -38,6 +38,9 @@ export default function PostDetailPage() {
     const [loading, setLoading] = useState(true);
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [updatingVisibility, setUpdatingVisibility] = useState(false);
+    const [isLiked, setIsLiked] = useState(false);
+    const [likesCount, setLikesCount] = useState(0);
+    const [likingInProgress, setLikingInProgress] = useState(false);
 
     useEffect(() => {
         const fetchPost = async () => {
@@ -47,6 +50,8 @@ export default function PostDetailPage() {
             try {
                 const data = await getPostById(postId);
                 setPost(data);
+                setIsLiked(data.is_post_liked_by_current_user);
+                setLikesCount(data.likes_count);
             } catch (error: any) {
                 console.error("Error fetching post:", error);
                 toast.error(error.response?.data?.message || "Failed to load post");
@@ -83,6 +88,32 @@ export default function PostDetailPage() {
             toast.error(error.response?.data?.message || "Failed to update visibility");
         } finally {
             setUpdatingVisibility(false);
+        }
+    };
+
+    const handleLikeToggle = async () => {
+        if (!post || likingInProgress) return;
+
+        setLikingInProgress(true);
+        // Optimistic update
+        const previousIsLiked = isLiked;
+        const previousLikesCount = likesCount;
+        setIsLiked(!isLiked);
+        setLikesCount(isLiked ? likesCount - 1 : likesCount + 1);
+
+        try {
+            if (previousIsLiked) {
+                await unlikePost(post.post_id);
+            } else {
+                await likePost(post.post_id);
+            }
+        } catch (error: any) {
+            // Revert on failure
+            setIsLiked(previousIsLiked);
+            setLikesCount(previousLikesCount);
+            toast.error(error.response?.data?.message || "Failed to update like");
+        } finally {
+            setLikingInProgress(false);
         }
     };
 
@@ -265,10 +296,16 @@ export default function PostDetailPage() {
                         <div className="p-4 space-y-4">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-4">
-                                    <Button variant="ghost" size="icon" className="hover:text-red-500">
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="hover:text-red-500"
+                                        onClick={handleLikeToggle}
+                                        disabled={likingInProgress}
+                                    >
                                         <Heart
-                                            className={`w-7 h-7 ${
-                                                post.is_post_liked_by_current_user
+                                            className={`w-7 h-7 transition-colors ${
+                                                isLiked
                                                     ? "fill-red-500 text-red-500"
                                                     : ""
                                             }`}
@@ -289,7 +326,7 @@ export default function PostDetailPage() {
                             {/* Likes count */}
                             <div>
                                 <p className="font-semibold text-sm">
-                                    {post.likes_count} {post.likes_count === 1 ? "like" : "likes"}
+                                    {likesCount} {likesCount === 1 ? "like" : "likes"}
                                 </p>
                             </div>
 

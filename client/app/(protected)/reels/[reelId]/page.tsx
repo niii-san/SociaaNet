@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { getReelById, updateReelVisibility, ReelDetail } from "@/features/posts/posts.api";
+import { getReelById, updateReelVisibility, ReelDetail, likeReel, unlikeReel } from "@/features/posts/posts.api";
 import { useAuth } from "@/contexts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -43,6 +43,9 @@ export default function ReelDetailPage() {
     const [updatingVisibility, setUpdatingVisibility] = useState(false);
     const [isPlaying, setIsPlaying] = useState(false);
     const [isMuted, setIsMuted] = useState(false);
+    const [isLiked, setIsLiked] = useState(false);
+    const [likesCount, setLikesCount] = useState(0);
+    const [likingInProgress, setLikingInProgress] = useState(false);
 
     useEffect(() => {
         const fetchReel = async () => {
@@ -52,6 +55,8 @@ export default function ReelDetailPage() {
             try {
                 const data = await getReelById(reelId);
                 setReel(data);
+                setIsLiked(data.is_reel_liked_by_current_user);
+                setLikesCount(data.likes_count);
             } catch (error: any) {
                 console.error("Error fetching reel:", error);
                 toast.error(error.response?.data?.message || "Failed to load reel");
@@ -108,6 +113,32 @@ export default function ReelDetailPage() {
             toast.error(error.response?.data?.message || "Failed to update visibility");
         } finally {
             setUpdatingVisibility(false);
+        }
+    };
+
+    const handleLikeToggle = async () => {
+        if (!reel || likingInProgress) return;
+
+        setLikingInProgress(true);
+        // Optimistic update
+        const previousIsLiked = isLiked;
+        const previousLikesCount = likesCount;
+        setIsLiked(!isLiked);
+        setLikesCount(isLiked ? likesCount - 1 : likesCount + 1);
+
+        try {
+            if (previousIsLiked) {
+                await unlikeReel(reel.reel_id);
+            } else {
+                await likeReel(reel.reel_id);
+            }
+        } catch (error: any) {
+            // Revert on failure
+            setIsLiked(previousIsLiked);
+            setLikesCount(previousLikesCount);
+            toast.error(error.response?.data?.message || "Failed to update like");
+        } finally {
+            setLikingInProgress(false);
         }
     };
 
@@ -294,10 +325,16 @@ export default function ReelDetailPage() {
                         <div className="p-4 space-y-4">
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-4">
-                                    <Button variant="ghost" size="icon" className="hover:text-red-500">
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="hover:text-red-500"
+                                        onClick={handleLikeToggle}
+                                        disabled={likingInProgress}
+                                    >
                                         <Heart
-                                            className={`w-7 h-7 ${
-                                                reel.is_reel_liked_by_current_user
+                                            className={`w-7 h-7 transition-colors ${
+                                                isLiked
                                                     ? "fill-red-500 text-red-500"
                                                     : ""
                                             }`}
@@ -318,7 +355,7 @@ export default function ReelDetailPage() {
                             {/* Likes and Views count */}
                             <div className="flex items-center gap-4 text-sm">
                                 <p className="font-semibold">
-                                    {reel.likes_count} {reel.likes_count === 1 ? "like" : "likes"}
+                                    {likesCount} {likesCount === 1 ? "like" : "likes"}
                                 </p>
                                 <span className="text-muted-foreground">•</span>
                                 <p className="text-muted-foreground">

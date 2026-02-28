@@ -1,5 +1,5 @@
 import { ErrorCodes } from "../constants/error-code";
-import { filesRepo, userRepo } from "../repositories";
+import { filesRepo, userRepo, likesRepo } from "../repositories";
 import {
     convertImageKeyToImageUrl,
     convertVideoKeyToVideoUrl,
@@ -57,7 +57,11 @@ class PostsService {
         //TODO: load comments
 
         const comments: any = [];
-        const is_post_liked_by_current_user = false; //TODO: check if the post is liked by the current user
+        const is_post_liked_by_current_user = await likesRepo.isLikedByUser(
+            currentUserId,
+            postId,
+            "post"
+        );
 
         return {
             post_id: post._id.toString(),
@@ -120,7 +124,11 @@ class PostsService {
 
         const videoUrl = convertVideoKeyToVideoUrl(reel.media_key);
         const comments: any = []; //TODO:
-        const is_reel_liked_by_current_user = false; //TODO: check if the reel is liked by the current user
+        const is_reel_liked_by_current_user = await likesRepo.isLikedByUser(
+            userId,
+            reelId,
+            "reel"
+        );
 
         return {
             reel_id: reel._id.toString(),

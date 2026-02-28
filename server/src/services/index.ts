@@ -3,4 +3,5 @@ import { filesService } from "./files.service";
 import { mailService } from "./mail.service";
 import { postsService } from "./posts.service";
 import { usersService } from "./users.service";
-export { authService, usersService, filesService, mailService, postsService };
+import { likesService } from "./likes.service";
+export { authService, usersService, filesService, mailService, postsService, likesService };
