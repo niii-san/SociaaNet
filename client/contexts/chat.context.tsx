@@ -206,7 +206,11 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         // Conversation updated (new message in another conversation)
         s.on("conversation:updated", () => {
             refreshConversations();
-            refreshUnreadCount();
+        });
+
+        // Real-time unread count from server
+        s.on("unread:update", (data: { total: number }) => {
+            setUnreadTotal(data.total);
         });
 
         setSocket(s);

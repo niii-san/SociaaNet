@@ -230,7 +230,13 @@ export default function Page() {
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center justify-between gap-2">
-                                        <h3 className="font-semibold truncate">
+                                        <h3
+                                            className={`truncate ${
+                                                conv.unread_count > 0
+                                                    ? "font-bold"
+                                                    : "font-semibold"
+                                            }`}
+                                        >
                                             {name}
                                         </h3>
                                         <div className="flex items-center gap-1.5 shrink-0">
@@ -259,13 +265,28 @@ export default function Page() {
                                             </button>
                                         </div>
                                     </div>
-                                    <p className="text-sm text-muted-foreground truncate mt-0.5">
-                                        {conv.type === "group" &&
-                                        conv.last_message?.sender
-                                            ? `${conv.last_message.sender.full_name}: `
-                                            : ""}
-                                        {getLastMessagePreview(conv)}
-                                    </p>
+                                    <div className="flex items-center justify-between gap-2 mt-0.5">
+                                        <p
+                                            className={`text-sm truncate flex-1 ${
+                                                conv.unread_count > 0
+                                                    ? "text-foreground font-medium"
+                                                    : "text-muted-foreground"
+                                            }`}
+                                        >
+                                            {conv.type === "group" &&
+                                            conv.last_message?.sender
+                                                ? `${conv.last_message.sender.full_name}: `
+                                                : ""}
+                                            {getLastMessagePreview(conv)}
+                                        </p>
+                                        {conv.unread_count > 0 && (
+                                            <span className="bg-primary text-primary-foreground text-[10px] font-bold rounded-full min-w-5 h-5 flex items-center justify-center px-1.5 shrink-0">
+                                                {conv.unread_count > 99
+                                                    ? "99+"
+                                                    : conv.unread_count}
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
                             </Link>
                         );

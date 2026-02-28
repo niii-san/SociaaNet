@@ -80,13 +80,52 @@ class ChatRepository {
 
     // Get user's conversations with last message and participant info
     async getUserConversations(userId: string): Promise<any[]> {
+        const userObjectId = new mongoose.Types.ObjectId(userId);
+
         const conversations = await Conversation.aggregate([
             {
                 $match: {
-                    participants: new mongoose.Types.ObjectId(userId)
+                    participants: userObjectId
                 }
             },
             { $sort: { last_message_at: -1 } },
+            // Count all unread messages in each conversation
+            {
+                $lookup: {
+                    from: "messages",
+                    let: { convId: "$_id" },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: {
+                                    $and: [
+                                        { $eq: ["$conversation_id", "$$convId"] },
+                                        { $ne: ["$sender_id", userObjectId] },
+                                        {
+                                            $not: {
+                                                $in: [
+                                                    userObjectId,
+                                                    {
+                                                        $map: {
+                                                            input: {
+                                                                $ifNull: ["$read_by", []]
+                                                            },
+                                                            as: "r",
+                                                            in: "$$r.user_id"
+                                                        }
+                                                    }
+                                                ]
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        },
+                        { $count: "count" }
+                    ],
+                    as: "unread_messages"
+                }
+            },
             // Lookup last message
             {
                 $lookup: {
@@ -161,41 +200,10 @@ class ChatRepository {
                         }
                     },
                     unread_count: {
-                        $cond: {
-                            if: {
-                                $and: [
-                                    { $ne: ["$last_message_data", null] },
-                                    {
-                                        $eq: [
-                                            {
-                                                $size: {
-                                                    $filter: {
-                                                        input: {
-                                                            $ifNull: [
-                                                                "$last_message_data.read_by",
-                                                                []
-                                                            ]
-                                                        },
-                                                        as: "r",
-                                                        cond: {
-                                                            $eq: [
-                                                                "$$r.user_id",
-                                                                new mongoose.Types.ObjectId(
-                                                                    userId
-                                                                )
-                                                            ]
-                                                        }
-                                                    }
-                                                }
-                                            },
-                                            0
-                                        ]
-                                    }
-                                ]
-                            },
-                            then: 1,
-                            else: 0
-                        }
+                        $ifNull: [
+                            { $arrayElemAt: ["$unread_messages.count", 0] },
+                            0
+                        ]
                     }
                 }
             }

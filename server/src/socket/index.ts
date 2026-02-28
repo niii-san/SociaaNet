@@ -103,6 +103,11 @@ export function setupSocketIO(httpServer: http.Server): SocketIOServer {
                     conversationId,
                     userId
                 });
+                // Update unread count for user
+                const unreadCount = await chatRepo.getUnreadCount(userId);
+                io.to(`user:${userId}`).emit("unread:update", {
+                    total: unreadCount
+                });
             } catch {
                 socket.emit("error", { message: "Cannot join conversation" });
             }
@@ -158,7 +163,8 @@ export function setupSocketIO(httpServer: http.Server): SocketIOServer {
                         data.conversationId
                     );
                     if (conv) {
-                        conv.participants.forEach((pid) => {
+                        // Send unread count update to each other participant
+                        for (const pid of conv.participants) {
                             const pidStr = pid.toString();
                             if (pidStr !== userId) {
                                 io.to(`user:${pidStr}`).emit(
@@ -167,8 +173,17 @@ export function setupSocketIO(httpServer: http.Server): SocketIOServer {
                                         conversationId: data.conversationId
                                     }
                                 );
+                                // Send real-time unread count
+                                const unreadCount =
+                                    await chatRepo.getUnreadCount(pidStr);
+                                io.to(`user:${pidStr}`).emit(
+                                    "unread:update",
+                                    {
+                                        total: unreadCount
+                                    }
+                                );
                             }
-                        });
+                        }
                     }
                 } catch (err: any) {
                     socket.emit("error", {
@@ -219,6 +234,12 @@ export function setupSocketIO(httpServer: http.Server): SocketIOServer {
                             userId
                         }
                     );
+                    // Update unread count for the reader
+                    const unreadCount =
+                        await chatRepo.getUnreadCount(userId);
+                    io.to(`user:${userId}`).emit("unread:update", {
+                        total: unreadCount
+                    });
                 } catch {
                     // silently ignore
                 }
