@@ -6,6 +6,7 @@ import { Activity, ActivityDocument } from "./activity-model";
 import { Follow, FollowDocument } from "./follow.model";
 import { Conversation, ConversationDocument } from "./conversation.model";
 import { Message, MessageDocument } from "./message.model";
+import { Notification, NotificationDocument } from "./notification.model";
 
 export {
     User,
@@ -23,5 +24,7 @@ export {
     Conversation,
     ConversationDocument,
     Message,
-    MessageDocument
+    MessageDocument,
+    Notification,
+    NotificationDocument
 };

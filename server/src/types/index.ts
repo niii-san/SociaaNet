@@ -14,6 +14,7 @@ import { WatchHistoryEntity } from "./watch-history.type";
 import { RepostEntity } from "./repost.type";
 import { SavedItemEntity } from "./saved-item.type";
 import { ConversationEntity, MessageEntity, MessageReaction, MessageReadReceipt } from "./conversation.type";
+import { NotificationEntity, NotificationType } from "./notification.type";
 
 export {
     UserEntity,
@@ -35,5 +36,7 @@ export {
     ConversationEntity,
     MessageEntity,
     MessageReaction,
-    MessageReadReceipt
+    MessageReadReceipt,
+    NotificationEntity,
+    NotificationType
 };
