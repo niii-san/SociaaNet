@@ -48,6 +48,22 @@ export function MessageBubble({
             <div
                 className={`flex ${isMine ? "justify-end" : "justify-start"} px-4 py-0.5`}
             >
+                {/* Avatar for received messages */}
+                {!isMine && (
+                    <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center overflow-hidden shrink-0 mr-2 mt-auto mb-1">
+                        {message.sender.avatar_url ? (
+                            <img
+                                src={message.sender.avatar_url}
+                                alt={message.sender.full_name}
+                                className="w-full h-full object-cover"
+                            />
+                        ) : (
+                            <span className="text-[10px] font-semibold text-muted-foreground">
+                                {message.sender.full_name?.[0]?.toUpperCase()}
+                            </span>
+                        )}
+                    </div>
+                )}
                 <div className="max-w-[75%]">
                     {!isMine && isGroup && (
                         <p className="text-[10px] text-muted-foreground mb-0.5 ml-1">
@@ -77,6 +93,22 @@ export function MessageBubble({
                 if (!showEmojiPicker) setShowEmojiPicker(false);
             }}
         >
+            {/* Avatar for received messages */}
+            {!isMine && (
+                <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center overflow-hidden shrink-0 mr-2 mt-auto mb-1">
+                    {message.sender.avatar_url ? (
+                        <img
+                            src={message.sender.avatar_url}
+                            alt={message.sender.full_name}
+                            className="w-full h-full object-cover"
+                        />
+                    ) : (
+                        <span className="text-[10px] font-semibold text-muted-foreground">
+                            {message.sender.full_name?.[0]?.toUpperCase()}
+                        </span>
+                    )}
+                </div>
+            )}
             <div className={`max-w-[75%] ${isMine ? "items-end" : "items-start"}`}>
                 {/* Sender name for group chats */}
                 {!isMine && isGroup && (
