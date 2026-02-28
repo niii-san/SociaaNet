@@ -95,6 +95,17 @@ class FilesService {
             visibility
         );
 
+        for (let i = 0; i < images.data.images.length; i++) {
+            await filesRepo.createImageMetaData(
+                userId,
+                images.data.images[i].image_key,
+                images.data.images[i].image_id,
+                visibility,
+                undefined,
+                post._id.toString()
+            );
+        }
+
         return {
             post_id: post._id,
             image_urls: post.media_keys.map((key) =>

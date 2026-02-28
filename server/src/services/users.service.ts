@@ -9,8 +9,13 @@ import {
     UpdateUsernameDto,
     UploadAvatarDto
 } from "../dtos";
-import { HttpError, convertImageKeyToImageUrl } from "../utils";
-import { activityRepo, authRepo, userRepo } from "../repositories";
+import {
+    HttpError,
+    convertImageKeyToImageUrl,
+    convertThumbnailKeytoThumbnailUrl,
+    convertVideoKeyToVideoUrl
+} from "../utils";
+import { activityRepo, authRepo, filesRepo, userRepo } from "../repositories";
 import { fileServiceClient } from "../clients";
 import { Types } from "mongoose";
 import { UserFieldRequirements } from "../constants";
@@ -68,6 +73,56 @@ class UsersService {
                 ? convertImageKeyToImageUrl(user.avatar_key)
                 : null;
 
+        if(user.is_private_account && !user.is_following && dto.currentUserId !== user._id.toString()) {
+            return {
+                user_id: user._id,
+                full_name: user.full_name,
+                username: user.username,
+                is_private_account: user.is_private_account,
+                followers_count: user.followers_count,
+                following_count: user.following_count,
+                bio: user.bio,
+                avatar_url: avatar_url,
+                created_at: user.created_at,
+                is_own_profile: dto.currentUserId === user._id.toString(),
+                is_following: user.is_following
+            };
+        }
+
+        const posts = await filesRepo.getUserPostsByUserId(user._id.toString());
+        const reels = await filesRepo.getUserReelsByUserId(user._id.toString());
+
+        
+
+        const reelsPayload = reels.map((reel) => ({
+            reel_id: reel._id,
+            media_url: convertVideoKeyToVideoUrl(reel.media_key),
+            thumbnail_url: convertThumbnailKeytoThumbnailUrl(
+                reel.thumbnail_key
+            ),
+            caption: reel.caption,
+            hashtags: reel.hashtags,
+            views_count: reel.views_count,
+            likes_count: reel.likes_count,
+            comments_count: reel.comments_count,
+            comments: [],
+            duration_seconds: reel.duration_seconds,
+            created_at: reel.created_at
+        }));
+
+        const postsPayload = posts.map((post) => ({
+            post_id: post._id,
+            media_urls: post.media_keys.map((key) =>
+                convertImageKeyToImageUrl(key)
+            ),
+            caption: post.caption,
+            comments_count: post.comments_count,
+            likes_count: post.likes_count,
+            comments: [],
+            hashtags: post.hashtags,
+            created_at: post.created_at
+        }));
+
         return {
             user_id: user._id,
             full_name: user.full_name,
@@ -78,6 +133,10 @@ class UsersService {
             bio: user.bio,
             avatar_url: avatar_url,
             created_at: user.created_at,
+            posts_count: posts.length,
+            reels_count: reels.length,
+            posts: postsPayload,
+            reels: reelsPayload,
             is_own_profile: dto.currentUserId === user._id.toString(),
             is_following: user.is_following
         };

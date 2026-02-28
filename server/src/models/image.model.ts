@@ -18,6 +18,13 @@ const imageMetaDataSchema = new mongoose.Schema<ImageMetaDataEntity>(
             type: String,
             required: true
         },
+
+        post_id: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Post",
+            default: null
+        },
+
         image_id: {
             type: String,
             required: true,
@@ -25,7 +32,7 @@ const imageMetaDataSchema = new mongoose.Schema<ImageMetaDataEntity>(
         },
         visibility: {
             type: String,
-            enum: ["public", "followers", "chat_only"],
+            enum: ["public", "followers", "private", "chat_only"],
             required: true
         },
         is_deleted: {

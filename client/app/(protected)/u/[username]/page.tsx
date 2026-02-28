@@ -12,7 +12,8 @@ import { RepostsGrid } from "@/components/profile/reposts-grid";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { MiniLoader } from "@/components/ui/mini-loader";
-import { UserX } from "lucide-react";
+import { UserX, Lock } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 
 export default function ProfilePage() {
     const { username } = useParams<{ username: string }>();
@@ -85,37 +86,55 @@ export default function ProfilePage() {
 
                         <Separator className="my-6" />
 
-                        <Tabs defaultValue="posts" className="w-full">
-                            <TabsList className="w-full justify-start rounded-none border-b bg-transparent p-0 h-auto">
-                                <TabsTrigger
-                                    value="posts"
-                                    className="rounded-none border-b-2 border-transparent px-4 py-2 font-semibold text-muted-foreground data-[state=active]:border-primary data-[state=active]:text-foreground"
-                                >
-                                    Posts
-                                </TabsTrigger>
-                                <TabsTrigger
-                                    value="reels"
-                                    className="rounded-none border-b-2 border-transparent px-4 py-2 font-semibold text-muted-foreground data-[state=active]:border-primary data-[state=active]:text-foreground"
-                                >
-                                    Reels
-                                </TabsTrigger>
-                                <TabsTrigger
-                                    value="reposts"
-                                    className="rounded-none border-b-2 border-transparent px-4 py-2 font-semibold text-muted-foreground data-[state=active]:border-primary data-[state=active]:text-foreground"
-                                >
-                                    Reposts
-                                </TabsTrigger>
-                            </TabsList>
-                            <TabsContent value="posts" className="mt-6">
-                                <PostsGrid posts={[]} />
-                            </TabsContent>
-                            <TabsContent value="reels" className="mt-6">
-                                <ReelsGrid reels={[]} />
-                            </TabsContent>
-                            <TabsContent value="reposts" className="mt-6">
-                                <RepostsGrid reposts={[]} />
-                            </TabsContent>
-                        </Tabs>
+                        {/* Check if account is private and user is not following */}
+                        {profileData.is_private_account && !profileData.is_following && !profileData.is_own_profile ? (
+                            <div className="flex flex-col items-center justify-center min-h-[50vh] gap-6">
+                                <div className="relative">
+                                    <div className="absolute inset-0 rounded-full bg-muted/50 blur-2xl" />
+                                    <div className="relative rounded-full bg-muted p-8">
+                                        <Lock className="w-16 h-16 text-muted-foreground" />
+                                    </div>
+                                </div>
+                                <div className="text-center space-y-2">
+                                    <h2 className="text-2xl font-bold">This Account is Private</h2>
+                                    <p className="text-muted-foreground max-w-md">
+                                        Follow this account to see their posts and reels.
+                                    </p>
+                                </div>
+                            </div>
+                        ) : (
+                            <Tabs defaultValue="posts" className="w-full">
+                                <TabsList className="w-full justify-start rounded-none border-b bg-transparent p-0 h-auto">
+                                    <TabsTrigger
+                                        value="posts"
+                                        className="rounded-none border-b-2 border-transparent px-4 py-2 font-semibold text-muted-foreground data-[state=active]:border-primary data-[state=active]:text-foreground"
+                                    >
+                                        Posts
+                                    </TabsTrigger>
+                                    <TabsTrigger
+                                        value="reels"
+                                        className="rounded-none border-b-2 border-transparent px-4 py-2 font-semibold text-muted-foreground data-[state=active]:border-primary data-[state=active]:text-foreground"
+                                    >
+                                        Reels
+                                    </TabsTrigger>
+                                    <TabsTrigger
+                                        value="reposts"
+                                        className="rounded-none border-b-2 border-transparent px-4 py-2 font-semibold text-muted-foreground data-[state=active]:border-primary data-[state=active]:text-foreground"
+                                    >
+                                        Reposts
+                                    </TabsTrigger>
+                                </TabsList>
+                                <TabsContent value="posts" className="mt-6">
+                                    <PostsGrid posts={profileData.posts || []} />
+                                </TabsContent>
+                                <TabsContent value="reels" className="mt-6">
+                                    <ReelsGrid reels={profileData.reels || []} />
+                                </TabsContent>
+                                <TabsContent value="reposts" className="mt-6">
+                                    <RepostsGrid reposts={[]} />
+                                </TabsContent>
+                            </Tabs>
+                        )}
                     </>
                 ) : (
                     <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6">

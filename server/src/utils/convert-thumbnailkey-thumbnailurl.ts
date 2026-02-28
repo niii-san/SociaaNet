@@ -4,6 +4,6 @@ export const convertThumbnailKeytoThumbnailUrl = (
     thumbnailUrl: string
 ): string => {
     const baseUrl = env.base_url;
-    const url = `${baseUrl}/api/v1/files/thumbnail/${thumbnailUrl}`;
+    const url = `${baseUrl}/api/v1/files/thumbnails/${thumbnailUrl}`;
     return url;
 };

@@ -15,6 +15,15 @@ interface IFilesRepository {
         visibility: "public" | "private" | "followers"
     ): Promise<PostDocument>;
 
+    createImageMetaData(
+        uploaderId: string,
+        imageKey: string,
+        imageId: string,
+        visibility: "public" | "followers" | "private" | "chat_only",
+        chatId?: string,
+        postId?: string
+    ): Promise<ImageMetaDataDocument>;
+
     deletePost(postId: string): Promise<boolean>;
     createReel(
         userId: string,
@@ -26,6 +35,8 @@ interface IFilesRepository {
         duration_seconds: number
     ): Promise<ReelDocument>;
     getReelByVideoKey(videoKey: string): Promise<ReelDocument | null>;
+    getUserPostsByUserId(userId: string): Promise<PostDocument[]>;
+    getUserReelsByUserId(userId: string): Promise<ReelDocument[]>;
 }
 
 class FilesRepository implements IFilesRepository {
@@ -54,6 +65,26 @@ class FilesRepository implements IFilesRepository {
         return {
             image_key: data?.image_key.toString() || ""
         };
+    }
+
+    async createImageMetaData(
+        uploaderId: string,
+        imageKey: string,
+        imageId: string,
+        visibility: "public" | "followers" | "private" | "chat_only",
+        chatId?: string,
+        postId?: string
+    ): Promise<ImageMetaDataDocument> {
+        const imageMetaData = await ImageMetaData.create({
+            uploader_id: uploaderId,
+            image_key: imageKey,
+            image_id: imageId,
+            visibility,
+            chat_id: chatId || null,
+            post_id: postId || null
+        });
+
+        return imageMetaData;
     }
 
     async createPost(
@@ -118,6 +149,26 @@ class FilesRepository implements IFilesRepository {
         });
 
         return reel;
+    }
+
+    async getUserPostsByUserId(userId: string): Promise<PostDocument[]> {
+        const posts = await Post.find({
+            author: userId,
+            is_deleted: false,
+            is_removed_by_moderator: false
+        }).sort({ created_at: -1 });
+
+        return posts;
+    }
+
+    async getUserReelsByUserId(userId: string): Promise<ReelDocument[]> {
+        const reels = await Reel.find({
+            author: userId,
+            is_deleted: false,
+            is_removed_by_moderator: false
+        }).sort({ created_at: -1 });
+
+        return reels;
     }
 }
 
