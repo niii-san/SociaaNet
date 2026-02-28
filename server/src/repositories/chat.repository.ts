@@ -354,7 +354,7 @@ class ChatRepository {
                             else: null
                         }
                     },
-                    unread_count: 0
+                    unread_count: { $literal: 0 }
                 }
             }
         ]);
@@ -991,7 +991,7 @@ class ChatRepository {
                             else: null
                         }
                     },
-                    unread_count: 0
+                    unread_count: { $literal: 0 }
                 }
             }
         ]);
