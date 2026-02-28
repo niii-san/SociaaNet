@@ -10,8 +10,13 @@ import { ChatHeader } from "@/components/chat/chat-header";
 import { ChatInput } from "@/components/chat/chat-input";
 import { MessageBubble } from "@/components/chat/message-bubble";
 import { GroupInfoDialog } from "@/components/chat/group-info-dialog";
-import { Loader2, MessageCircle } from "lucide-react";
+import { Loader2, MessageCircle, Check, X, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import {
+    acceptMessageRequest,
+    rejectMessageRequest
+} from "@/features/chat/chat.api";
 
 export default function Page() {
     const params = useParams();
@@ -20,6 +25,7 @@ export default function Page() {
     const { data: currentUser } = useAuth();
     const {
         conversations,
+        messageRequests,
         joinConversation,
         leaveConversation,
         sendMessage,
@@ -37,7 +43,8 @@ export default function Page() {
         onMessageUnreacted,
         onMessageDeleted,
         onConversationDeleted,
-        refreshConversations
+        refreshConversations,
+        refreshMessageRequests
     } = useChat();
 
     const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -48,14 +55,26 @@ export default function Page() {
     const [replyTo, setReplyTo] = useState<ChatMessage | null>(null);
     const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
     const [showInfo, setShowInfo] = useState(false);
+    const [respondingToRequest, setRespondingToRequest] = useState(false);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const messagesContainerRef = useRef<HTMLDivElement>(null);
     const isInitialLoad = useRef(true);
 
+    // Check both conversations and messageRequests for the current conversation
     const conversation = conversations.find(
         (c) => c.conversation_id === conversationId || c._id === conversationId
+    ) || messageRequests.find(
+        (c) => c.conversation_id === conversationId || c._id === conversationId
     );
+
+    const isPendingRequest =
+        conversation?.request_status === "pending" &&
+        conversation?.created_by !== currentUser?.user_id;
+
+    const isSenderPending =
+        conversation?.request_status === "pending" &&
+        conversation?.created_by === currentUser?.user_id;
 
     // Join conversation on mount
     useEffect(() => {
@@ -302,6 +321,33 @@ export default function Page() {
         };
     }, [conversationId, currentUser?.user_id]);
 
+    const handleAcceptRequest = async () => {
+        try {
+            setRespondingToRequest(true);
+            await acceptMessageRequest(conversationId);
+            toast.success("Message request accepted");
+            await Promise.all([refreshConversations(), refreshMessageRequests()]);
+        } catch {
+            toast.error("Failed to accept request");
+        } finally {
+            setRespondingToRequest(false);
+        }
+    };
+
+    const handleRejectRequest = async () => {
+        try {
+            setRespondingToRequest(true);
+            await rejectMessageRequest(conversationId);
+            toast.success("Message request rejected");
+            await refreshMessageRequests();
+            router.push("/inbox");
+        } catch {
+            toast.error("Failed to reject request");
+        } finally {
+            setRespondingToRequest(false);
+        }
+    };
+
     const handleSend = (data: {
         content?: string;
         messageType?: "text" | "image" | "video" | "mixed";
@@ -460,14 +506,69 @@ export default function Page() {
                 <div ref={messagesEndRef} />
             </div>
 
-            {/* Input */}
-            <ChatInput
-                onSend={handleSend}
-                replyTo={replyTo}
-                onCancelReply={() => setReplyTo(null)}
-                onTypingStart={() => startTyping(conversationId)}
-                onTypingStop={() => stopTyping(conversationId)}
-            />
+            {/* Message Request Banner or Input */}
+            {isPendingRequest ? (
+                <div className="border-t border-border bg-muted/30 p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                        <ShieldAlert className="w-5 h-5 text-muted-foreground" />
+                        <p className="text-sm text-muted-foreground">
+                            <span className="font-medium text-foreground">
+                                {conversation?.participants.find(
+                                    (p) => p.user_id !== currentUser?.user_id
+                                )?.full_name || "This user"}
+                            </span>{" "}
+                            wants to send you a message
+                        </p>
+                    </div>
+                    <div className="flex gap-2">
+                        <Button
+                            variant="outline"
+                            className="flex-1 gap-1.5 text-destructive hover:text-destructive hover:bg-destructive/10"
+                            onClick={handleRejectRequest}
+                            disabled={respondingToRequest}
+                        >
+                            {respondingToRequest ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                                <X className="w-4 h-4" />
+                            )}
+                            Reject
+                        </Button>
+                        <Button
+                            className="flex-1 gap-1.5"
+                            onClick={handleAcceptRequest}
+                            disabled={respondingToRequest}
+                        >
+                            {respondingToRequest ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                                <Check className="w-4 h-4" />
+                            )}
+                            Accept
+                        </Button>
+                    </div>
+                </div>
+            ) : isSenderPending ? (
+                <div className="border-t border-border bg-muted/30 p-4 text-center">
+                    <p className="text-sm text-muted-foreground">
+                        Waiting for{" "}
+                        <span className="font-medium text-foreground">
+                            {conversation?.participants.find(
+                                (p) => p.user_id !== currentUser?.user_id
+                            )?.full_name || "this user"}
+                        </span>{" "}
+                        to accept your message request
+                    </p>
+                </div>
+            ) : (
+                <ChatInput
+                    onSend={handleSend}
+                    replyTo={replyTo}
+                    onCancelReply={() => setReplyTo(null)}
+                    onTypingStart={() => startTyping(conversationId)}
+                    onTypingStop={() => stopTyping(conversationId)}
+                />
+            )}
 
             {/* Group Info / Chat Info Dialog */}
             {conversation && (

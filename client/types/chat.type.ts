@@ -1,3 +1,5 @@
+export type MessageRequestStatus = "none" | "pending" | "accepted" | "rejected";
+
 export interface ChatParticipant {
     user_id: string;
     username: string;
@@ -28,6 +30,8 @@ export interface ChatConversation {
     last_message_at: string;
     created_at: string;
     unread_count: number;
+    request_status: MessageRequestStatus;
+    created_by?: string;
 }
 
 export interface MessageReaction {

@@ -4,12 +4,18 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts";
 import { useChat } from "@/contexts/chat.context";
 import { ChatConversation } from "@/types";
-import { Mail, Plus, Users, Search, MessageCircle, Trash2, Loader2 } from "lucide-react";
+import { Mail, Plus, Users, Search, MessageCircle, Trash2, Loader2, MailQuestion, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Link from "next/link";
 import { NewChatDialog } from "@/components/chat/new-chat-dialog";
-import { getUsersActivity, deleteConversation as deleteConversationAPI } from "@/features/chat/chat.api";
+import {
+    getUsersActivity,
+    deleteConversation as deleteConversationAPI,
+    acceptMessageRequest,
+    rejectMessageRequest
+} from "@/features/chat/chat.api";
 import { toast } from "sonner";
 
 function getConversationName(
@@ -57,12 +63,21 @@ function getLastMessagePreview(conv: ChatConversation): string {
 
 export default function Page() {
     const { data: currentUser, settings: userSettings } = useAuth();
-    const { conversations, onlineUsers, refreshConversations } = useChat();
+    const {
+        conversations,
+        messageRequests,
+        requestCount,
+        onlineUsers,
+        refreshConversations,
+        refreshMessageRequests
+    } = useChat();
     const myActivityOff =
         userSettings?.privacy?.show_activity_status === false;
     const [searchQuery, setSearchQuery] = useState("");
     const [showNewChat, setShowNewChat] = useState(false);
     const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [respondingId, setRespondingId] = useState<string | null>(null);
+    const [activeTab, setActiveTab] = useState("chats");
     const [activityData, setActivityData] = useState<
         Record<
             string,
@@ -112,6 +127,42 @@ export default function Page() {
         }
     };
 
+    const handleAcceptRequest = async (
+        e: React.MouseEvent,
+        convId: string
+    ) => {
+        e.preventDefault();
+        e.stopPropagation();
+        try {
+            setRespondingId(convId);
+            await acceptMessageRequest(convId);
+            toast.success("Message request accepted");
+            await Promise.all([refreshConversations(), refreshMessageRequests()]);
+        } catch {
+            toast.error("Failed to accept request");
+        } finally {
+            setRespondingId(null);
+        }
+    };
+
+    const handleRejectRequest = async (
+        e: React.MouseEvent,
+        convId: string
+    ) => {
+        e.preventDefault();
+        e.stopPropagation();
+        try {
+            setRespondingId(convId);
+            await rejectMessageRequest(convId);
+            toast.success("Message request rejected");
+            await refreshMessageRequests();
+        } catch {
+            toast.error("Failed to reject request");
+        } finally {
+            setRespondingId(null);
+        }
+    };
+
     const filteredConversations = conversations.filter((conv) => {
         if (!searchQuery) return true;
         const name = getConversationName(
@@ -150,150 +201,271 @@ export default function Page() {
                 </div>
             </header>
 
-            {/* Conversations List */}
-            <div className="divide-y divide-border">
-                {filteredConversations.length === 0 ? (
-                    <div className="text-center py-16">
-                        <MessageCircle className="w-16 h-16 mx-auto text-muted-foreground/40 mb-4" />
-                        <h3 className="text-lg font-semibold mb-2">
-                            {searchQuery
-                                ? "No conversations found"
-                                : "No conversations yet"}
-                        </h3>
-                        <p className="text-muted-foreground mb-6">
-                            {searchQuery
-                                ? "Try a different search"
-                                : "Start chatting with your friends!"}
-                        </p>
-                        {!searchQuery && (
-                            <Button
-                                className="gap-2"
-                                onClick={() => setShowNewChat(true)}
-                            >
-                                <Plus className="w-4 h-4" />
-                                Start a conversation
-                            </Button>
+            {/* Tabs */}
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+                <TabsList className="w-full rounded-none border-b border-border bg-transparent p-0">
+                    <TabsTrigger
+                        value="chats"
+                        className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-3"
+                    >
+                        Chats
+                    </TabsTrigger>
+                    <TabsTrigger
+                        value="requests"
+                        className="flex-1 rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:bg-transparent py-3 gap-1.5"
+                    >
+                        Requests
+                        {requestCount > 0 && (
+                            <span className="bg-primary text-primary-foreground text-[10px] font-bold rounded-full min-w-5 h-5 flex items-center justify-center px-1.5">
+                                {requestCount > 99 ? "99+" : requestCount}
+                            </span>
+                        )}
+                    </TabsTrigger>
+                </TabsList>
+
+                {/* Chats Tab */}
+                <TabsContent value="chats" className="mt-0">
+                    <div className="divide-y divide-border">
+                        {filteredConversations.length === 0 ? (
+                            <div className="text-center py-16">
+                                <MessageCircle className="w-16 h-16 mx-auto text-muted-foreground/40 mb-4" />
+                                <h3 className="text-lg font-semibold mb-2">
+                                    {searchQuery
+                                        ? "No conversations found"
+                                        : "No conversations yet"}
+                                </h3>
+                                <p className="text-muted-foreground mb-6">
+                                    {searchQuery
+                                        ? "Try a different search"
+                                        : "Start chatting with your friends!"}
+                                </p>
+                                {!searchQuery && (
+                                    <Button
+                                        className="gap-2"
+                                        onClick={() => setShowNewChat(true)}
+                                    >
+                                        <Plus className="w-4 h-4" />
+                                        Start a conversation
+                                    </Button>
+                                )}
+                            </div>
+                        ) : (
+                            filteredConversations.map((conv) => {
+                                const name = getConversationName(
+                                    conv,
+                                    currentUser?.user_id || ""
+                                );
+                                const avatar = getConversationAvatar(
+                                    conv,
+                                    currentUser?.user_id || ""
+                                );
+                                const otherUser = conv.participants.find(
+                                    (p) => p.user_id !== currentUser?.user_id
+                                );
+                                const otherActivity = otherUser
+                                    ? activityData[otherUser.user_id]
+                                    : null;
+                                const showActivity =
+                                    !myActivityOff &&
+                                    otherActivity?.show_activity_status !== false;
+                                const isOnline =
+                                    conv.type === "direct" &&
+                                    showActivity &&
+                                    (otherActivity?.is_online ||
+                                        (otherUser &&
+                                            onlineUsers.has(otherUser.user_id)));
+
+                                return (
+                                    <Link
+                                        key={conv.conversation_id}
+                                        href={`/inbox/${conv.conversation_id}`}
+                                        className="group flex items-center gap-3 p-4 hover:bg-muted/50 transition-colors relative"
+                                    >
+                                        <div className="relative shrink-0">
+                                            <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center overflow-hidden">
+                                                {avatar ? (
+                                                    <img
+                                                        src={avatar}
+                                                        alt={name}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                ) : conv.type === "group" ? (
+                                                    <Users className="w-6 h-6 text-muted-foreground" />
+                                                ) : (
+                                                    <div className="w-full h-full bg-primary/20 flex items-center justify-center">
+                                                        <span className="text-primary font-bold text-lg">
+                                                            {name[0]?.toUpperCase()}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                            {isOnline && (
+                                                <span className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-background rounded-full" />
+                                            )}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <div className="flex items-center justify-between gap-2">
+                                                <h3
+                                                    className={`truncate ${
+                                                        conv.unread_count > 0
+                                                            ? "font-bold"
+                                                            : "font-semibold"
+                                                    }`}
+                                                >
+                                                    {name}
+                                                </h3>
+                                                <div className="flex items-center gap-1.5 shrink-0">
+                                                    <span className="text-xs text-muted-foreground">
+                                                        {formatTime(
+                                                            conv.last_message?.created_at ||
+                                                                conv.last_message_at
+                                                        )}
+                                                    </span>
+                                                    <button
+                                                        onClick={(e) =>
+                                                            handleDeleteConversation(
+                                                                e,
+                                                                conv.conversation_id
+                                                            )
+                                                        }
+                                                        disabled={deletingId === conv.conversation_id}
+                                                        className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
+                                                        title="Delete chat"
+                                                    >
+                                                        {deletingId === conv.conversation_id ? (
+                                                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                                        ) : (
+                                                            <Trash2 className="w-3.5 h-3.5" />
+                                                        )}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div className="flex items-center justify-between gap-2 mt-0.5">
+                                                <p
+                                                    className={`text-sm truncate flex-1 ${
+                                                        conv.unread_count > 0
+                                                            ? "text-foreground font-medium"
+                                                            : "text-muted-foreground"
+                                                    }`}
+                                                >
+                                                    {conv.type === "group" &&
+                                                    conv.last_message?.sender
+                                                        ? `${conv.last_message.sender.full_name}: `
+                                                        : ""}
+                                                    {getLastMessagePreview(conv)}
+                                                </p>
+                                                {conv.unread_count > 0 && (
+                                                    <span className="bg-primary text-primary-foreground text-[10px] font-bold rounded-full min-w-5 h-5 flex items-center justify-center px-1.5 shrink-0">
+                                                        {conv.unread_count > 99
+                                                            ? "99+"
+                                                            : conv.unread_count}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </Link>
+                                );
+                            })
                         )}
                     </div>
-                ) : (
-                    filteredConversations.map((conv) => {
-                        const name = getConversationName(
-                            conv,
-                            currentUser?.user_id || ""
-                        );
-                        const avatar = getConversationAvatar(
-                            conv,
-                            currentUser?.user_id || ""
-                        );
-                        const otherUser = conv.participants.find(
-                            (p) => p.user_id !== currentUser?.user_id
-                        );
-                        const otherActivity = otherUser
-                            ? activityData[otherUser.user_id]
-                            : null;
-                        const showActivity =
-                            !myActivityOff &&
-                            otherActivity?.show_activity_status !== false;
-                        const isOnline =
-                            conv.type === "direct" &&
-                            showActivity &&
-                            (otherActivity?.is_online ||
-                                (otherUser &&
-                                    onlineUsers.has(otherUser.user_id)));
+                </TabsContent>
 
-                        return (
-                            <Link
-                                key={conv.conversation_id}
-                                href={`/inbox/${conv.conversation_id}`}
-                                className="group flex items-center gap-3 p-4 hover:bg-muted/50 transition-colors relative"
-                            >
-                                <div className="relative shrink-0">
-                                    <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center overflow-hidden">
-                                        {avatar ? (
-                                            <img
-                                                src={avatar}
-                                                alt={name}
-                                                className="w-full h-full object-cover"
-                                            />
-                                        ) : conv.type === "group" ? (
-                                            <Users className="w-6 h-6 text-muted-foreground" />
-                                        ) : (
-                                            <div className="w-full h-full bg-primary/20 flex items-center justify-center">
-                                                <span className="text-primary font-bold text-lg">
-                                                    {name[0]?.toUpperCase()}
-                                                </span>
-                                            </div>
-                                        )}
-                                    </div>
-                                    {isOnline && (
-                                        <span className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-background rounded-full" />
-                                    )}
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <div className="flex items-center justify-between gap-2">
-                                        <h3
-                                            className={`truncate ${
-                                                conv.unread_count > 0
-                                                    ? "font-bold"
-                                                    : "font-semibold"
-                                            }`}
+                {/* Requests Tab */}
+                <TabsContent value="requests" className="mt-0">
+                    <div className="divide-y divide-border">
+                        {messageRequests.length === 0 ? (
+                            <div className="text-center py-16">
+                                <MailQuestion className="w-16 h-16 mx-auto text-muted-foreground/40 mb-4" />
+                                <h3 className="text-lg font-semibold mb-2">
+                                    No message requests
+                                </h3>
+                                <p className="text-muted-foreground">
+                                    When someone who doesn&apos;t follow you sends a message, it will appear here.
+                                </p>
+                            </div>
+                        ) : (
+                            messageRequests.map((conv) => {
+                                const sender = conv.participants.find(
+                                    (p) => p.user_id !== currentUser?.user_id
+                                );
+                                const name = sender?.full_name || "Unknown User";
+                                const avatar = sender?.avatar_url || null;
+                                const isResponding = respondingId === conv.conversation_id;
+
+                                return (
+                                    <div
+                                        key={conv.conversation_id}
+                                        className="flex items-center gap-3 p-4"
+                                    >
+                                        <Link
+                                            href={`/inbox/${conv.conversation_id}`}
+                                            className="flex items-center gap-3 flex-1 min-w-0"
                                         >
-                                            {name}
-                                        </h3>
-                                        <div className="flex items-center gap-1.5 shrink-0">
-                                            <span className="text-xs text-muted-foreground">
-                                                {formatTime(
-                                                    conv.last_message?.created_at ||
-                                                        conv.last_message_at
+                                            <div className="w-14 h-14 rounded-full bg-muted flex items-center justify-center overflow-hidden shrink-0">
+                                                {avatar ? (
+                                                    <img
+                                                        src={avatar}
+                                                        alt={name}
+                                                        className="w-full h-full object-cover"
+                                                    />
+                                                ) : (
+                                                    <div className="w-full h-full bg-primary/20 flex items-center justify-center">
+                                                        <span className="text-primary font-bold text-lg">
+                                                            {name[0]?.toUpperCase()}
+                                                        </span>
+                                                    </div>
                                                 )}
-                                            </span>
-                                            <button
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <h3 className="font-semibold truncate">{name}</h3>
+                                                <p className="text-xs text-muted-foreground">
+                                                    @{sender?.username || "unknown"}
+                                                </p>
+                                                <p className="text-sm text-muted-foreground truncate mt-0.5">
+                                                    {getLastMessagePreview(conv)}
+                                                </p>
+                                            </div>
+                                        </Link>
+                                        <div className="flex items-center gap-2 shrink-0">
+                                            <Button
+                                                size="sm"
+                                                variant="outline"
+                                                className="gap-1 text-destructive hover:text-destructive hover:bg-destructive/10"
                                                 onClick={(e) =>
-                                                    handleDeleteConversation(
-                                                        e,
-                                                        conv.conversation_id
-                                                    )
+                                                    handleRejectRequest(e, conv.conversation_id)
                                                 }
-                                                disabled={deletingId === conv.conversation_id}
-                                                className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded-md hover:bg-destructive/10 text-muted-foreground hover:text-destructive"
-                                                title="Delete chat"
+                                                disabled={isResponding}
                                             >
-                                                {deletingId === conv.conversation_id ? (
+                                                {isResponding ? (
                                                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
                                                 ) : (
-                                                    <Trash2 className="w-3.5 h-3.5" />
+                                                    <X className="w-3.5 h-3.5" />
                                                 )}
-                                            </button>
+                                                Reject
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                className="gap-1"
+                                                onClick={(e) =>
+                                                    handleAcceptRequest(e, conv.conversation_id)
+                                                }
+                                                disabled={isResponding}
+                                            >
+                                                {isResponding ? (
+                                                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                                ) : (
+                                                    <Check className="w-3.5 h-3.5" />
+                                                )}
+                                                Accept
+                                            </Button>
                                         </div>
                                     </div>
-                                    <div className="flex items-center justify-between gap-2 mt-0.5">
-                                        <p
-                                            className={`text-sm truncate flex-1 ${
-                                                conv.unread_count > 0
-                                                    ? "text-foreground font-medium"
-                                                    : "text-muted-foreground"
-                                            }`}
-                                        >
-                                            {conv.type === "group" &&
-                                            conv.last_message?.sender
-                                                ? `${conv.last_message.sender.full_name}: `
-                                                : ""}
-                                            {getLastMessagePreview(conv)}
-                                        </p>
-                                        {conv.unread_count > 0 && (
-                                            <span className="bg-primary text-primary-foreground text-[10px] font-bold rounded-full min-w-5 h-5 flex items-center justify-center px-1.5 shrink-0">
-                                                {conv.unread_count > 99
-                                                    ? "99+"
-                                                    : conv.unread_count}
-                                            </span>
-                                        )}
-                                    </div>
-                                </div>
-                            </Link>
-                        );
-                    })
-                )}
-            </div>
+                                );
+                            })
+                        )}
+                    </div>
+                </TabsContent>
+            </Tabs>
 
             <NewChatDialog
                 open={showNewChat}

@@ -17,6 +17,32 @@ export async function getOrCreateDirectConversation(
     return res.data.data;
 }
 
+// Get message requests
+export async function getMessageRequests(): Promise<ChatConversation[]> {
+    const res = await api.get("/chat/message-requests");
+    return res.data.data;
+}
+
+// Get message request count
+export async function getRequestCount(): Promise<number> {
+    const res = await api.get("/chat/message-requests/count");
+    return res.data.data.count;
+}
+
+// Accept a message request
+export async function acceptMessageRequest(
+    conversationId: string
+): Promise<void> {
+    await api.post(`/chat/message-requests/${conversationId}/accept`);
+}
+
+// Reject a message request
+export async function rejectMessageRequest(
+    conversationId: string
+): Promise<void> {
+    await api.post(`/chat/message-requests/${conversationId}/reject`);
+}
+
 // Create group conversation
 export async function createGroupConversation(
     participantIds: string[],

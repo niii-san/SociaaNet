@@ -10,18 +10,26 @@ import React, {
 } from "react";
 import { io, Socket } from "socket.io-client";
 import { ChatConversation, ChatMessage } from "@/types";
-import { getConversations, getUnreadCount } from "@/features/chat/chat.api";
+import {
+    getConversations,
+    getUnreadCount,
+    getMessageRequests as fetchMessageRequests,
+    getRequestCount as fetchRequestCount
+} from "@/features/chat/chat.api";
 import { useAuth } from "./auth.context";
 
 interface ChatContextType {
     socket: Socket | null;
     isConnected: boolean;
     conversations: ChatConversation[];
+    messageRequests: ChatConversation[];
+    requestCount: number;
     unreadTotal: number;
     activeConversationId: string | null;
     setActiveConversationId: (id: string | null) => void;
     refreshConversations: () => Promise<void>;
     refreshUnreadCount: () => Promise<void>;
+    refreshMessageRequests: () => Promise<void>;
     sendMessage: (data: {
         conversationId: string;
         content?: string;
@@ -97,6 +105,8 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
     const [socket, setSocket] = useState<Socket | null>(null);
     const [isConnected, setIsConnected] = useState(false);
     const [conversations, setConversations] = useState<ChatConversation[]>([]);
+    const [messageRequests, setMessageRequests] = useState<ChatConversation[]>([]);
+    const [requestCount, setRequestCount] = useState(0);
     const [unreadTotal, setUnreadTotal] = useState(0);
     const [activeConversationId, setActiveConversationId] = useState<
         string | null
@@ -213,6 +223,15 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
             setUnreadTotal(data.total);
         });
 
+        // Message request events
+        s.on("message-request:new", () => {
+            refreshMessageRequests();
+        });
+
+        s.on("message-request:accepted", () => {
+            refreshConversations();
+        });
+
         setSocket(s);
 
         return () => {
@@ -228,6 +247,7 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         if (isConnected) {
             refreshConversations();
             refreshUnreadCount();
+            refreshMessageRequests();
         }
     }, [isConnected]);
 
@@ -261,6 +281,19 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         try {
             const count = await getUnreadCount();
             setUnreadTotal(count);
+        } catch {
+            // silently fail
+        }
+    }, []);
+
+    const refreshMessageRequests = useCallback(async () => {
+        try {
+            const [requests, count] = await Promise.all([
+                fetchMessageRequests(),
+                fetchRequestCount()
+            ]);
+            setMessageRequests(requests);
+            setRequestCount(count);
         } catch {
             // silently fail
         }
@@ -362,11 +395,14 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
                 socket,
                 isConnected,
                 conversations,
+                messageRequests,
+                requestCount,
                 unreadTotal,
                 activeConversationId,
                 setActiveConversationId,
                 refreshConversations,
                 refreshUnreadCount,
+                refreshMessageRequests,
                 sendMessage,
                 joinConversation,
                 leaveConversation,
