@@ -44,8 +44,15 @@ const conversationSchema = new mongoose.Schema<ConversationEntity>(
         },
         deleted_by: [
             {
-                type: mongoose.Schema.Types.ObjectId,
-                ref: "User"
+                user_id: {
+                    type: mongoose.Schema.Types.ObjectId,
+                    ref: "User"
+                },
+                deleted_at: {
+                    type: Date,
+                    default: Date.now
+                },
+                _id: false
             }
         ]
     },

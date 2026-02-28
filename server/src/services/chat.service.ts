@@ -180,7 +180,7 @@ class ChatService {
         limit: number = 50
     ) {
         await this.getConversation(conversationId, userId);
-        return chatRepo.getMessages(conversationId, page, limit);
+        return chatRepo.getMessages(conversationId, userId, page, limit);
     }
 
     // React to message

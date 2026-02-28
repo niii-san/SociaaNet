@@ -85,8 +85,38 @@ class ChatRepository {
         const conversations = await Conversation.aggregate([
             {
                 $match: {
-                    participants: userObjectId,
-                    deleted_by: { $ne: userObjectId }
+                    participants: userObjectId
+                }
+            },
+            // Filter out conversations that user has deleted and no new messages since
+            {
+                $addFields: {
+                    _userDeleteRecord: {
+                        $arrayElemAt: [
+                            {
+                                $filter: {
+                                    input: { $ifNull: ["$deleted_by", []] },
+                                    as: "d",
+                                    cond: { $eq: ["$$d.user_id", userObjectId] }
+                                }
+                            },
+                            0
+                        ]
+                    }
+                }
+            },
+            {
+                $match: {
+                    $or: [
+                        // User hasn't deleted this conversation
+                        { _userDeleteRecord: null },
+                        // User deleted but new messages arrived after deletion
+                        {
+                            $expr: {
+                                $gt: ["$last_message_at", "$_userDeleteRecord.deleted_at"]
+                            }
+                        }
+                    ]
                 }
             },
             { $sort: { last_message_at: -1 } },
@@ -94,7 +124,10 @@ class ChatRepository {
             {
                 $lookup: {
                     from: "messages",
-                    let: { convId: "$_id" },
+                    let: {
+                        convId: "$_id",
+                        deletedAt: "$_userDeleteRecord.deleted_at"
+                    },
                     pipeline: [
                         {
                             $match: {
@@ -117,6 +150,13 @@ class ChatRepository {
                                                     }
                                                 ]
                                             }
+                                        },
+                                        // Only count messages after user's deletion time
+                                        {
+                                            $or: [
+                                                { $eq: [{ $type: "$$deletedAt" }, "missing"] },
+                                                { $gt: ["$created_at", "$$deletedAt"] }
+                                            ]
                                         }
                                     ]
                                 }
@@ -253,11 +293,10 @@ class ChatRepository {
 
         const saved = await message.save();
 
-        // Update conversation's last message and restore for all users
+        // Update conversation's last message
         await Conversation.findByIdAndUpdate(data.conversation_id, {
             last_message: saved._id,
-            last_message_at: new Date(),
-            deleted_by: []
+            last_message_at: new Date()
         });
 
         return saved;
@@ -266,19 +305,26 @@ class ChatRepository {
     // Get messages for a conversation with pagination
     async getMessages(
         conversationId: string,
+        userId: string,
         page: number = 1,
         limit: number = 50
     ): Promise<{ messages: any[]; total: number; hasMore: boolean }> {
         const skip = (page - 1) * limit;
+        const convOid = new mongoose.Types.ObjectId(conversationId);
+
+        // Check if user has a deletion record for this conversation
+        const deletionTime = await this.getUserDeletionTime(conversationId, userId);
+
+        // Build match filter — only show messages after user's deletion time
+        const matchFilter: any = { conversation_id: convOid };
+        if (deletionTime) {
+            matchFilter.created_at = { $gt: deletionTime };
+        }
 
         const [messages, total] = await Promise.all([
             Message.aggregate([
                 {
-                    $match: {
-                        conversation_id: new mongoose.Types.ObjectId(
-                            conversationId
-                        )
-                    }
+                    $match: matchFilter
                 },
                 { $sort: { created_at: -1 } },
                 { $skip: skip },
@@ -364,9 +410,7 @@ class ChatRepository {
                     }
                 }
             ]),
-            Message.countDocuments({
-                conversation_id: new mongoose.Types.ObjectId(conversationId)
-            })
+            Message.countDocuments(matchFilter)
         ]);
 
         // Convert sender avatar keys
@@ -516,11 +560,35 @@ class ChatRepository {
             },
             { $unwind: "$conv" },
             {
+                $addFields: {
+                    _userDeleteRecord: {
+                        $arrayElemAt: [
+                            {
+                                $filter: {
+                                    input: { $ifNull: ["$conv.deleted_by", []] },
+                                    as: "d",
+                                    cond: { $eq: ["$$d.user_id", userObjectId] }
+                                }
+                            },
+                            0
+                        ]
+                    }
+                }
+            },
+            {
                 $match: {
                     "conv.participants": userObjectId,
-                    "conv.deleted_by": { $ne: userObjectId },
                     sender_id: { $ne: userObjectId },
-                    "read_by.user_id": { $ne: userObjectId }
+                    "read_by.user_id": { $ne: userObjectId },
+                    // Exclude messages from before user's deletion time
+                    $or: [
+                        { _userDeleteRecord: null },
+                        {
+                            $expr: {
+                                $gt: ["$created_at", "$_userDeleteRecord.deleted_at"]
+                            }
+                        }
+                    ]
                 }
             },
             { $count: "total" }
@@ -680,23 +748,35 @@ class ChatRepository {
                 : null
         }));
     }
-    // Soft delete a conversation for a specific user
+    // Soft delete a conversation for a specific user (with timestamp)
     async deleteConversation(conversationId: string, userId: string): Promise<boolean> {
         const convOid = new mongoose.Types.ObjectId(conversationId);
         const userOid = new mongoose.Types.ObjectId(userId);
+        const now = new Date();
+
+        // Remove existing entry for this user first, then add fresh one with new timestamp
+        await Conversation.updateOne(
+            { _id: convOid },
+            { $pull: { deleted_by: { user_id: userOid } } }
+        );
+
         const result = await Conversation.updateOne(
             { _id: convOid },
-            { $addToSet: { deleted_by: userOid } }
+            { $push: { deleted_by: { user_id: userOid, deleted_at: now } } }
         );
         return result.modifiedCount > 0;
     }
 
-    // Restore conversation for all users (when new message arrives)
-    async restoreConversation(conversationId: string): Promise<void> {
-        await Conversation.updateOne(
-            { _id: new mongoose.Types.ObjectId(conversationId) },
-            { $set: { deleted_by: [] } }
+    // Get the deletion timestamp for a specific user in a conversation
+    async getUserDeletionTime(conversationId: string, userId: string): Promise<Date | null> {
+        const conv = await Conversation.findOne(
+            {
+                _id: new mongoose.Types.ObjectId(conversationId),
+                "deleted_by.user_id": new mongoose.Types.ObjectId(userId)
+            },
+            { "deleted_by.$": 1 }
         );
+        return conv?.deleted_by?.[0]?.deleted_at || null;
     }
 }
 

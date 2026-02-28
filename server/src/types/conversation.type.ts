@@ -1,5 +1,10 @@
 import mongoose from "mongoose";
 
+export interface ConversationDeleteRecord {
+    user_id: mongoose.Types.ObjectId;
+    deleted_at: Date;
+}
+
 export interface ConversationEntity {
     type: "direct" | "group";
     participants: mongoose.Types.ObjectId[];
@@ -9,7 +14,7 @@ export interface ConversationEntity {
     last_message?: mongoose.Types.ObjectId;
     last_message_at?: Date;
     created_by: mongoose.Types.ObjectId;
-    deleted_by: mongoose.Types.ObjectId[];
+    deleted_by: ConversationDeleteRecord[];
     created_at?: Date;
     updated_at?: Date;
 }
