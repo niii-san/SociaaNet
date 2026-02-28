@@ -15,7 +15,7 @@ export function UserSearchResult({ user }: UserSearchResultProps) {
     return (
         <Link
             href={`/u/${user.username}`}
-            className="flex items-center gap-3 p-3 rounded-lg hover:bg-blue-50 hover:border-blue-300 dark:hover:bg-blue-950/20 dark:hover:border-blue-800 transition-colors border border-transparent"
+            className="flex items-center gap-3 p-3 rounded-lg hover:bg-primary/5 hover:border-primary/30 transition-colors border border-transparent"
         >
             <div className="relative w-12 h-12 rounded-full overflow-hidden bg-muted shrink-0">
                 {isLocalhost ? (

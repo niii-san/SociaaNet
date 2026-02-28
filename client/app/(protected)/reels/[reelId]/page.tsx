@@ -274,7 +274,7 @@ export default function ReelDetailPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-background flex items-center justify-center pt-16">
+            <div className="min-h-screen bg-background flex items-center justify-center">
                 <MiniLoader />
             </div>
         );
@@ -282,7 +282,7 @@ export default function ReelDetailPage() {
 
     if (!reel) {
         return (
-            <div className="min-h-screen bg-background flex flex-col items-center justify-center pt-16 gap-4">
+            <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
                 <h2 className="text-2xl font-bold">Reel Not Found</h2>
                 <p className="text-muted-foreground">This reel may have been deleted or is not available.</p>
                 <Button onClick={() => router.back()}>Go Back</Button>
@@ -297,7 +297,7 @@ export default function ReelDetailPage() {
         : ["public", "private"];
 
     return (
-        <div className="min-h-screen bg-background pb-12 pt-16">
+        <div className="min-h-screen bg-background pb-12">
             <div className="container max-w-4xl mx-auto px-4 py-8">
                 {/* Reel Card */}
                 <Card className="overflow-hidden">

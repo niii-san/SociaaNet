@@ -25,7 +25,7 @@ export function UserListItem({
     const isLocalhost = user.avatar_url?.includes('localhost');
 
     return (
-        <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-blue-50 hover:border-blue-300 dark:hover:bg-blue-950/20 dark:hover:border-blue-800 transition-colors border border-transparent">
+        <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-primary/5 hover:border-primary/30 transition-colors border border-transparent">
             <Link
                 href={`/u/${user.username}`}
                 onClick={onNavigate}

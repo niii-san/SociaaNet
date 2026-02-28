@@ -411,7 +411,7 @@ export function AuthHome() {
                             <Link href="/ads" className="hover:underline">
                                 Ads info
                             </Link>
-                            <span>© 2025 SociaaNet</span>
+                            <span>© 2026 SociaaNet</span>
                         </div>
                     </div>
                 </aside>

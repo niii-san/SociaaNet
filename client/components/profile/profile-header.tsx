@@ -118,8 +118,8 @@ export function ProfileHeader({
                                     className="w-full h-full object-cover"
                                 />
                             ) : (
-                                <div className="w-full h-full bg-linear-to-br from-primary to-purple-600 flex items-center justify-center text-white">
-                                    <User className="w-20 h-20" />
+                                <div className="w-full h-full bg-primary/20 flex items-center justify-center">
+                                    <User className="w-20 h-20 text-primary" />
                                 </div>
                             )}
                             {isOwner && (

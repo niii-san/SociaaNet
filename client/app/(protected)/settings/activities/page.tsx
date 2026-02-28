@@ -82,7 +82,7 @@ export default function ActivitiesPage() {
                                 <Link
                                     key={option.href}
                                     href={option.href}
-                                    className="flex items-center gap-4 p-4 rounded-lg border bg-card hover:bg-blue-50 hover:border-blue-300 dark:hover:bg-blue-950/20 dark:hover:border-blue-800 transition-colors group"
+                                    className="flex items-center gap-4 p-4 rounded-lg border bg-card hover:bg-primary/5 hover:border-primary/30 transition-colors group"
                                 >
                                     <div className={`p-3 rounded-full ${option.bgColor}`}>
                                         <Icon className={`w-5 h-5 ${option.iconColor}`} />
@@ -93,7 +93,7 @@ export default function ActivitiesPage() {
                                             {option.description}
                                         </p>
                                     </div>
-                                    <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
+                                    <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-primary transition-colors" />
                                 </Link>
                             );
                         })}

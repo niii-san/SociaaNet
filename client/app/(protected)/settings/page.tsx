@@ -266,7 +266,7 @@ export default function SettingsPage() {
                                     router.push("/settings/activities")
                                 }
                                 variant="outline"
-                                className="gap-1 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-300 dark:hover:bg-blue-950/20 dark:hover:text-blue-400 dark:hover:border-blue-800 transition-colors"
+                                className="gap-1 hover:bg-primary/5 hover:text-primary hover:border-primary/30 transition-colors"
                             >
                                 View
                                 <ChevronRight className="w-4 h-4" />

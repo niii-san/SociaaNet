@@ -69,7 +69,7 @@ export default function ProfilePage() {
     };
 
     return (
-        <div className="min-h-screen bg-background pb-12 pt-16">
+        <div className="min-h-screen bg-background pb-12">
             <div className="container max-w-5xl mx-auto px-4">
                 {profileData ? (
                     <>

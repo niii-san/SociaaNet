@@ -207,7 +207,7 @@ export function ActivityItem({ activity }: ActivityItemProps) {
     const colors = getActivityColor(activity.verb);
 
     return (
-        <div className="flex items-start gap-4 p-4 rounded-lg border bg-card hover:bg-blue-50 hover:border-blue-300 dark:hover:bg-blue-950/20 dark:hover:border-blue-800 transition-colors">
+        <div className="flex items-start gap-4 p-4 rounded-lg border bg-card hover:bg-primary/5 hover:border-primary/30 transition-colors">
             <div className={`p-3 rounded-full ${colors.bg} shrink-0`}>
                 <Icon className={`w-5 h-5 ${colors.icon}`} />
             </div>

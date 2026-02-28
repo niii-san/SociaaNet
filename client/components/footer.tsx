@@ -124,7 +124,7 @@ export function Footer() {
                 </div>
                 <div className="border-t border-border pt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
                     <p className="text-muted-foreground text-sm">
-                        © 2025 SociaaNet. All rights reserved.
+                        © 2026 SociaaNet. All rights reserved.
                     </p>
                     <div className="flex items-center gap-4">
                         <a

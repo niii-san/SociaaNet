@@ -180,7 +180,7 @@ export default function RegisterPage() {
 
                 {/* Footer */}
                 <div className="relative z-10 flex gap-6 text-sm text-white/50">
-                    <span>© 2025 SociaaNet</span>
+                    <span>© 2026 SociaaNet</span>
                     <Link
                         href="/privacy"
                         className="hover:text-white transition-colors"

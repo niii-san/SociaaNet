@@ -89,7 +89,7 @@ export function UnAuthHome() {
                                                 community 🚀✨
                                             </p>
                                             <div className="flex items-center gap-6 text-muted-foreground">
-                                                <button className="flex items-center gap-2 hover:text-accent transition-colors">
+                                                <button className="flex items-center gap-2 hover:text-pink-500 transition-colors">
                                                     <Heart className="w-5 h-5" />
                                                     <span>2.4k</span>
                                                 </button>

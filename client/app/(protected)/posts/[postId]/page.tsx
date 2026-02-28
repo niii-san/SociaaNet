@@ -231,7 +231,7 @@ export default function PostDetailPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-background flex items-center justify-center pt-16">
+            <div className="min-h-screen bg-background flex items-center justify-center">
                 <MiniLoader />
             </div>
         );
@@ -239,7 +239,7 @@ export default function PostDetailPage() {
 
     if (!post) {
         return (
-            <div className="min-h-screen bg-background flex flex-col items-center justify-center pt-16 gap-4">
+            <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
                 <h2 className="text-2xl font-bold">Post Not Found</h2>
                 <p className="text-muted-foreground">This post may have been deleted or is not available.</p>
                 <Button onClick={() => router.back()}>Go Back</Button>
@@ -254,7 +254,7 @@ export default function PostDetailPage() {
         : ["public", "private"];
 
     return (
-        <div className="min-h-screen bg-background pb-12 pt-16">
+        <div className="min-h-screen bg-background pb-12">
             <div className="container max-w-4xl mx-auto px-4 py-8">
                 {/* Post Card */}
                 <Card className="overflow-hidden">
