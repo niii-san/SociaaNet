@@ -207,6 +207,30 @@ class CommentsRepository implements ICommentsRepository {
             is_deleted: false
         });
     }
+
+    async getCommentsByUser(
+        userId: string,
+        page: number = 1,
+        limit: number = 20
+    ): Promise<{ comments: CommentDocument[]; total: number }> {
+        const skip = (page - 1) * limit;
+
+        const [comments, total] = await Promise.all([
+            Comment.find({
+                author: userId,
+                is_deleted: false
+            })
+                .sort({ created_at: -1 })
+                .skip(skip)
+                .limit(limit),
+            Comment.countDocuments({
+                author: userId,
+                is_deleted: false
+            })
+        ]);
+
+        return { comments, total };
+    }
 }
 
 export const commentsRepo = new CommentsRepository();

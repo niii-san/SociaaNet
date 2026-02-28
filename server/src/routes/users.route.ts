@@ -24,6 +24,7 @@ import multer from "multer";
 import { getCurrentUserController } from "../controllers/users/get-current-user.controller";
 import { getUserActivitiesController } from "../controllers/users/get-user-activities.controller";
 import { getLikeHistoryController } from "../controllers/users/get-like-history.controller";
+import { getCommentHistoryController } from "../controllers/users/get-comment-history.controller";
 
 const usersRouter = Router();
 
@@ -65,6 +66,7 @@ usersRouter.get("/me/activities", getUserActivitiesController);
 
 // History
 usersRouter.get("/me/history/likes", getLikeHistoryController);
+usersRouter.get("/me/history/comments", getCommentHistoryController);
 
 usersRouter.get("/search", searchUsersController);
 

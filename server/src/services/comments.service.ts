@@ -4,7 +4,11 @@ import { commentsRepo } from "../repositories/comments.repository";
 import { likesRepo } from "../repositories/likes.repository";
 import { filesRepo, activityRepo } from "../repositories";
 import { ActivityVerb } from "../types";
-import { HttpError, convertImageKeyToImageUrl } from "../utils";
+import {
+    HttpError,
+    convertImageKeyToImageUrl,
+    convertThumbnailKeytoThumbnailUrl
+} from "../utils";
 
 class CommentsService {
     async addComment(
@@ -467,6 +471,65 @@ class CommentsService {
         return {
             comment_id: commentId,
             likes_count: Math.max(0, comment.likes_count - 1)
+        };
+    }
+
+    async getCommentHistory(userId: string, page: number, limit: number) {
+        const { comments, total } = await commentsRepo.getCommentsByUser(
+            userId,
+            page,
+            limit
+        );
+
+        const items = [];
+
+        for (const comment of comments) {
+            const targetId = comment.target_id.toString();
+            let target: {
+                caption: string;
+                media_url: string | null;
+            } | null = null;
+
+            if (comment.target_type === "post") {
+                const post = await filesRepo.getPostById(targetId);
+                if (post) {
+                    target = {
+                        caption: post.caption,
+                        media_url:
+                            post.media_keys.length > 0
+                                ? convertImageKeyToImageUrl(post.media_keys[0])
+                                : null
+                    };
+                }
+            } else if (comment.target_type === "reel") {
+                const reel = await filesRepo.getReelById(targetId);
+                if (reel) {
+                    target = {
+                        caption: reel.caption,
+                        media_url: convertThumbnailKeytoThumbnailUrl(
+                            reel.thumbnail_key
+                        )
+                    };
+                }
+            }
+
+            items.push({
+                comment_id: comment._id.toString(),
+                content: comment.content,
+                target_type: comment.target_type,
+                target_id: targetId,
+                likes_count: comment.likes_count,
+                created_at: comment.created_at,
+                target
+            });
+        }
+
+        return {
+            items,
+            total,
+            page,
+            limit,
+            total_pages: Math.ceil(total / limit)
         };
     }
 
