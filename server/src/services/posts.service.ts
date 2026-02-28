@@ -1,5 +1,5 @@
 import { ErrorCodes } from "../constants/error-code";
-import { filesRepo, userRepo, likesRepo, repostsRepo } from "../repositories";
+import { filesRepo, userRepo, likesRepo, repostsRepo, savedItemsRepo } from "../repositories";
 import {
     convertImageKeyToImageUrl,
     convertVideoKeyToVideoUrl,
@@ -71,6 +71,12 @@ class PostsService {
             "post"
         );
 
+        const is_post_saved_by_current_user = await savedItemsRepo.isSavedByUser(
+            currentUserId,
+            postId,
+            "post"
+        );
+
         return {
             post_id: post._id.toString(),
             author: authorPayload,
@@ -79,6 +85,7 @@ class PostsService {
             is_post_author: isPostAuthor,
             is_post_liked_by_current_user,
             is_post_reposted_by_current_user,
+            is_post_saved_by_current_user,
             likes_count: post.likes_count,
             comments_count: post.comments_count,
             reposts_count: post.reposts_count,
@@ -146,6 +153,12 @@ class PostsService {
             "reel"
         );
 
+        const is_reel_saved_by_current_user = await savedItemsRepo.isSavedByUser(
+            userId,
+            reelId,
+            "reel"
+        );
+
         return {
             reel_id: reel._id.toString(),
             author: authorPayload,
@@ -155,6 +168,7 @@ class PostsService {
             is_reel_author: isReelAuthor,
             is_reel_liked_by_current_user,
             is_reel_reposted_by_current_user,
+            is_reel_saved_by_current_user,
             likes_count: reel.likes_count,
             comments_count: reel.comments_count,
             reposts_count: reel.reposts_count,

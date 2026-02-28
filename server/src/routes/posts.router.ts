@@ -8,6 +8,8 @@ import { addCommentController } from "../controllers/comments/add-comment.contro
 import { getCommentsController } from "../controllers/comments/get-comments.controller";
 import { repostPostController } from "../controllers/posts/repost-post.controller";
 import { unrepostPostController } from "../controllers/posts/unrepost-post.controller";
+import { savePostController } from "../controllers/posts/save-post.controller";
+import { unsavePostController } from "../controllers/posts/unsave-post.controller";
 
 export const postsRouter = Router();
 
@@ -28,6 +30,10 @@ postsRouter.delete("/:postId/like", unlikePostController);
 // Repost / Unrepost
 postsRouter.post("/:postId/repost", repostPostController);
 postsRouter.delete("/:postId/repost", unrepostPostController);
+
+// Save / Unsave
+postsRouter.post("/:postId/save", savePostController);
+postsRouter.delete("/:postId/save", unsavePostController);
 
 // Comments
 postsRouter.get("/:postId/comments", getCommentsController);

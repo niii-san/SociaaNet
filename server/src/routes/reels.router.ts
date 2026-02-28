@@ -8,6 +8,8 @@ import { addCommentController } from "../controllers/comments/add-comment.contro
 import { getCommentsController } from "../controllers/comments/get-comments.controller";
 import { repostReelController } from "../controllers/reels/repost-reel.controller";
 import { unrepostReelController } from "../controllers/reels/unrepost-reel.controller";
+import { saveReelController } from "../controllers/reels/save-reel.controller";
+import { unsaveReelController } from "../controllers/reels/unsave-reel.controller";
 
 export const reelsRouter = Router();
 
@@ -28,6 +30,10 @@ reelsRouter.delete("/:reelId/like", unlikeReelController);
 // Repost / Unrepost
 reelsRouter.post("/:reelId/repost", repostReelController);
 reelsRouter.delete("/:reelId/repost", unrepostReelController);
+
+// Save / Unsave
+reelsRouter.post("/:reelId/save", saveReelController);
+reelsRouter.delete("/:reelId/save", unsaveReelController);
 
 // Comments
 reelsRouter.get("/:reelId/comments", getCommentsController);

@@ -7,5 +7,6 @@ import { likesRepo } from "./likes.repository";
 import { commentsRepo } from "./comments.repository";
 import { viewsRepo } from "./views.repository";
 import { repostsRepo } from "./reposts.repository";
+import { savedItemsRepo } from "./saved-items.repository";
 
-export { authRepo, userRepo, filesRepo, activityRepo, settingsRepo, likesRepo, commentsRepo, viewsRepo, repostsRepo };
+export { authRepo, userRepo, filesRepo, activityRepo, settingsRepo, likesRepo, commentsRepo, viewsRepo, repostsRepo, savedItemsRepo };

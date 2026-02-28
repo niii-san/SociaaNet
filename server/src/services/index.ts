@@ -7,4 +7,5 @@ import { likesService } from "./likes.service";
 import { commentsService } from "./comments.service";
 import { viewsService } from "./views.service";
 import { repostsService } from "./reposts.service";
-export { authService, usersService, filesService, mailService, postsService, likesService, commentsService, viewsService, repostsService };
+import { savedItemsService } from "./saved-items.service";
+export { authService, usersService, filesService, mailService, postsService, likesService, commentsService, viewsService, repostsService, savedItemsService };
