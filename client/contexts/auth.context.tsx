@@ -7,6 +7,7 @@ import { api } from "@/lib/axios-instance";
 import { getCurrentUser } from "@/features";
 import { getUserSettings } from "@/features/settings/settings.api";
 import { useUI } from "./ui.context";
+import { useTheme } from "./theme.context";
 
 type AuthContextType = {
     isLoggedIn: boolean;
@@ -28,8 +29,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
     const { showLoader, hideLoader } = useUI();
+    const { setTheme } = useTheme();
 
     const pathname = usePathname();
+
+    const syncThemeFromSettings = (userSettings: UserSettings) => {
+        if (userSettings?.appearance?.theme) {
+            setTheme(userSettings.appearance.theme);
+        }
+    };
 
     const validateSession = async () => {
         try {
@@ -44,6 +52,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setUser(userData);
             setSettings(userSettings);
             setIsLoggedIn(true);
+            syncThemeFromSettings(userSettings);
         } catch (err) {
             setUser(null);
             setSettings(null);
@@ -79,6 +88,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         try {
             const userSettings = await getUserSettings();
             setSettings(userSettings);
+            syncThemeFromSettings(userSettings);
             console.log("Settings refetched:", userSettings);
         } catch (err) {
             console.error("Failed to refetch settings:", err);

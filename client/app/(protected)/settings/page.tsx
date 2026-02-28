@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuth } from "@/contexts";
+import { useAuth, useTheme } from "@/contexts";
 import { useState, useMemo } from "react";
 import { MiniLoader } from "@/components/ui/mini-loader";
 import { Input } from "@/components/ui/input";
@@ -40,6 +40,7 @@ import { Card } from "@/components/ui/card";
 
 export default function SettingsPage() {
     const { settings, refetchSettings, invalidateCurrentUser } = useAuth();
+    const { setTheme } = useTheme();
     const [updating, setUpdating] = useState(false);
     const [loggingOut, setLoggingOut] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
@@ -94,6 +95,10 @@ export default function SettingsPage() {
         field: keyof AppearanceSettings,
         value: any
     ) => {
+        // Apply theme instantly for smooth UX
+        if (field === "theme") {
+            setTheme(value);
+        }
         setUpdating(true);
         try {
             await updateAppearanceSettings({ [field]: value });

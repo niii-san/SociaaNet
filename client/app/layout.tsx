@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Toaster } from "sonner";
-import { UIProvider } from "@/contexts";
+import { UIProvider, ThemeProvider } from "@/contexts";
+import { themeScript } from "@/lib/theme-script";
 
 export const metadata: Metadata = {
     title: "SociaaNet, A social network for everyone",
@@ -14,10 +15,15 @@ export default function RootLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <html lang="en">
+        <html lang="en" suppressHydrationWarning>
+            <head>
+                <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+            </head>
             <body className={`antialiased`}>
-                <UIProvider>{children}</UIProvider>
-                <Toaster />
+                <ThemeProvider>
+                    <UIProvider>{children}</UIProvider>
+                    <Toaster richColors />
+                </ThemeProvider>
             </body>
         </html>
     );
