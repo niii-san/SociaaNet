@@ -29,22 +29,50 @@ function mapAuthor(author: any): FeedAuthor {
 class FeedService {
     /**
      * Home feed: unseen posts first from followed users, then seen/older.
+     * Falls back to trending public posts if user follows nobody.
      * Returns posts with engagement data and an "all caught up" boundary index.
      */
     async getHomeFeed(userId: string, page: number = 1, limit: number = 10) {
         const followingIds = await feedRepo.getFollowingIds(userId);
         const seenPostIds = await feedRepo.getSeenTargetIds(userId, "post");
 
-        const { unseen, seen, total_unseen, total_seen } =
-            await feedRepo.getFeedPosts(
-                userId,
-                followingIds,
-                seenPostIds,
-                page,
-                limit
+        const {
+            unseen,
+            seen,
+            total_unseen,
+            total_seen,
+            fallback,
+            total_fallback
+        } = await feedRepo.getFeedPosts(
+            userId,
+            followingIds,
+            seenPostIds,
+            page,
+            limit
+        );
+
+        // ─── Fallback mode: user follows nobody ───
+        if (followingIds.length === 0 && fallback.length > 0) {
+            const fallbackItems = await Promise.all(
+                fallback.map((post) =>
+                    this.mapPostToFeedItem(post, userId, false)
+                )
             );
 
-        // Build feed items with engagement states for the current user
+            return {
+                posts: fallbackItems,
+                caught_up_at_index: null,
+                show_caught_up_divider: false,
+                is_fallback: true,
+                page,
+                limit,
+                total: total_fallback,
+                total_unseen: 0,
+                has_more: page * limit < total_fallback
+            };
+        }
+
+        // ─── Normal mode: followed users feed ───
         const unseenItems = await Promise.all(
             unseen.map((post) => this.mapPostToFeedItem(post, userId, false))
         );
@@ -67,6 +95,7 @@ class FeedService {
             posts: [...unseenItems, ...seenItems],
             caught_up_at_index: unseenItems.length > 0 ? unseenItems.length : null,
             show_caught_up_divider: show_caught_up_divider || (all_unseen_loaded && seenItems.length > 0),
+            is_fallback: false,
             page,
             limit,
             total: total_unseen + total_seen,
@@ -163,10 +192,10 @@ class FeedService {
      * Suggested users for the sidebar widget.
      */
     async getSuggestedUsers(userId: string, limit: number = 5) {
-        const followingIds = await feedRepo.getFollowingIds(userId);
+        const allFollowTargetIds = await feedRepo.getAllFollowTargetIds(userId);
         const users = await feedRepo.getSuggestedUsers(
             userId,
-            followingIds,
+            allFollowTargetIds,
             limit
         );
 

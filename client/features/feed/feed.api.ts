@@ -101,6 +101,7 @@ export interface HomeFeedResponse {
     posts: FeedPost[];
     caught_up_at_index: number | null;
     show_caught_up_divider: boolean;
+    is_fallback: boolean;
     page: number;
     limit: number;
     total: number;

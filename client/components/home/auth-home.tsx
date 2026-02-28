@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, TrendingUp } from "lucide-react";
 import { getHomeFeed, FeedPost } from "@/features/feed/feed.api";
 import { PostCard } from "@/components/feed/post-card";
 import { CaughtUpDivider } from "@/components/feed/caught-up-divider";
@@ -15,6 +15,7 @@ export function AuthHome() {
     const [hasMore, setHasMore] = useState(true);
     const [caughtUpIndex, setCaughtUpIndex] = useState<number | null>(null);
     const [showCaughtUp, setShowCaughtUp] = useState(false);
+    const [isFallback, setIsFallback] = useState(false);
     const loaderRef = useRef<HTMLDivElement>(null);
 
     usePageTitle("Home");
@@ -28,6 +29,7 @@ export function AuthHome() {
                     setPosts(data.posts);
                     setCaughtUpIndex(data.caught_up_at_index);
                     setShowCaughtUp(data.show_caught_up_divider);
+                    setIsFallback(data.is_fallback);
                 } else {
                     setPosts((prev) => {
                         const existingIds = new Set(
@@ -118,6 +120,21 @@ export function AuthHome() {
                     </div>
                 ) : (
                     <>
+                        {/* Fallback banner when showing trending posts */}
+                        {isFallback && (
+                            <div className="flex items-center gap-3 px-4 py-3 border-b border-border bg-muted/30">
+                                <TrendingUp className="w-5 h-5 text-primary shrink-0" />
+                                <div>
+                                    <p className="text-sm font-medium">
+                                        Trending posts
+                                    </p>
+                                    <p className="text-xs text-muted-foreground">
+                                        Follow people to personalize your feed
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
                         {posts.map((post, index) => (
                             <div key={post.post_id}>
                                 <PostCard post={post} />

@@ -17,6 +17,10 @@ export function SuggestedUsersSidebar() {
             .finally(() => setLoading(false));
     }, []);
 
+    const handleFollowChange = (userId: string) => {
+        setUsers((prev) => prev.filter((u) => u.user_id !== userId));
+    };
+
     if (loading) {
         return (
             <div className="bg-muted/50 rounded-2xl p-4">
@@ -72,6 +76,7 @@ export function SuggestedUsersSidebar() {
                             isFollowing={false}
                             isPrivate={false}
                             size="sm"
+                            onFollowChange={() => handleFollowChange(user.user_id)}
                         />
                     </div>
                 ))}

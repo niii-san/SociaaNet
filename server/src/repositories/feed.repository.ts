@@ -19,6 +19,19 @@ class FeedRepository {
     }
 
     /**
+     * Get IDs of users that the current user has any follow relationship with
+     * (accepted, pending, or rejected — not removed). Used for excluding from suggestions.
+     */
+    async getAllFollowTargetIds(userId: string): Promise<string[]> {
+        const follows = await Follow.find({
+            follower: userId,
+            is_removed: false
+        }).select("following").lean();
+
+        return follows.map((f) => f.following.toString());
+    }
+
+    /**
      * Get IDs of posts/reels that user has already seen.
      */
     async getSeenTargetIds(
@@ -36,8 +49,8 @@ class FeedRepository {
     }
 
     /**
-     * Get feed posts: unseen posts from followed users first, then seen/older posts.
-     * Respects visibility rules. Excludes deleted/removed content.
+     * Get feed posts: unseen posts from followed users first (ranked by engagement+recency),
+     * then seen/older posts. When user follows nobody, falls back to trending public posts.
      */
     async getFeedPosts(
         userId: string,
@@ -50,80 +63,183 @@ class FeedRepository {
         seen: PostDocument[];
         total_unseen: number;
         total_seen: number;
+        fallback: PostDocument[];
+        total_fallback: number;
     }> {
-        const authorFilter = followingIds.length > 0
-            ? followingIds.map((id) => new mongoose.Types.ObjectId(id))
-            : [];
-
-        // Include own posts + followed users' posts
-        const allAuthorIds = [
-            new mongoose.Types.ObjectId(userId),
-            ...authorFilter
-        ];
-
         const seenObjectIds = seenPostIds.map(
             (id) => new mongoose.Types.ObjectId(id)
         );
 
-        const baseMatch = {
-            author: { $in: allAuthorIds },
+        const userObjectId = new mongoose.Types.ObjectId(userId);
+
+        // Engagement+recency scoring pipeline stages
+        const scoringStages = [
+            {
+                $addFields: {
+                    engagement_score: {
+                        $add: [
+                            { $multiply: ["$likes_count", 3] },
+                            { $multiply: ["$comments_count", 5] },
+                            { $multiply: ["$reposts_count", 4] }
+                        ]
+                    },
+                    recency_hours: {
+                        $divide: [
+                            { $subtract: [new Date(), "$created_at"] },
+                            1000 * 60 * 60
+                        ]
+                    }
+                }
+            },
+            {
+                $addFields: {
+                    // Decay: score / (1 + hours_old)^1.2  — newer posts rank higher
+                    feed_score: {
+                        $divide: [
+                            { $add: ["$engagement_score", 1] },
+                            {
+                                $pow: [
+                                    { $add: [1, "$recency_hours"] },
+                                    1.2
+                                ]
+                            }
+                        ]
+                    }
+                }
+            }
+        ];
+
+        const lookupAuthor = [
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "author",
+                    foreignField: "_id",
+                    as: "author",
+                    pipeline: [
+                        {
+                            $project: {
+                                username: 1,
+                                full_name: 1,
+                                avatar_key: 1,
+                                is_online: 1
+                            }
+                        }
+                    ]
+                }
+            },
+            { $unwind: "$author" }
+        ];
+
+        // If user follows people, show their content
+        if (followingIds.length > 0) {
+            const authorFilter = followingIds.map(
+                (id) => new mongoose.Types.ObjectId(id)
+            );
+            const allAuthorIds = [userObjectId, ...authorFilter];
+
+            const baseMatch = {
+                author: { $in: allAuthorIds },
+                is_deleted: false,
+                is_removed_by_moderator: false,
+                visibility: { $ne: "private" }
+            };
+
+            // Count unseen & seen
+            const [total_unseen, total_seen] = await Promise.all([
+                Post.countDocuments({
+                    ...baseMatch,
+                    _id: { $nin: seenObjectIds }
+                }),
+                Post.countDocuments({
+                    ...baseMatch,
+                    _id: { $in: seenObjectIds }
+                })
+            ]);
+
+            const unseenSkip = (page - 1) * limit;
+
+            // Fetch unseen posts ranked by engagement+recency
+            let unseen: PostDocument[] = [];
+            if (unseenSkip < total_unseen) {
+                unseen = (await Post.aggregate([
+                    {
+                        $match: {
+                            ...baseMatch,
+                            _id: { $nin: seenObjectIds }
+                        }
+                    },
+                    ...scoringStages,
+                    { $sort: { feed_score: -1, created_at: -1 } },
+                    { $skip: unseenSkip },
+                    { $limit: limit },
+                    ...lookupAuthor
+                ])) as PostDocument[];
+            }
+
+            // Fill remaining with seen posts
+            let seen: PostDocument[] = [];
+            const remaining = limit - unseen.length;
+            if (remaining > 0 && unseen.length < limit) {
+                const seenSkip = Math.max(
+                    0,
+                    (page - 1) * limit - total_unseen
+                );
+                seen = (await Post.aggregate([
+                    {
+                        $match: {
+                            ...baseMatch,
+                            _id: { $in: seenObjectIds }
+                        }
+                    },
+                    ...scoringStages,
+                    { $sort: { feed_score: -1, created_at: -1 } },
+                    { $skip: seenSkip },
+                    { $limit: remaining },
+                    ...lookupAuthor
+                ])) as PostDocument[];
+            }
+
+            return {
+                unseen,
+                seen,
+                total_unseen,
+                total_seen,
+                fallback: [],
+                total_fallback: 0
+            };
+        }
+
+        // ─── Fallback: user follows nobody → show trending public posts ───
+        const fallbackMatch = {
+            author: { $ne: userObjectId },
             is_deleted: false,
             is_removed_by_moderator: false,
-            visibility: { $ne: "private" }
+            visibility: "public",
+            is_sensitive_content: { $ne: true }
         };
 
-        // Count unseen
-        const total_unseen = await Post.countDocuments({
-            ...baseMatch,
-            _id: { $nin: seenObjectIds }
-        });
+        const skip = (page - 1) * limit;
+        const [fallback, total_fallback] = await Promise.all([
+            Post.aggregate([
+                { $match: fallbackMatch },
+                ...scoringStages,
+                { $sort: { feed_score: -1, created_at: -1 } },
+                { $skip: skip },
+                { $limit: limit },
+                ...lookupAuthor
+            ]),
+            Post.countDocuments(fallbackMatch)
+        ]);
 
-        // Count seen
-        const total_seen = await Post.countDocuments({
-            ...baseMatch,
-            _id: { $in: seenObjectIds }
-        });
-
-        // Calculate skip offsets
-        const unseenSkip = (page - 1) * limit;
-
-        // Fetch unseen posts (sorted by engagement score + recency)
-        let unseen: PostDocument[] = [];
-        if (unseenSkip < total_unseen) {
-            unseen = await Post.find({
-                ...baseMatch,
-                _id: { $nin: seenObjectIds }
-            })
-                .sort({ created_at: -1 })
-                .skip(unseenSkip)
-                .limit(limit)
-                .populate("author", "username full_name avatar_key is_online")
-                .lean<PostDocument[]>();
-        }
-
-        // If unseen didn't fill the page, fill remaining with seen
-        let seen: PostDocument[] = [];
-        const remaining = limit - unseen.length;
-        if (remaining > 0 && unseen.length < limit) {
-            const seenSkip = Math.max(
-                0,
-                (page - 1) * limit - total_unseen
-            );
-            seen = await Post.find({
-                ...baseMatch,
-                _id: { $in: seenObjectIds }
-            })
-                .sort({ created_at: -1 })
-                .skip(seenSkip)
-                .limit(remaining)
-                .populate(
-                    "author",
-                    "username full_name avatar_key is_online"
-                )
-                .lean<PostDocument[]>();
-        }
-
-        return { unseen, seen, total_unseen, total_seen };
+        return {
+            unseen: [],
+            seen: [],
+            total_unseen: 0,
+            total_seen: 0,
+            fallback: fallback as PostDocument[],
+            total_fallback
+        };
     }
 
     /**
@@ -336,6 +452,7 @@ class FeedRepository {
 
     /**
      * Get reels feed: unseen reels first (from followed + public), then seen ones.
+     * Ranked by engagement+recency with author diversification.
      */
     async getReelsFeed(
         userId: string,
@@ -361,7 +478,7 @@ class FeedRepository {
             is_deleted: false,
             is_removed_by_moderator: false,
             is_sensitive_content: { $ne: true },
-            author: { $ne: userObjectId }, // Exclude own reels from feed
+            author: { $ne: userObjectId },
             $or: [
                 { visibility: "public" },
                 {
@@ -373,7 +490,7 @@ class FeedRepository {
 
         const skip = (page - 1) * limit;
 
-        // Unseen reels first, then seen — both sorted by engagement
+        // Engagement + recency decay scoring with unseen priority
         const reels = await Reel.aggregate([
             { $match: baseMatch },
             {
@@ -385,6 +502,13 @@ class FeedRepository {
                             1
                         ]
                     },
+                    is_from_following: {
+                        $cond: [
+                            { $in: ["$author", followingObjectIds] },
+                            1,
+                            0
+                        ]
+                    },
                     engagement_score: {
                         $add: [
                             { $multiply: ["$likes_count", 3] },
@@ -392,16 +516,54 @@ class FeedRepository {
                             { $multiply: ["$reposts_count", 4] },
                             "$views_count"
                         ]
+                    },
+                    recency_hours: {
+                        $divide: [
+                            { $subtract: [new Date(), "$created_at"] },
+                            1000 * 60 * 60
+                        ]
                     }
                 }
             },
             {
-                $sort: {
-                    is_unseen: -1,
-                    engagement_score: -1,
-                    created_at: -1
+                $addFields: {
+                    // Combined score: engagement decayed by time,
+                    // boosted for followed users, prioritized if unseen
+                    reel_score: {
+                        $add: [
+                            {
+                                $multiply: [
+                                    "$is_unseen",
+                                    10000 // Unseen reels get massive priority
+                                ]
+                            },
+                            {
+                                $multiply: [
+                                    "$is_from_following",
+                                    500 // Boost reels from followed users
+                                ]
+                            },
+                            {
+                                $divide: [
+                                    { $add: ["$engagement_score", 1] },
+                                    {
+                                        $pow: [
+                                            {
+                                                $add: [
+                                                    1,
+                                                    "$recency_hours"
+                                                ]
+                                            },
+                                            1.2
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
                 }
             },
+            { $sort: { reel_score: -1, created_at: -1 } },
             { $skip: skip },
             { $limit: limit },
             {
@@ -441,17 +603,17 @@ class FeedRepository {
 
     /**
      * Get suggested users to follow (for sidebar).
-     * Users who the current user does NOT follow, sorted by followers count.
+     * Excludes users with ANY follow relationship (accepted, pending, rejected).
      */
     async getSuggestedUsers(
         userId: string,
-        followingIds: string[],
+        allFollowTargetIds: string[],
         limit: number = 5
     ) {
         const { User } = await import("../models");
         const excludeIds = [
             new mongoose.Types.ObjectId(userId),
-            ...followingIds.map((id) => new mongoose.Types.ObjectId(id))
+            ...allFollowTargetIds.map((id) => new mongoose.Types.ObjectId(id))
         ];
 
         const users = await User.find({
