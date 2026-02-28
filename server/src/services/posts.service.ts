@@ -7,6 +7,8 @@ import {
 } from "../utils";
 
 class PostsService {
+    private readonly VALID_VISIBILITIES = ["public", "private", "followers"];
+
     async getPost(postId: string, currentUserId: string) {
         const post = await filesRepo.getPostById(postId);
 
@@ -144,6 +146,95 @@ class PostsService {
             comments,
             visibility: reel.visibility,
             created_at: reel.created_at
+        };
+    }
+    async updatePostVisibility(
+        postId: string,
+        visibility: string,
+        currentUserId: string
+    ) {
+        if (!this.VALID_VISIBILITIES.includes(visibility)) {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                "Invalid visibility value. Must be one of: public, private, followers"
+            );
+        }
+
+        const post = await filesRepo.getPostById(postId);
+
+        if (!post) {
+            throw new HttpError(
+                404,
+                false,
+                ErrorCodes.NOT_FOUND,
+                "Post not found"
+            );
+        }
+
+        if (post.author.toString() !== currentUserId) {
+            throw new HttpError(
+                403,
+                false,
+                ErrorCodes.FORBIDDEN,
+                "You can only change the visibility of your own posts"
+            );
+        }
+
+        const updatedPost = await filesRepo.updatePostVisibility(
+            postId,
+            visibility as "public" | "private" | "followers"
+        );
+
+        return {
+            post_id: updatedPost!._id.toString(),
+            visibility: updatedPost!.visibility
+        };
+    }
+
+    async updateReelVisibility(
+        reelId: string,
+        visibility: string,
+        currentUserId: string
+    ) {
+        if (!this.VALID_VISIBILITIES.includes(visibility)) {
+            throw new HttpError(
+                400,
+                false,
+                ErrorCodes.INVALID_INPUT,
+                "Invalid visibility value. Must be one of: public, private, followers"
+            );
+        }
+
+        const reel = await filesRepo.getReelById(reelId);
+
+        if (!reel) {
+            throw new HttpError(
+                404,
+                false,
+                ErrorCodes.NOT_FOUND,
+                "Reel not found"
+            );
+        }
+
+        if (reel.author.toString() !== currentUserId) {
+            throw new HttpError(
+                403,
+                false,
+                ErrorCodes.FORBIDDEN,
+                "You can only change the visibility of your own reels"
+            );
+        }
+
+        const updatedReel = await filesRepo.updateReelVisibility(
+            reelId,
+            visibility as "public" | "private" | "followers"
+        );
+
+        return {
+            reel_id: updatedReel!._id.toString(),
+            visibility: updatedReel!.visibility
         };
     }
 }

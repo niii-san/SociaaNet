@@ -40,6 +40,24 @@ interface IFilesRepository {
 
     getPostById(postId: string): Promise<PostDocument | null>;
     getReelById(reelId: string): Promise<ReelDocument | null>;
+    updatePostVisibility(
+        postId: string,
+        visibility: "public" | "private" | "followers"
+    ): Promise<PostDocument | null>;
+    updateReelVisibility(
+        reelId: string,
+        visibility: "public" | "private" | "followers"
+    ): Promise<ReelDocument | null>;
+    updateAllUserPostsVisibility(
+        userId: string,
+        visibility: "public" | "private" | "followers",
+        session?: import("mongoose").ClientSession
+    ): Promise<number>;
+    updateAllUserReelsVisibility(
+        userId: string,
+        visibility: "public" | "private" | "followers",
+        session?: import("mongoose").ClientSession
+    ): Promise<number>;
 }
 
 class FilesRepository implements IFilesRepository {
@@ -192,6 +210,76 @@ class FilesRepository implements IFilesRepository {
         });
 
         return reel;
+    }
+
+    async updatePostVisibility(
+        postId: string,
+        visibility: "public" | "private" | "followers"
+    ): Promise<PostDocument | null> {
+        const post = await Post.findOneAndUpdate(
+            {
+                _id: postId,
+                is_deleted: false,
+                is_removed_by_moderator: false
+            },
+            { $set: { visibility } },
+            { new: true }
+        );
+
+        return post;
+    }
+
+    async updateReelVisibility(
+        reelId: string,
+        visibility: "public" | "private" | "followers"
+    ): Promise<ReelDocument | null> {
+        const reel = await Reel.findOneAndUpdate(
+            {
+                _id: reelId,
+                is_deleted: false,
+                is_removed_by_moderator: false
+            },
+            { $set: { visibility } },
+            { new: true }
+        );
+
+        return reel;
+    }
+
+    async updateAllUserPostsVisibility(
+        userId: string,
+        visibility: "public" | "private" | "followers",
+        session?: import("mongoose").ClientSession
+    ): Promise<number> {
+        const result = await Post.updateMany(
+            {
+                author: userId,
+                is_deleted: false,
+                is_removed_by_moderator: false
+            },
+            { $set: { visibility } },
+            session ? { session } : {}
+        );
+
+        return result.modifiedCount;
+    }
+
+    async updateAllUserReelsVisibility(
+        userId: string,
+        visibility: "public" | "private" | "followers",
+        session?: import("mongoose").ClientSession
+    ): Promise<number> {
+        const result = await Reel.updateMany(
+            {
+                author: userId,
+                is_deleted: false,
+                is_removed_by_moderator: false
+            },
+            { $set: { visibility } },
+            session ? { session } : {}
+        );
+
+        return result.modifiedCount;
     }
 }
 

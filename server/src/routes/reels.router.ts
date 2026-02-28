@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authenticate } from "../middlewares";
-import { getReelController } from "../controllers";
+import { getReelController, updateReelVisibilityController } from "../controllers";
 import { likeReelController } from "../controllers/reels/like-reel.controller";
 import { unlikeReelController } from "../controllers/reels/unlike-reel.controller";
 import { addCommentController } from "../controllers/comments/add-comment.controller";
@@ -11,6 +11,9 @@ export const reelsRouter = Router();
 reelsRouter.use(authenticate);
 
 reelsRouter.get("/:reelId", getReelController);
+
+// Visibility
+reelsRouter.patch("/:reelId/visibility", updateReelVisibilityController);
 
 // Like / Unlike
 reelsRouter.post("/:reelId/like", likeReelController);

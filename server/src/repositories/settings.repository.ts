@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 import { ErrorCodes } from "../constants/error-code";
 import { User, UserSettings } from "../models";
+import { Post } from "../models/post.model";
+import { Reel } from "../models/reel.model";
 
 interface ISettingsRepository {
     // Privacy Settings
@@ -146,6 +148,27 @@ class SettingsRepository implements ISettingsRepository {
                     { session }
                 );
 
+                // Cascade: change all "public" posts and reels to "followers"
+                await Post.updateMany(
+                    {
+                        author: userId,
+                        is_deleted: false,
+                        visibility: "public"
+                    },
+                    { $set: { visibility: "followers" } },
+                    { session }
+                );
+
+                await Reel.updateMany(
+                    {
+                        author: userId,
+                        is_deleted: false,
+                        visibility: "public"
+                    },
+                    { $set: { visibility: "followers" } },
+                    { session }
+                );
+
                 updated = settingsRes.modifiedCount > 0;
             });
             return { is_private_account: true };
@@ -192,6 +215,27 @@ class SettingsRepository implements ISettingsRepository {
                             is_private_account: false
                         }
                     },
+                    { session }
+                );
+
+                // Cascade: change all "followers" posts and reels to "public"
+                await Post.updateMany(
+                    {
+                        author: userId,
+                        is_deleted: false,
+                        visibility: "followers"
+                    },
+                    { $set: { visibility: "public" } },
+                    { session }
+                );
+
+                await Reel.updateMany(
+                    {
+                        author: userId,
+                        is_deleted: false,
+                        visibility: "followers"
+                    },
+                    { $set: { visibility: "public" } },
                     { session }
                 );
 

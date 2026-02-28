@@ -33,6 +33,8 @@ import { uploadReelController } from "./medias/upload-reel.controller";
 import { getVideoController } from "./files/get-video.controller";
 import { getPostController } from "./posts/get-post.controller";
 import { getReelController } from "./reels/get-reel.controller";
+import { updatePostVisibilityController } from "./posts/update-post-visibility.controller";
+import { updateReelVisibilityController } from "./reels/update-reel-visibility.controller";
 
 export {
     signupController,
@@ -69,5 +71,7 @@ export {
     uploadReelController,
     getVideoController,
     getPostController,
-    getReelController
+    getReelController,
+    updatePostVisibilityController,
+    updateReelVisibilityController
 };
