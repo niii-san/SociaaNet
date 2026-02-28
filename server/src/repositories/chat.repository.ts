@@ -85,7 +85,8 @@ class ChatRepository {
         const conversations = await Conversation.aggregate([
             {
                 $match: {
-                    participants: userObjectId
+                    participants: userObjectId,
+                    deleted_by: { $ne: userObjectId }
                 }
             },
             { $sort: { last_message_at: -1 } },
@@ -252,10 +253,11 @@ class ChatRepository {
 
         const saved = await message.save();
 
-        // Update conversation's last message
+        // Update conversation's last message and restore for all users
         await Conversation.findByIdAndUpdate(data.conversation_id, {
             last_message: saved._id,
-            last_message_at: new Date()
+            last_message_at: new Date(),
+            deleted_by: []
         });
 
         return saved;
@@ -516,6 +518,7 @@ class ChatRepository {
             {
                 $match: {
                     "conv.participants": userObjectId,
+                    "conv.deleted_by": { $ne: userObjectId },
                     sender_id: { $ne: userObjectId },
                     "read_by.user_id": { $ne: userObjectId }
                 }
@@ -677,14 +680,23 @@ class ChatRepository {
                 : null
         }));
     }
-    // Delete a conversation and all its messages
-    async deleteConversation(conversationId: string): Promise<boolean> {
+    // Soft delete a conversation for a specific user
+    async deleteConversation(conversationId: string, userId: string): Promise<boolean> {
         const convOid = new mongoose.Types.ObjectId(conversationId);
-        // Delete all messages in this conversation
-        await Message.deleteMany({ conversation_id: convOid });
-        // Delete the conversation itself
-        const result = await Conversation.deleteOne({ _id: convOid });
-        return result.deletedCount > 0;
+        const userOid = new mongoose.Types.ObjectId(userId);
+        const result = await Conversation.updateOne(
+            { _id: convOid },
+            { $addToSet: { deleted_by: userOid } }
+        );
+        return result.modifiedCount > 0;
+    }
+
+    // Restore conversation for all users (when new message arrives)
+    async restoreConversation(conversationId: string): Promise<void> {
+        await Conversation.updateOne(
+            { _id: new mongoose.Types.ObjectId(conversationId) },
+            { $set: { deleted_by: [] } }
+        );
     }
 }
 

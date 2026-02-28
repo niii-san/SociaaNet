@@ -382,24 +382,10 @@ export const deleteConversationController = asyncHandler(
         const { conversationId } = req.params;
         const userId = req.user._id.toString();
 
-        const participantIds = await chatService.deleteConversation(
+        await chatService.deleteConversation(
             conversationId,
             userId
         );
-
-        // Notify all participants via socket
-        try {
-            const io = getIO();
-            participantIds.forEach((pid) => {
-                if (pid !== userId) {
-                    io.to(`user:${pid}`).emit("conversation:deleted", {
-                        conversationId
-                    });
-                }
-            });
-        } catch {
-            // Socket not available, skip notification
-        }
 
         return res
             .status(200)

@@ -344,7 +344,7 @@ class ChatService {
         return chatRepo.getFriends(userId);
     }
 
-    // Delete a conversation
+    // Delete a conversation (soft delete for requesting user only)
     async deleteConversation(conversationId: string, userId: string) {
         const conv = await chatRepo.getConversationById(conversationId);
         if (!conv) {
@@ -369,20 +369,7 @@ class ChatService {
             );
         }
 
-        // For groups, only admin can delete
-        if (
-            conv.type === "group" &&
-            conv.group_admin?.toString() !== userId
-        ) {
-            throw new HttpError(
-                403,
-                false,
-                ErrorCodes.FORBIDDEN,
-                "Only group admin can delete the group"
-            );
-        }
-
-        const deleted = await chatRepo.deleteConversation(conversationId);
+        const deleted = await chatRepo.deleteConversation(conversationId, userId);
         if (!deleted) {
             throw new HttpError(
                 500,
@@ -392,8 +379,7 @@ class ChatService {
             );
         }
 
-        // Return participant IDs for notifying them via socket
-        return conv.participants.map((p) => p.toString());
+        return true;
     }
 }
 
