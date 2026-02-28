@@ -211,9 +211,9 @@ export function AuthHome() {
                                     <div className="flex-1 min-w-0">
                                         {/* Post Header */}
                                         <div className="flex items-center gap-1 flex-wrap">
-                                            <span className="font-semibold hover:underline cursor-pointer">
+                                            <Link href={`/u/${post.user.username}`} className="font-semibold hover:underline">
                                                 {post.user.name}
-                                            </span>
+                                            </Link>
                                             {post.user.verified && (
                                                 <svg
                                                     className="w-4 h-4 text-primary"
@@ -223,9 +223,9 @@ export function AuthHome() {
                                                     <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" />
                                                 </svg>
                                             )}
-                                            <span className="text-muted-foreground">
+                                            <Link href={`/u/${post.user.username}`} className="text-muted-foreground hover:underline">
                                                 @{post.user.username}
-                                            </span>
+                                            </Link>
                                             <span className="text-muted-foreground">
                                                 ·
                                             </span>
@@ -372,12 +372,12 @@ export function AuthHome() {
                                         className="w-10 h-10 rounded-full bg-muted"
                                     />
                                     <div className="flex-1 min-w-0">
-                                        <p className="font-semibold text-sm truncate hover:underline cursor-pointer">
+                                        <Link href={`/u/${user.username}`} className="font-semibold text-sm truncate hover:underline block">
                                             {user.name}
-                                        </p>
-                                        <p className="text-xs text-muted-foreground truncate">
+                                        </Link>
+                                        <Link href={`/u/${user.username}`} className="text-xs text-muted-foreground truncate block">
                                             @{user.username}
-                                        </p>
+                                        </Link>
                                     </div>
                                     <Button size="sm" className="rounded-full">
                                         Follow

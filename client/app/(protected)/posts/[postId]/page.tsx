@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import CommentSection from "@/components/comments/comment-section";
+import Link from "next/link";
 
 export default function PostDetailPage() {
     const { postId } = useParams<{ postId: string }>();
@@ -237,14 +238,18 @@ export default function PostDetailPage() {
                         {/* Header */}
                         <div className="flex items-center justify-between p-4 border-b">
                             <div className="flex items-center gap-3">
-                                <Avatar className="w-10 h-10">
-                                    <AvatarImage src={post.author.avatar_url || undefined} />
-                                    <AvatarFallback>
-                                        {post.author.full_name?.charAt(0).toUpperCase() || "U"}
-                                    </AvatarFallback>
-                                </Avatar>
+                                <Link href={`/u/${post.author.username}`}>
+                                    <Avatar className="w-10 h-10">
+                                        <AvatarImage src={post.author.avatar_url || undefined} />
+                                        <AvatarFallback>
+                                            {post.author.full_name?.charAt(0).toUpperCase() || "U"}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                </Link>
                                 <div>
-                                    <p className="font-semibold text-sm">{post.author.username}</p>
+                                    <Link href={`/u/${post.author.username}`} className="font-semibold text-sm hover:underline">
+                                        {post.author.username}
+                                    </Link>
                                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                         <span>{formatDate(post.created_at)}</span>
                                         <span>•</span>
@@ -396,7 +401,9 @@ export default function PostDetailPage() {
                             {post.caption && (
                                 <div>
                                     <p className="text-sm">
-                                        <span className="font-semibold mr-2">{post.author.username}</span>
+                                        <Link href={`/u/${post.author.username}`} className="font-semibold mr-2 hover:underline">
+                                            {post.author.username}
+                                        </Link>
                                         {post.caption}
                                     </p>
                                     {post.hashtags.length > 0 && (

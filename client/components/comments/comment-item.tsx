@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -172,19 +173,21 @@ export default function CommentItem({
         <div className={indentClass}>
             <div className="flex gap-3 group">
                 {/* Avatar */}
-                <Avatar className="w-8 h-8 shrink-0">
-                    <AvatarImage src={comment.author.avatar_url || undefined} />
-                    <AvatarFallback className="text-xs">
-                        {comment.author.full_name?.charAt(0).toUpperCase() || "U"}
-                    </AvatarFallback>
-                </Avatar>
+                <Link href={`/u/${comment.author.username}`}>
+                    <Avatar className="w-8 h-8 shrink-0">
+                        <AvatarImage src={comment.author.avatar_url || undefined} />
+                        <AvatarFallback className="text-xs">
+                            {comment.author.full_name?.charAt(0).toUpperCase() || "U"}
+                        </AvatarFallback>
+                    </Avatar>
+                </Link>
 
                 {/* Content */}
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                        <span className="font-semibold text-sm">
+                        <Link href={`/u/${comment.author.username}`} className="font-semibold text-sm hover:underline">
                             {comment.author.username}
-                        </span>
+                        </Link>
                         {comment.is_author && (
                             <Badge
                                 variant="secondary"

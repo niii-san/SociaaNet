@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import CommentSection from "@/components/comments/comment-section";
+import Link from "next/link";
 
 export default function ReelDetailPage() {
     const { reelId } = useParams<{ reelId: string }>();
@@ -280,14 +281,18 @@ export default function ReelDetailPage() {
                         {/* Header */}
                         <div className="flex items-center justify-between p-4 border-b">
                             <div className="flex items-center gap-3">
-                                <Avatar className="w-10 h-10">
-                                    <AvatarImage src={reel.author.avatar_url || undefined} />
-                                    <AvatarFallback>
-                                        {reel.author.full_name?.charAt(0).toUpperCase() || "U"}
-                                    </AvatarFallback>
-                                </Avatar>
+                                <Link href={`/u/${reel.author.username}`}>
+                                    <Avatar className="w-10 h-10">
+                                        <AvatarImage src={reel.author.avatar_url || undefined} />
+                                        <AvatarFallback>
+                                            {reel.author.full_name?.charAt(0).toUpperCase() || "U"}
+                                        </AvatarFallback>
+                                    </Avatar>
+                                </Link>
                                 <div>
-                                    <p className="font-semibold text-sm">{reel.author.username}</p>
+                                    <Link href={`/u/${reel.author.username}`} className="font-semibold text-sm hover:underline">
+                                        {reel.author.username}
+                                    </Link>
                                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                         <span>{formatDate(reel.created_at)}</span>
                                         <span>•</span>
@@ -438,7 +443,9 @@ export default function ReelDetailPage() {
                             {reel.caption && (
                                 <div>
                                     <p className="text-sm">
-                                        <span className="font-semibold mr-2">{reel.author.username}</span>
+                                        <Link href={`/u/${reel.author.username}`} className="font-semibold mr-2 hover:underline">
+                                            {reel.author.username}
+                                        </Link>
                                         {reel.caption}
                                     </p>
                                     {reel.hashtags.length > 0 && (
