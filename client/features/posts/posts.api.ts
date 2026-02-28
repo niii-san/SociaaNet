@@ -94,9 +94,16 @@ export const createReel = async (
 };
 
 // Get post by ID
+export interface Author {
+    user_id: string;
+    username: string;
+    full_name: string;
+    avatar_url: string | null;
+}
+
 export interface PostDetail {
     post_id: string;
-    author_id: string;
+    author: Author;
     media_urls: string[];
     caption: string;
     is_post_author: boolean;
@@ -136,7 +143,7 @@ export const updatePostVisibility = async (
 // Get reel by ID
 export interface ReelDetail {
     reel_id: string;
-    author_id: string;
+    author: Author;
     video_url: string;
     caption: string;
     hashtags: string[];

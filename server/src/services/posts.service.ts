@@ -1,5 +1,5 @@
 import { ErrorCodes } from "../constants/error-code";
-import { filesRepo } from "../repositories";
+import { filesRepo, userRepo } from "../repositories";
 import {
     convertImageKeyToImageUrl,
     convertVideoKeyToVideoUrl,
@@ -19,6 +19,17 @@ class PostsService {
             );
         }
 
+        const author = await userRepo.getUserById(post.author.toString());
+
+        if (!author) {
+            throw new HttpError(
+                404,
+                false,
+                ErrorCodes.NOT_FOUND,
+                "Author of the post not found"
+            );
+        }
+
         const isPostAuthor = post.author.toString() === currentUserId;
 
         if (!isPostAuthor && post.visibility === "private") {
@@ -29,6 +40,15 @@ class PostsService {
                 "You do not have permission to view this post"
             );
         }
+
+        const authorPayload = {
+            user_id: author._id.toString(),
+            username: author.username,
+            full_name: author.full_name,
+            avatar_url: author.avatar_key
+                ? convertImageKeyToImageUrl(author.avatar_key)
+                : null
+        };
 
         const mediasUrl = post.media_keys.map((key) => {
             return convertImageKeyToImageUrl(key);
@@ -41,7 +61,7 @@ class PostsService {
 
         return {
             post_id: post._id.toString(),
-            author_id: post.author.toString(),
+            author: authorPayload,
             media_urls: mediasUrl,
             caption: post.caption,
             is_post_author: isPostAuthor,
@@ -67,6 +87,17 @@ class PostsService {
             );
         }
 
+        const author = await userRepo.getUserById(reel.author.toString());
+
+        if (!author) {
+            throw new HttpError(
+                404,
+                false,
+                ErrorCodes.NOT_FOUND,
+                "Author of the reel not found"
+            );
+        }
+
         const isReelAuthor = reel.author.toString() === userId;
 
         if (!isReelAuthor && reel.visibility === "private") {
@@ -78,13 +109,22 @@ class PostsService {
             );
         }
 
+        const authorPayload = {
+            user_id: author._id.toString(),
+            username: author.username,
+            full_name: author.full_name,
+            avatar_url: author.avatar_key
+                ? convertImageKeyToImageUrl(author.avatar_key)
+                : null
+        };
+
         const videoUrl = convertVideoKeyToVideoUrl(reel.media_key);
         const comments: any = []; //TODO:
         const is_reel_liked_by_current_user = false; //TODO: check if the reel is liked by the current user
 
         return {
             reel_id: reel._id.toString(),
-            author_id: reel.author.toString(),
+            author: authorPayload,
             video_url: videoUrl,
             caption: reel.caption,
             hashtags: reel.hashtags,

@@ -169,13 +169,13 @@ export default function PostDetailPage() {
                         <div className="flex items-center justify-between p-4 border-b">
                             <div className="flex items-center gap-3">
                                 <Avatar className="w-10 h-10">
-                                    <AvatarImage src={currentUser?.avatar_url || undefined} />
+                                    <AvatarImage src={post.author.avatar_url || undefined} />
                                     <AvatarFallback>
-                                        {currentUser?.full_name?.charAt(0).toUpperCase() || "U"}
+                                        {post.author.full_name?.charAt(0).toUpperCase() || "U"}
                                     </AvatarFallback>
                                 </Avatar>
                                 <div>
-                                    <p className="font-semibold text-sm">{currentUser?.username}</p>
+                                    <p className="font-semibold text-sm">{post.author.username}</p>
                                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                         <span>{formatDate(post.created_at)}</span>
                                         <span>•</span>
@@ -297,7 +297,7 @@ export default function PostDetailPage() {
                             {post.caption && (
                                 <div>
                                     <p className="text-sm">
-                                        <span className="font-semibold mr-2">{currentUser?.username}</span>
+                                        <span className="font-semibold mr-2">{post.author.username}</span>
                                         {post.caption}
                                     </p>
                                     {post.hashtags.length > 0 && (
