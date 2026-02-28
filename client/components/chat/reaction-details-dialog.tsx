@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { getMessageReactions } from "@/features/chat/chat.api";
+import { useAuth } from "@/contexts";
 import {
     Dialog,
     DialogContent,
@@ -10,7 +11,6 @@ import {
 } from "@/components/ui/dialog";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Loader2 } from "lucide-react";
-import Link from "next/link";
 
 interface ReactionUser {
     user_id: string;
@@ -25,13 +25,16 @@ interface ReactionDetailsDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     messageId: string | null;
+    onRemoveReaction?: (messageId: string) => void;
 }
 
 export function ReactionDetailsDialog({
     open,
     onOpenChange,
-    messageId
+    messageId,
+    onRemoveReaction
 }: ReactionDetailsDialogProps) {
+    const { data: currentUser } = useAuth();
     const [reactions, setReactions] = useState<ReactionUser[]>([]);
     const [loading, setLoading] = useState(false);
     const [activeTab, setActiveTab] = useState<string>("all");
@@ -130,42 +133,61 @@ export function ReactionDetailsDialog({
                         </div>
                     ) : (
                         <div className="py-1">
-                            {filteredReactions.map((reaction) => (
-                                <Link
-                                    key={`${reaction.user_id}-${reaction.emoji}`}
-                                    href={`/u/${reaction.username}`}
-                                    onClick={() => onOpenChange(false)}
-                                    className="flex items-center gap-3 px-4 py-2.5 hover:bg-muted/50 transition-colors"
-                                >
-                                    <Avatar className="w-10 h-10">
-                                        {reaction.avatar_url ? (
-                                            <AvatarImage
-                                                src={reaction.avatar_url}
-                                                alt={reaction.full_name}
-                                            />
-                                        ) : null}
-                                        <AvatarFallback className="text-xs">
-                                            {reaction.full_name
-                                                .split(" ")
-                                                .map((n) => n[0])
-                                                .join("")
-                                                .toUpperCase()
-                                                .slice(0, 2)}
-                                        </AvatarFallback>
-                                    </Avatar>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="text-sm font-medium truncate">
-                                            {reaction.full_name}
-                                        </p>
-                                        <p className="text-xs text-muted-foreground truncate">
-                                            @{reaction.username}
-                                        </p>
+                            {filteredReactions.map((reaction) => {
+                                const isMe =
+                                    reaction.user_id ===
+                                    currentUser?.user_id;
+                                return (
+                                    <div
+                                        key={`${reaction.user_id}-${reaction.emoji}`}
+                                        onClick={() => {
+                                            if (
+                                                isMe &&
+                                                messageId &&
+                                                onRemoveReaction
+                                            ) {
+                                                onRemoveReaction(messageId);
+                                                onOpenChange(false);
+                                            }
+                                        }}
+                                        className={`flex items-center gap-3 px-4 py-2.5 transition-colors ${
+                                            isMe
+                                                ? "hover:bg-muted/50 cursor-pointer"
+                                                : ""
+                                        }`}
+                                    >
+                                        <Avatar className="w-10 h-10">
+                                            {reaction.avatar_url ? (
+                                                <AvatarImage
+                                                    src={reaction.avatar_url}
+                                                    alt={reaction.full_name}
+                                                />
+                                            ) : null}
+                                            <AvatarFallback className="text-xs">
+                                                {reaction.full_name
+                                                    .split(" ")
+                                                    .map((n) => n[0])
+                                                    .join("")
+                                                    .toUpperCase()
+                                                    .slice(0, 2)}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-medium truncate">
+                                                {reaction.full_name}
+                                            </p>
+                                            <p className="text-xs text-muted-foreground truncate">
+                                                {isMe
+                                                    ? "Tap to remove"
+                                                    : `@${reaction.username}`}
+                                            </p>
+                                        </div>
+                                        <span className="text-xl shrink-0">
+                                            {reaction.emoji}
+                                        </span>
                                     </div>
-                                    <span className="text-xl shrink-0">
-                                        {reaction.emoji}
-                                    </span>
-                                </Link>
-                            ))}
+                                );
+                            })}
                         </div>
                     )}
                 </div>

@@ -223,9 +223,17 @@ export function MessageBubble({
                         ).map(([emoji, count]) => (
                             <button
                                 key={emoji}
-                                onClick={() =>
-                                    setShowReactionDetails(true)
-                                }
+                                onClick={() => {
+                                    if (myReaction?.emoji === emoji) {
+                                        onUnreact(message._id);
+                                    } else {
+                                        onReact(message._id, emoji);
+                                    }
+                                }}
+                                onContextMenu={(e) => {
+                                    e.preventDefault();
+                                    setShowReactionDetails(true);
+                                }}
                                 className={`inline-flex items-center gap-0.5 text-xs px-1.5 py-0.5 rounded-full border transition-colors cursor-pointer ${
                                     myReaction?.emoji === emoji
                                         ? "bg-primary/10 border-primary/30"
@@ -240,6 +248,14 @@ export function MessageBubble({
                                 )}
                             </button>
                         ))}
+                        {/* Small button to view who reacted */}
+                        <button
+                            onClick={() => setShowReactionDetails(true)}
+                            className="inline-flex items-center text-[10px] px-1.5 py-0.5 rounded-full text-muted-foreground hover:text-foreground transition-colors"
+                            title="See who reacted"
+                        >
+                            •••
+                        </button>
                     </div>
                 )}
 
@@ -248,6 +264,7 @@ export function MessageBubble({
                     open={showReactionDetails}
                     onOpenChange={setShowReactionDetails}
                     messageId={message._id}
+                    onRemoveReaction={() => onUnreact(message._id)}
                 />
 
                 {/* Time and read status */}
