@@ -5,7 +5,12 @@ import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/contexts";
 import { useChat } from "@/contexts/chat.context";
 import { ChatConversation, ChatMessage } from "@/types";
-import { getMessages } from "@/features/chat/chat.api";
+import {
+    getMessages,
+    getConversationById,
+    acceptMessageRequest,
+    rejectMessageRequest
+} from "@/features/chat/chat.api";
 import { ChatHeader } from "@/components/chat/chat-header";
 import { ChatInput } from "@/components/chat/chat-input";
 import { MessageBubble } from "@/components/chat/message-bubble";
@@ -13,10 +18,6 @@ import { GroupInfoDialog } from "@/components/chat/group-info-dialog";
 import { Loader2, MessageCircle, Check, X, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import {
-    acceptMessageRequest,
-    rejectMessageRequest
-} from "@/features/chat/chat.api";
 
 export default function Page() {
     const params = useParams();
@@ -56,17 +57,33 @@ export default function Page() {
     const [typingUsers, setTypingUsers] = useState<Set<string>>(new Set());
     const [showInfo, setShowInfo] = useState(false);
     const [respondingToRequest, setRespondingToRequest] = useState(false);
+    const [fetchedConversation, setFetchedConversation] = useState<ChatConversation | null>(null);
 
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const messagesContainerRef = useRef<HTMLDivElement>(null);
     const isInitialLoad = useRef(true);
 
     // Check both conversations and messageRequests for the current conversation
-    const conversation = conversations.find(
+    const contextConversation = conversations.find(
         (c) => c.conversation_id === conversationId || c._id === conversationId
     ) || messageRequests.find(
         (c) => c.conversation_id === conversationId || c._id === conversationId
     );
+
+    // Use context data if available, otherwise use fetched data
+    const conversation = contextConversation || fetchedConversation;
+
+    // Fetch conversation from server if not in context
+    useEffect(() => {
+        if (!contextConversation && conversationId) {
+            getConversationById(conversationId)
+                .then((data) => setFetchedConversation(data))
+                .catch(() => {
+                    toast.error("Conversation not found");
+                    router.push("/inbox");
+                });
+        }
+    }, [conversationId, contextConversation]);
 
     const isPendingRequest =
         conversation?.request_status === "pending" &&
@@ -326,6 +343,10 @@ export default function Page() {
             setRespondingToRequest(true);
             await acceptMessageRequest(conversationId);
             toast.success("Message request accepted");
+            // Update local fetched conversation so UI switches to chat input
+            setFetchedConversation((prev) =>
+                prev ? { ...prev, request_status: "accepted" } : prev
+            );
             await Promise.all([refreshConversations(), refreshMessageRequests()]);
         } catch {
             toast.error("Failed to accept request");

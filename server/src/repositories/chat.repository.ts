@@ -273,6 +273,107 @@ class ChatRepository {
         }));
     }
 
+    // Get a single conversation formatted the same way as getUserConversations
+    async getFormattedConversationById(conversationId: string): Promise<any | null> {
+        const convObjectId = new mongoose.Types.ObjectId(conversationId);
+
+        const results = await Conversation.aggregate([
+            { $match: { _id: convObjectId } },
+            // Lookup participants
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "participants",
+                    foreignField: "_id",
+                    as: "participants_data"
+                }
+            },
+            // Lookup last message
+            {
+                $lookup: {
+                    from: "messages",
+                    localField: "last_message",
+                    foreignField: "_id",
+                    as: "last_message_data"
+                }
+            },
+            { $unwind: { path: "$last_message_data", preserveNullAndEmptyArrays: true } },
+            // Lookup last message sender
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "last_message_data.sender_id",
+                    foreignField: "_id",
+                    as: "last_message_sender"
+                }
+            },
+            {
+                $unwind: {
+                    path: "$last_message_sender",
+                    preserveNullAndEmptyArrays: true
+                }
+            },
+            {
+                $project: {
+                    _id: 1,
+                    type: 1,
+                    group_name: 1,
+                    group_avatar_key: 1,
+                    group_admin: 1,
+                    last_message_at: 1,
+                    created_at: 1,
+                    request_status: 1,
+                    created_by: 1,
+                    participants: {
+                        $map: {
+                            input: "$participants_data",
+                            as: "p",
+                            in: {
+                                user_id: "$$p._id",
+                                username: "$$p.username",
+                                full_name: "$$p.full_name",
+                                avatar_key: "$$p.avatar_key"
+                            }
+                        }
+                    },
+                    last_message: {
+                        $cond: {
+                            if: "$last_message_data",
+                            then: {
+                                _id: "$last_message_data._id",
+                                content: "$last_message_data.content",
+                                message_type: "$last_message_data.message_type",
+                                is_deleted: "$last_message_data.is_deleted",
+                                created_at: "$last_message_data.created_at",
+                                sender: {
+                                    user_id: "$last_message_sender._id",
+                                    username: "$last_message_sender.username",
+                                    full_name: "$last_message_sender.full_name"
+                                }
+                            },
+                            else: null
+                        }
+                    },
+                    unread_count: 0
+                }
+            }
+        ]);
+
+        if (results.length === 0) return null;
+
+        const conv = results[0];
+        return {
+            ...conv,
+            conversation_id: conv._id,
+            participants: conv.participants.map((p: any) => ({
+                ...p,
+                avatar_url: p.avatar_key
+                    ? convertImageKeyToImageUrl(p.avatar_key)
+                    : null
+            }))
+        };
+    }
+
     // Create a message
     async createMessage(data: {
         conversation_id: string;

@@ -38,10 +38,9 @@ class ChatService {
                     existing._id.toString(),
                     "accepted"
                 );
-                existing.request_status = "accepted" as any;
-                return existing;
             }
-            return existing;
+            // Return the formatted version with participant details
+            return chatRepo.getFormattedConversationById(existing._id.toString());
         }
 
         // No existing conversation — check if messaging is allowed
@@ -72,10 +71,10 @@ class ChatService {
                 conversation._id.toString(),
                 "pending"
             );
-            conversation.request_status = "pending" as any;
         }
 
-        return conversation;
+        // Return the formatted version with participant details
+        return chatRepo.getFormattedConversationById(conversation._id.toString());
     }
 
     // Create group conversation
@@ -141,6 +140,34 @@ class ChatService {
     // Get user's conversations
     async getUserConversations(userId: string) {
         return chatRepo.getUserConversations(userId);
+    }
+
+    // Get a single formatted conversation by ID with permission check
+    async getFormattedConversation(conversationId: string, userId: string) {
+        // First verify user is a participant
+        const raw = await chatRepo.getConversationById(conversationId);
+        if (!raw) {
+            throw new HttpError(
+                404,
+                false,
+                ErrorCodes.NOT_FOUND,
+                "Conversation not found"
+            );
+        }
+
+        const isParticipant = raw.participants.some(
+            (p) => p.toString() === userId
+        );
+        if (!isParticipant) {
+            throw new HttpError(
+                403,
+                false,
+                ErrorCodes.FORBIDDEN,
+                "You are not part of this conversation"
+            );
+        }
+
+        return chatRepo.getFormattedConversationById(conversationId);
     }
 
     // Get conversation by ID with permission check

@@ -24,6 +24,26 @@ export const getConversationsController = asyncHandler(
     }
 );
 
+// GET /api/v1/chat/conversations/:conversationId
+export const getConversationByIdController = asyncHandler(
+    async (req: RequestWithUserContext, res: Response) => {
+        const { conversationId } = req.params;
+        const userId = req.user._id.toString();
+
+        // Verify user is a participant
+        const conversation = await chatService.getFormattedConversation(
+            conversationId,
+            userId
+        );
+
+        return res
+            .status(200)
+            .json(
+                new HttpSuccess(200, true, "Conversation fetched", conversation)
+            );
+    }
+);
+
 // POST /api/v1/chat/conversations/direct
 export const createDirectConversationController = asyncHandler(
     async (req: RequestWithUserContext, res: Response) => {

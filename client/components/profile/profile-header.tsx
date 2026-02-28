@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts";
 import {
     CalendarDays,
     Camera,
+    Loader2,
     MessageCircle,
     MoreHorizontal,
     User,
@@ -11,6 +12,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { ImagePickerModal } from "./image-picker-modal";
 import { api } from "@/lib/axios-instance";
 import { toast } from "sonner";
@@ -21,6 +23,7 @@ import { FollowButton } from "@/components/follow/follow-button";
 import { FollowersDialog } from "@/components/follow/followers-dialog";
 import { FollowingDialog } from "@/components/follow/following-dialog";
 import Link from "next/link";
+import { getOrCreateDirectConversation } from "@/features/chat/chat.api";
 
 interface ProfileHeaderProps {
     user: IUserProfile;
@@ -57,10 +60,33 @@ export function ProfileHeader({
         initialValue: ""
     });
     const currentUserData = useAuth();
+    const router = useRouter();
+    const [startingChat, setStartingChat] = useState(false);
 
     const handleAvatarClick = () => {
         if (!isOwner) return;
         setShowImagePicker(true);
+    };
+
+    const handleMessageClick = async () => {
+        try {
+            setStartingChat(true);
+            const conv = await getOrCreateDirectConversation(user.user_id);
+            const convId = conv.conversation_id || conv._id;
+
+            if (conv.request_status === "pending") {
+                toast.success("Message request sent!");
+            }
+
+            router.push(`/inbox/${convId}`);
+        } catch (err: any) {
+            const msg =
+                err?.response?.data?.message ||
+                "Cannot message this user";
+            toast.error(msg);
+        } finally {
+            setStartingChat(false);
+        }
     };
 
     const handleEditField = (
@@ -209,8 +235,14 @@ export function ProfileHeader({
                                             variant="outline"
                                             size="icon"
                                             className="rounded-full"
+                                            onClick={handleMessageClick}
+                                            disabled={startingChat}
                                         >
-                                            <MessageCircle className="w-5 h-5" />
+                                            {startingChat ? (
+                                                <Loader2 className="w-5 h-5 animate-spin" />
+                                            ) : (
+                                                <MessageCircle className="w-5 h-5" />
+                                            )}
                                         </Button>
                                         <Button
                                             variant="ghost"

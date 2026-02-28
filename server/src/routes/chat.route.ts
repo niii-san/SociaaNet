@@ -2,6 +2,7 @@ import { Router } from "express";
 import { authenticate } from "../middlewares";
 import {
     getConversationsController,
+    getConversationByIdController,
     createDirectConversationController,
     createGroupConversationController,
     getMessagesController,
@@ -42,6 +43,7 @@ chatRouter.post("/upload", upload.array("files", 10), uploadChatMediaController)
 chatRouter.get("/conversations", getConversationsController);
 chatRouter.post("/conversations/direct", createDirectConversationController);
 chatRouter.post("/conversations/group", createGroupConversationController);
+chatRouter.get("/conversations/:conversationId", getConversationByIdController);
 chatRouter.delete("/conversations/:conversationId", deleteConversationController);
 
 // Messages

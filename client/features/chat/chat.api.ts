@@ -7,6 +7,14 @@ export async function getConversations(): Promise<ChatConversation[]> {
     return res.data.data;
 }
 
+// Get a single conversation by ID
+export async function getConversationById(
+    conversationId: string
+): Promise<ChatConversation> {
+    const res = await api.get(`/chat/conversations/${conversationId}`);
+    return res.data.data;
+}
+
 // Create or get direct conversation
 export async function getOrCreateDirectConversation(
     targetUserId: string
