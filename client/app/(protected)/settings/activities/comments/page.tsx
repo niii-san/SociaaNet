@@ -171,7 +171,7 @@ function CommentHistoryCard({ item }: { item: CommentHistoryItem }) {
                         )}
                         <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground">
                             <span className="flex items-center gap-1">
-                                <Heart className="w-3 h-3 text-red-400" />
+                                <Heart className="w-3 h-3 text-pink-400" />
                                 {item.likes_count}
                             </span>
                             <span>{formatTimeAgo(item.created_at)}</span>

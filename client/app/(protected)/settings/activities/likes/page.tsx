@@ -86,7 +86,7 @@ export default function LikeHistoryPage() {
                     <Link href="/settings/activities" className="text-muted-foreground hover:text-foreground transition-colors">
                         <ArrowLeft className="w-5 h-5" />
                     </Link>
-                    <Heart className="w-6 h-6 text-red-500" />
+                    <Heart className="w-6 h-6 text-pink-500" />
                     <h1 className="text-2xl font-bold">Like History</h1>
                     {data && (
                         <span className="text-sm text-muted-foreground ml-auto">
@@ -179,7 +179,7 @@ function LikeHistoryCard({ item }: { item: LikeHistoryItem }) {
                         </p>
                         <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground">
                             <span className="flex items-center gap-1">
-                                <Heart className="w-3 h-3 text-red-400" />
+                                <Heart className="w-3 h-3 text-pink-400" />
                                 {likesCount}
                             </span>
                             <span className="flex items-center gap-1">
@@ -200,7 +200,7 @@ function LikeHistoryCard({ item }: { item: LikeHistoryItem }) {
 
                     {/* Like icon */}
                     <div className="flex items-center">
-                        <Heart className="w-4 h-4 text-red-500 fill-red-500" />
+                        <Heart className="w-4 h-4 text-pink-500 fill-pink-500" />
                     </div>
                 </div>
             </Card>

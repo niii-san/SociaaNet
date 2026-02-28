@@ -11,8 +11,8 @@ const activityOptions = [
         description: "Posts and content you've liked",
         icon: Heart,
         href: "/settings/activities/likes",
-        iconColor: "text-red-500",
-        bgColor: "bg-red-500/10"
+        iconColor: "text-pink-500",
+        bgColor: "bg-pink-500/10"
     },
     {
         title: "Comments",

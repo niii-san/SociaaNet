@@ -179,7 +179,7 @@ function WatchHistoryCard({ item }: { item: WatchHistoryItem }) {
                         </p>
                         <div className="flex items-center gap-3 mt-1.5 text-xs text-muted-foreground">
                             <span className="flex items-center gap-1">
-                                <Heart className="w-3 h-3 text-red-400" />
+                                <Heart className="w-3 h-3 text-pink-400" />
                                 {likesCount}
                             </span>
                             <span className="flex items-center gap-1">

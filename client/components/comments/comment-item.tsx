@@ -216,11 +216,11 @@ export default function CommentItem({
                             >
                                 <Heart
                                     className={`w-3.5 h-3.5 ${
-                                        isLiked ? "fill-red-500 text-red-500" : ""
+                                        isLiked ? "fill-pink-500 text-pink-500" : ""
                                     }`}
                                 />
                                 {likesCount > 0 && (
-                                    <span className={isLiked ? "text-red-500 font-medium" : ""}>
+                                    <span className={isLiked ? "text-pink-500 font-medium" : ""}>
                                         {likesCount}
                                     </span>
                                 )}

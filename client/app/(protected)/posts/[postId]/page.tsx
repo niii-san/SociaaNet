@@ -342,14 +342,14 @@ export default function PostDetailPage() {
                                     <Button
                                         variant="ghost"
                                         size="icon"
-                                        className="hover:text-red-500"
+                                        className="hover:text-pink-500"
                                         onClick={handleLikeToggle}
                                         disabled={likingInProgress}
                                     >
                                         <Heart
                                             className={`w-7 h-7 transition-colors ${
                                                 isLiked
-                                                    ? "fill-red-500 text-red-500"
+                                                    ? "fill-pink-500 text-pink-500"
                                                     : ""
                                             }`}
                                         />

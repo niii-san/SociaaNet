@@ -276,11 +276,11 @@ export function AuthHome() {
                                                     toggleLike(post.id)
                                                 }
                                                 className={`flex items-center gap-2 transition-colors group ${likedPosts.includes(post.id)
-                                                        ? "text-red-500"
-                                                        : "text-muted-foreground hover:text-red-500"
+                                                        ? "text-pink-500"
+                                                        : "text-muted-foreground hover:text-pink-500"
                                                     }`}
                                             >
-                                                <div className="p-2 rounded-full group-hover:bg-red-500/10 transition-colors">
+                                                <div className="p-2 rounded-full group-hover:bg-pink-500/10 transition-colors">
                                                     <Heart
                                                         className={`w-4 h-4 ${likedPosts.includes(
                                                             post.id
