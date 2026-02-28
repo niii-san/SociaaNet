@@ -1,6 +1,7 @@
 "use client";
 
 import { Heart, MessageCircle, Copy } from "lucide-react";
+import Link from "next/link";
 
 interface Post {
     post_id: string;
@@ -28,30 +29,32 @@ export function PostsGrid({ posts }: PostsGridProps) {
     return (
         <div className="grid grid-cols-3 gap-1">
             {posts.map((post) => (
-                <div key={post.post_id} className="aspect-square bg-muted relative group cursor-pointer overflow-hidden">
-                    <img 
-                        src={post.media_urls[0]} 
-                        alt="post" 
-                        className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" 
-                    />
-                    {/* Multiple images indicator */}
-                    {post.media_urls.length > 1 && (
-                        <div className="absolute top-2 right-2 z-10">
-                            <Copy className="w-5 h-5 text-white drop-shadow-lg" />
-                        </div>
-                    )}
-                    {/* Hover overlay with stats */}
-                    <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4 text-white">
-                        <div className="flex items-center gap-1">
-                            <Heart className="w-6 h-6 fill-white" />
-                            <span className="font-bold">{post.likes_count}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                            <MessageCircle className="w-6 h-6 fill-white" />
-                            <span className="font-bold">{post.comments_count}</span>
+                <Link href={`/posts/${post.post_id}`} key={post.post_id}>
+                    <div className="aspect-square bg-muted relative group cursor-pointer overflow-hidden">
+                        <img 
+                            src={post.media_urls[0]} 
+                            alt="post" 
+                            className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110" 
+                        />
+                        {/* Multiple images indicator */}
+                        {post.media_urls.length > 1 && (
+                            <div className="absolute top-2 right-2 z-10">
+                                <Copy className="w-5 h-5 text-white drop-shadow-lg" />
+                            </div>
+                        )}
+                        {/* Hover overlay with stats */}
+                        <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-4 text-white">
+                            <div className="flex items-center gap-1">
+                                <Heart className="w-6 h-6 fill-white" />
+                                <span className="font-bold">{post.likes_count}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                                <MessageCircle className="w-6 h-6 fill-white" />
+                                <span className="font-bold">{post.comments_count}</span>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </Link>
             ))}
         </div>
     );

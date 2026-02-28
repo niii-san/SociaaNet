@@ -92,3 +92,43 @@ export const createReel = async (
     
     return response.data;
 };
+
+// Get post by ID
+export interface PostDetail {
+    post_id: string;
+    author_id: string;
+    media_urls: string[];
+    caption: string;
+    is_post_author: boolean;
+    is_post_liked_by_current_user: boolean;
+    likes_count: number;
+    comments_count: number;
+    comments: any[];
+    hashtags: string[];
+    visibility: "public" | "private" | "followers";
+    created_at: string;
+}
+
+export interface GetPostResponse {
+    status_code: number;
+    success: boolean;
+    message: string;
+    data: PostDetail;
+}
+
+export const getPostById = async (postId: string): Promise<PostDetail> => {
+    const response = await api.get(`/posts/${postId}`);
+    return response.data?.data as PostDetail;
+};
+
+// Update post visibility
+export interface UpdatePostVisibilityRequest {
+    visibility: "public" | "private" | "followers";
+}
+
+export const updatePostVisibility = async (
+    postId: string,
+    visibility: "public" | "private" | "followers"
+): Promise<void> => {
+    await api.patch(`/posts/${postId}/visibility`, { visibility });
+};

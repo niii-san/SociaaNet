@@ -37,6 +37,9 @@ interface IFilesRepository {
     getReelByVideoKey(videoKey: string): Promise<ReelDocument | null>;
     getUserPostsByUserId(userId: string): Promise<PostDocument[]>;
     getUserReelsByUserId(userId: string): Promise<ReelDocument[]>;
+
+    getPostById(postId: string): Promise<PostDocument | null>;
+    getReelById(reelId: string): Promise<ReelDocument | null>;
 }
 
 class FilesRepository implements IFilesRepository {
@@ -169,6 +172,26 @@ class FilesRepository implements IFilesRepository {
         }).sort({ created_at: -1 });
 
         return reels;
+    }
+
+    async getPostById(postId: string): Promise<PostDocument | null> {
+        const post = await Post.findOne({
+            _id: postId,
+            is_deleted: false,
+            is_removed_by_moderator: false
+        });
+
+        return post;
+    }
+
+    async getReelById(reelId: string): Promise<ReelDocument | null> {
+        const reel = await Reel.findOne({
+            _id: reelId,
+            is_deleted: false,
+            is_removed_by_moderator: false
+        });
+
+        return reel;
     }
 }
 

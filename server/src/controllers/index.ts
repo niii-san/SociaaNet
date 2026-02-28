@@ -31,7 +31,7 @@ import { changePasswordController } from "./auth/change-password.controller";
 import { uploadPostController } from "./medias/upload-post.controller";
 import { uploadReelController } from "./medias/upload-reel.controller";
 import { getVideoController } from "./files/get-video.controller";
-
+import { getPostController } from "./posts/get-post.controller";
 
 export {
     signupController,
@@ -66,5 +66,6 @@ export {
     changePasswordController,
     uploadPostController,
     uploadReelController,
-    getVideoController
+    getVideoController,
+    getPostController
 };
