@@ -13,7 +13,9 @@ import {
     ArrowLeft,
     Shield,
     Menu,
-    X
+    X,
+    ClipboardList,
+    Flag
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
@@ -37,10 +39,20 @@ const modNavItems = [
         icon: Film,
         label: "Reels",
         href: "/moderator/reels"
+    },
+    {
+        icon: Flag,
+        label: "Reports",
+        href: "/moderator/reports"
+    },
+    {
+        icon: ClipboardList,
+        label: "Audit Log",
+        href: "/moderator/audit-log"
     }
 ];
 
-export default function ModeratorLayout({
+export function ModeratorLayoutInner({
     children
 }: {
     children: React.ReactNode;
