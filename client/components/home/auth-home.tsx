@@ -8,6 +8,7 @@ import { FeedReelCard } from "@/components/feed/feed-reel-card";
 import { CaughtUpDivider } from "@/components/feed/caught-up-divider";
 import { SuggestedUsersBar } from "@/components/feed/suggested-users-bar";
 import { FeedSkeleton } from "@/components/feed/feed-skeletons";
+import { PullToRefresh } from "@/components/ui/pull-to-refresh";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
 export function AuthHome() {
@@ -102,6 +103,11 @@ export function AuthHome() {
         return () => observer.disconnect();
     }, [hasMore, loadingMore, page, fetchFeed]);
 
+    const handleRefresh = useCallback(async () => {
+        setPage(1);
+        await fetchFeed(1);
+    }, [fetchFeed]);
+
     return (
         <>
             {/* Header */}
@@ -112,8 +118,9 @@ export function AuthHome() {
             {/* Suggested Users */}
             <SuggestedUsersBar />
 
-            {/* Feed */}
-            <div className="min-h-screen">
+            {/* Feed with pull-to-refresh */}
+            <PullToRefresh onRefresh={handleRefresh}>
+                <div className="min-h-screen">
                 {loading ? (
                     <FeedSkeleton />
                 ) : items.length === 0 ? (
@@ -191,6 +198,7 @@ export function AuthHome() {
                     </>
                 )}
             </div>
+            </PullToRefresh>
         </>
     );
 }

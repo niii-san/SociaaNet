@@ -7,6 +7,7 @@ import { SearchDialog } from "@/components/explore/search-dialog";
 import { ExploreCard } from "@/components/explore/explore-card";
 import { getExplore, ExploreItem } from "@/features/feed/feed.api";
 import { ExploreGridSkeleton } from "@/components/explore/explore-skeleton";
+import { PullToRefresh } from "@/components/ui/pull-to-refresh";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useKeyboardShortcut } from "@/hooks/useKeyboardShortcut";
 
@@ -85,6 +86,11 @@ export default function ExplorePage() {
         return () => observer.disconnect();
     }, [hasMore, loadingMore, page, fetchExplore]);
 
+    const handleRefresh = useCallback(async () => {
+        setPage(1);
+        await fetchExplore(1);
+    }, [fetchExplore]);
+
     return (
         <div className="min-h-screen bg-background pb-12">
             {/* Header */}
@@ -111,56 +117,58 @@ export default function ExplorePage() {
                 </div>
             </header>
 
-            <div className="px-4 py-4">
-                {loading ? (
-                    <ExploreGridSkeleton />
-                ) : items.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center py-20">
-                        <Compass className="w-16 h-16 text-muted-foreground/40 mb-4" />
-                        <h3 className="text-lg font-semibold mb-2">
-                            Nothing to explore yet
-                        </h3>
-                        <p className="text-muted-foreground text-sm text-center">
-                            Content from new creators will appear here as the community grows.
-                        </p>
-                    </div>
-                ) : (
-                    <>
-                        {/* Masonry Grid */}
-                        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 auto-rows-auto">
-                            {items.map((item, index) => (
-                                <ExploreCard
-                                    key={
-                                        item.type === "post"
-                                            ? item.post_id
-                                            : item.reel_id
-                                    }
-                                    item={item}
-                                    size={
-                                        index % 7 === 0
-                                            ? "large"
-                                            : "normal"
-                                    }
-                                />
-                            ))}
+            <PullToRefresh onRefresh={handleRefresh}>
+                <div className="px-4 py-4">
+                    {loading ? (
+                        <ExploreGridSkeleton />
+                    ) : items.length === 0 ? (
+                        <div className="flex flex-col items-center justify-center py-20">
+                            <Compass className="w-16 h-16 text-muted-foreground/40 mb-4" />
+                            <h3 className="text-lg font-semibold mb-2">
+                                Nothing to explore yet
+                            </h3>
+                            <p className="text-muted-foreground text-sm text-center">
+                                Content from new creators will appear here as the community grows.
+                            </p>
                         </div>
+                    ) : (
+                        <>
+                            {/* Masonry Grid */}
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 auto-rows-auto">
+                                {items.map((item, index) => (
+                                    <ExploreCard
+                                        key={
+                                            item.type === "post"
+                                                ? item.post_id
+                                                : item.reel_id
+                                        }
+                                        item={item}
+                                        size={
+                                            index % 7 === 0
+                                                ? "large"
+                                                : "normal"
+                                        }
+                                    />
+                                ))}
+                            </div>
 
-                        <div
-                            ref={loaderRef}
-                            className="py-6 flex justify-center"
-                        >
-                            {loadingMore && (
-                                <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
-                            )}
-                            {!hasMore && items.length > 0 && (
-                                <p className="text-muted-foreground text-sm">
-                                    You&apos;ve reached the end
-                                </p>
-                            )}
-                        </div>
-                    </>
-                )}
-            </div>
+                            <div
+                                ref={loaderRef}
+                                className="py-6 flex justify-center"
+                            >
+                                {loadingMore && (
+                                    <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                                )}
+                                {!hasMore && items.length > 0 && (
+                                    <p className="text-muted-foreground text-sm">
+                                        You&apos;ve reached the end
+                                    </p>
+                                )}
+                            </div>
+                        </>
+                    )}
+                </div>
+            </PullToRefresh>
 
             <SearchDialog open={searchOpen} onOpenChange={setSearchOpen} />
         </div>
