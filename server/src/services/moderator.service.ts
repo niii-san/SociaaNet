@@ -6,6 +6,9 @@ import {
     convertThumbnailKeytoThumbnailUrl
 } from "../utils";
 import { ErrorCodes } from "../constants/error-code";
+import { notificationService } from "./notification.service";
+import { Post } from "../models/post.model";
+import { Reel } from "../models/reel.model";
 
 class ModeratorService {
     // ─── Dashboard ─────────────────────────────────────────────
@@ -49,10 +52,19 @@ class ModeratorService {
             throw new HttpError(404, false, ErrorCodes.NOT_FOUND, "User not found");
         }
 
+        // Notify the user
+        await notificationService.notify({
+            recipientId: userId,
+            senderId: moderatorId,
+            type: "mod_account_disabled",
+            targetType: "user",
+            content: "Your account has been disabled by a moderator for violating community guidelines."
+        });
+
         return { message: "User account disabled successfully" };
     }
 
-    async enableUser(userId: string) {
+    async enableUser(userId: string, moderatorId: string) {
         const user = await moderatorRepo.getUserDetails(userId);
         if (!user) {
             throw new HttpError(404, false, ErrorCodes.NOT_FOUND, "User not found");
@@ -62,6 +74,15 @@ class ModeratorService {
         if (!enabled) {
             throw new HttpError(404, false, ErrorCodes.NOT_FOUND, "User not found");
         }
+
+        // Notify the user
+        await notificationService.notify({
+            recipientId: userId,
+            senderId: moderatorId,
+            type: "mod_account_enabled",
+            targetType: "user",
+            content: "Your account has been re-enabled."
+        });
 
         return { message: "User account enabled successfully" };
     }
@@ -114,11 +135,28 @@ class ModeratorService {
         return { posts, pagination: result.pagination };
     }
 
-    async removePost(postId: string) {
+    async removePost(postId: string, moderatorId: string) {
+        // Get post first to know the author
+        const postDoc = await Post.findById(postId);
+        if (!postDoc) {
+            throw new HttpError(404, false, ErrorCodes.NOT_FOUND, "Post not found");
+        }
+
         const post = await moderatorRepo.removePost(postId);
         if (!post) {
             throw new HttpError(404, false, ErrorCodes.NOT_FOUND, "Post not found");
         }
+
+        // Notify the post author
+        await notificationService.notify({
+            recipientId: postDoc.author.toString(),
+            senderId: moderatorId,
+            type: "mod_post_removed",
+            targetId: postId,
+            targetType: "post",
+            content: "Your post has been removed by a moderator for violating community guidelines."
+        });
+
         return { message: "Post removed successfully" };
     }
 
@@ -167,11 +205,28 @@ class ModeratorService {
         return { reels, pagination: result.pagination };
     }
 
-    async removeReel(reelId: string) {
+    async removeReel(reelId: string, moderatorId: string) {
+        // Get reel first to know the author
+        const reelDoc = await Reel.findById(reelId);
+        if (!reelDoc) {
+            throw new HttpError(404, false, ErrorCodes.NOT_FOUND, "Reel not found");
+        }
+
         const reel = await moderatorRepo.removeReel(reelId);
         if (!reel) {
             throw new HttpError(404, false, ErrorCodes.NOT_FOUND, "Reel not found");
         }
+
+        // Notify the reel author
+        await notificationService.notify({
+            recipientId: reelDoc.author.toString(),
+            senderId: moderatorId,
+            type: "mod_reel_removed",
+            targetId: reelId,
+            targetType: "reel",
+            content: "Your reel has been removed by a moderator for violating community guidelines."
+        });
+
         return { message: "Reel removed successfully" };
     }
 

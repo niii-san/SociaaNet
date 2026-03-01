@@ -6,7 +6,8 @@ import { moderatorService } from "../../services/moderator.service";
 export const removeReelController = asyncHandler(
     async (req: RequestWithUserContext, res: Response) => {
         const { reelId } = req.params;
-        const result = await moderatorService.removeReel(reelId);
+        const moderatorId = req.user._id.toString();
+        const result = await moderatorService.removeReel(reelId, moderatorId);
         return res
             .status(200)
             .json(new HttpSuccess(200, true, result.message, null));

@@ -15,7 +15,11 @@ import {
     Loader2,
     CheckCheck,
     Trash2,
-    ArrowLeft
+    ArrowLeft,
+    ShieldAlert,
+    ShieldCheck,
+    ShieldX,
+    AlertTriangle
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -43,6 +47,15 @@ function getNotificationIcon(type: AppNotification["type"]) {
             return <Repeat2 className="w-5 h-5 text-green-500" />;
         case "mention":
             return <AtSign className="w-5 h-5 text-purple-500" />;
+        case "mod_post_removed":
+        case "mod_reel_removed":
+            return <ShieldAlert className="w-5 h-5 text-red-500" />;
+        case "mod_account_disabled":
+            return <ShieldX className="w-5 h-5 text-red-500" />;
+        case "mod_account_enabled":
+            return <ShieldCheck className="w-5 h-5 text-green-500" />;
+        case "mod_warning":
+            return <AlertTriangle className="w-5 h-5 text-yellow-500" />;
         default:
             return <Bell className="w-5 h-5 text-muted-foreground" />;
     }
@@ -74,6 +87,16 @@ function getNotificationText(notification: AppNotification): string {
             return "reposted your reel";
         case "mention":
             return "mentioned you";
+        case "mod_post_removed":
+            return notification.content || "removed your post for violating community guidelines";
+        case "mod_reel_removed":
+            return notification.content || "removed your reel for violating community guidelines";
+        case "mod_account_disabled":
+            return notification.content || "Your account has been disabled";
+        case "mod_account_enabled":
+            return notification.content || "Your account has been re-enabled";
+        case "mod_warning":
+            return notification.content || "You have received a warning from a moderator";
         default:
             return "interacted with you";
     }
@@ -111,6 +134,18 @@ function getNotificationLink(notification: AppNotification): string | null {
                     ? `/posts/${notification.target_id}`
                     : `/reels/${notification.target_id}`;
             }
+            return null;
+        case "mod_post_removed":
+            return notification.target_id
+                ? `/posts/${notification.target_id}`
+                : null;
+        case "mod_reel_removed":
+            return notification.target_id
+                ? `/reels/${notification.target_id}`
+                : null;
+        case "mod_account_disabled":
+        case "mod_account_enabled":
+        case "mod_warning":
             return null;
         default:
             return null;

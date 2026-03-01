@@ -17,7 +17,13 @@ const typeToSettingsKey: Record<NotificationType, string> = {
     reply_comment: "comments",
     repost_post: "likes", // group reposts under likes setting
     repost_reel: "likes",
-    mention: "mentions"
+    mention: "mentions",
+    // Moderation notifications always sent (empty key = no preference check)
+    mod_post_removed: "",
+    mod_reel_removed: "",
+    mod_account_disabled: "",
+    mod_account_enabled: "",
+    mod_warning: ""
 };
 
 class NotificationService {

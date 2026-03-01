@@ -12,7 +12,12 @@ export type NotificationType =
     | "reply_comment"
     | "repost_post"
     | "repost_reel"
-    | "mention";
+    | "mention"
+    | "mod_post_removed"
+    | "mod_reel_removed"
+    | "mod_account_disabled"
+    | "mod_account_enabled"
+    | "mod_warning";
 
 export interface NotificationEntity {
     _id: Types.ObjectId;
