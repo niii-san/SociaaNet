@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts";
 import { SmilePlus, Reply, Trash2, Check, CheckCheck } from "lucide-react";
 import { EmojiPicker } from "./emoji-picker";
 import { ReactionDetailsDialog } from "./reaction-details-dialog";
+import Link from "next/link";
 
 interface MessageBubbleProps {
     message: ChatMessage;
@@ -132,9 +133,13 @@ export function MessageBubble({
                         <p className="text-muted-foreground truncate">
                             {message.reply_to.is_deleted
                                 ? "Message deleted"
-                                : message.reply_to.message_type !== "text"
-                                  ? "📷 Media"
-                                  : message.reply_to.content}
+                                : message.reply_to.message_type === "shared_post"
+                                  ? "📌 Shared a post"
+                                  : message.reply_to.message_type === "shared_reel"
+                                    ? "🎬 Shared a reel"
+                                    : message.reply_to.message_type !== "text"
+                                      ? "📷 Media"
+                                      : message.reply_to.content}
                         </p>
                     </div>
                 )}
@@ -162,7 +167,7 @@ export function MessageBubble({
                                         key={i}
                                         className="relative overflow-hidden"
                                     >
-                                        {message.message_type === "video" ? (
+                                        {url.includes("/videos/") ? (
                                             <video
                                                 src={url}
                                                 controls
@@ -180,6 +185,148 @@ export function MessageBubble({
                                 ))}
                             </div>
                         )}
+
+                        {/* Shared Post */}
+                        {message.message_type === "shared_post" &&
+                            message.shared_post && (
+                                <Link
+                                    href={`/posts/${message.shared_post.post_id}`}
+                                    className="block"
+                                >
+                                    <div className="m-2 rounded-xl border border-border overflow-hidden bg-background/50">
+                                        {message.shared_post.is_deleted ? (
+                                            <div className="p-4 text-center text-sm text-muted-foreground italic">
+                                                This post has been deleted
+                                            </div>
+                                        ) : (
+                                            <>
+                                                {message.shared_post
+                                                    .media_urls?.length >
+                                                    0 && (
+                                                    <img
+                                                        src={
+                                                            message
+                                                                .shared_post
+                                                                .media_urls[0]
+                                                        }
+                                                        alt="Shared post"
+                                                        className="w-full max-h-48 object-cover"
+                                                        loading="lazy"
+                                                    />
+                                                )}
+                                                <div className="p-2.5">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <span className="text-xs font-semibold">
+                                                            {
+                                                                message
+                                                                    .shared_post
+                                                                    .author
+                                                                    ?.full_name
+                                                            }
+                                                        </span>
+                                                        <span className="text-[10px] text-muted-foreground">
+                                                            @
+                                                            {
+                                                                message
+                                                                    .shared_post
+                                                                    .author
+                                                                    ?.username
+                                                            }
+                                                        </span>
+                                                    </div>
+                                                    {message.shared_post
+                                                        .caption && (
+                                                        <p className="text-xs line-clamp-2 text-muted-foreground">
+                                                            {
+                                                                message
+                                                                    .shared_post
+                                                                    .caption
+                                                            }
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                </Link>
+                            )}
+
+                        {/* Shared Reel */}
+                        {message.message_type === "shared_reel" &&
+                            message.shared_reel && (
+                                <Link
+                                    href={`/reels?id=${message.shared_reel.reel_id}`}
+                                    className="block"
+                                >
+                                    <div className="m-2 rounded-xl border border-border overflow-hidden bg-background/50">
+                                        {message.shared_reel.is_deleted ? (
+                                            <div className="p-4 text-center text-sm text-muted-foreground italic">
+                                                This reel has been deleted
+                                            </div>
+                                        ) : (
+                                            <>
+                                                {message.shared_reel
+                                                    .thumbnail_url && (
+                                                    <div className="relative">
+                                                        <img
+                                                            src={
+                                                                message
+                                                                    .shared_reel
+                                                                    .thumbnail_url
+                                                            }
+                                                            alt="Reel thumbnail"
+                                                            className="w-full max-h-48 object-cover"
+                                                            loading="lazy"
+                                                        />
+                                                        <div className="absolute inset-0 flex items-center justify-center">
+                                                            <div className="w-10 h-10 rounded-full bg-black/50 flex items-center justify-center">
+                                                                <svg
+                                                                    className="w-5 h-5 text-white ml-0.5"
+                                                                    fill="currentColor"
+                                                                    viewBox="0 0 24 24"
+                                                                >
+                                                                    <path d="M8 5v14l11-7z" />
+                                                                </svg>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                                <div className="p-2.5">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <span className="text-xs font-semibold">
+                                                            {
+                                                                message
+                                                                    .shared_reel
+                                                                    .author
+                                                                    ?.full_name
+                                                            }
+                                                        </span>
+                                                        <span className="text-[10px] text-muted-foreground">
+                                                            @
+                                                            {
+                                                                message
+                                                                    .shared_reel
+                                                                    .author
+                                                                    ?.username
+                                                            }
+                                                        </span>
+                                                    </div>
+                                                    {message.shared_reel
+                                                        .caption && (
+                                                        <p className="text-xs line-clamp-2 text-muted-foreground">
+                                                            {
+                                                                message
+                                                                    .shared_reel
+                                                                    .caption
+                                                            }
+                                                        </p>
+                                                    )}
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                </Link>
+                            )}
 
                         {/* Text */}
                         {message.content && (

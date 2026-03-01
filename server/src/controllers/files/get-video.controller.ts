@@ -1,27 +1,21 @@
 import { Response } from "express";
 import { fileServiceClient } from "../../clients";
-import { GetImageDto } from "../../dtos";
-import { filesService } from "../../services";
 import { asyncHandler } from "../../utils";
-import { RequestWithUserContext } from "../../types";
 
-interface ReqWithParams extends RequestWithUserContext {
+interface ReqWithParams extends Request {
     params: {
         videoKey: string;
     };
 }
 export const getVideoController = asyncHandler(
     async (req: ReqWithParams, res: Response) => {
-        const userId = req.user._id.toString();
         const { videoKey } = req.params;
 
-        const reel = await filesService.getReelVideo(videoKey, userId);
-
-        const videoStream = await fileServiceClient.getVideoStream(
-            reel.video_key
-        );
+        const videoStream = await fileServiceClient.getVideoStream(videoKey);
 
         res.setHeader("Content-Type", "video/mp4");
+        res.setHeader("Cache-Control", "private, max-age=3600");
+
         videoStream.data.pipe(res);
     }
 );

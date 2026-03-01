@@ -7,7 +7,7 @@ import {
     Follow,
     UserSettings
 } from "../models";
-import { convertImageKeyToImageUrl } from "../utils";
+import { convertImageKeyToImageUrl, convertVideoKeyToVideoUrl, convertThumbnailKeytoThumbnailUrl } from "../utils";
 import { MessageRequestStatus } from "../types/conversation.type";
 
 class ChatRepository {
@@ -379,8 +379,10 @@ class ChatRepository {
         conversation_id: string;
         sender_id: string;
         content?: string;
-        message_type: "text" | "image" | "video" | "mixed";
+        message_type: "text" | "image" | "video" | "mixed" | "shared_post" | "shared_reel";
         media_keys?: string[];
+        shared_post_id?: string;
+        shared_reel_id?: string;
         reply_to?: string;
     }): Promise<MessageDocument> {
         const message = new Message({
@@ -390,6 +392,12 @@ class ChatRepository {
             message_type: data.message_type,
             media_urls: [], // deprecated — kept empty for backward compat
             media_keys: data.media_keys || [],
+            shared_post_id: data.shared_post_id
+                ? new mongoose.Types.ObjectId(data.shared_post_id)
+                : null,
+            shared_reel_id: data.shared_reel_id
+                ? new mongoose.Types.ObjectId(data.shared_reel_id)
+                : null,
             reply_to: data.reply_to
                 ? new mongoose.Types.ObjectId(data.reply_to)
                 : null,
@@ -479,6 +487,66 @@ class ChatRepository {
                         preserveNullAndEmptyArrays: true
                     }
                 },
+                // Lookup shared post
+                {
+                    $lookup: {
+                        from: "posts",
+                        localField: "shared_post_id",
+                        foreignField: "_id",
+                        as: "shared_post_data"
+                    }
+                },
+                {
+                    $unwind: {
+                        path: "$shared_post_data",
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
+                // Lookup shared post author
+                {
+                    $lookup: {
+                        from: "users",
+                        localField: "shared_post_data.author",
+                        foreignField: "_id",
+                        as: "shared_post_author"
+                    }
+                },
+                {
+                    $unwind: {
+                        path: "$shared_post_author",
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
+                // Lookup shared reel
+                {
+                    $lookup: {
+                        from: "reels",
+                        localField: "shared_reel_id",
+                        foreignField: "_id",
+                        as: "shared_reel_data"
+                    }
+                },
+                {
+                    $unwind: {
+                        path: "$shared_reel_data",
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
+                // Lookup shared reel author
+                {
+                    $lookup: {
+                        from: "users",
+                        localField: "shared_reel_data.author",
+                        foreignField: "_id",
+                        as: "shared_reel_author"
+                    }
+                },
+                {
+                    $unwind: {
+                        path: "$shared_reel_author",
+                        preserveNullAndEmptyArrays: true
+                    }
+                },
                 {
                     $project: {
                         _id: 1,
@@ -497,6 +565,50 @@ class ChatRepository {
                             username: "$sender_data.username",
                             full_name: "$sender_data.full_name",
                             avatar_key: "$sender_data.avatar_key"
+                        },
+                        shared_post: {
+                            $cond: {
+                                if: "$shared_post_data",
+                                then: {
+                                    post_id: "$shared_post_data._id",
+                                    caption: "$shared_post_data.caption",
+                                    media_keys: "$shared_post_data.media_keys",
+                                    likes_count: "$shared_post_data.likes_count",
+                                    comments_count: "$shared_post_data.comments_count",
+                                    is_deleted: "$shared_post_data.is_deleted",
+                                    created_at: "$shared_post_data.created_at",
+                                    author: {
+                                        user_id: "$shared_post_author._id",
+                                        username: "$shared_post_author.username",
+                                        full_name: "$shared_post_author.full_name",
+                                        avatar_key: "$shared_post_author.avatar_key"
+                                    }
+                                },
+                                else: null
+                            }
+                        },
+                        shared_reel: {
+                            $cond: {
+                                if: "$shared_reel_data",
+                                then: {
+                                    reel_id: "$shared_reel_data._id",
+                                    caption: "$shared_reel_data.caption",
+                                    thumbnail_key: "$shared_reel_data.thumbnail_key",
+                                    media_key: "$shared_reel_data.media_key",
+                                    likes_count: "$shared_reel_data.likes_count",
+                                    comments_count: "$shared_reel_data.comments_count",
+                                    views_count: "$shared_reel_data.views_count",
+                                    is_deleted: "$shared_reel_data.is_deleted",
+                                    created_at: "$shared_reel_data.created_at",
+                                    author: {
+                                        user_id: "$shared_reel_author._id",
+                                        username: "$shared_reel_author.username",
+                                        full_name: "$shared_reel_author.full_name",
+                                        avatar_key: "$shared_reel_author.avatar_key"
+                                    }
+                                },
+                                else: null
+                            }
                         },
                         reply_to: {
                             $cond: {
@@ -525,15 +637,61 @@ class ChatRepository {
         ]);
 
         // Convert sender avatar keys and media keys to URLs
+        const videoExtensions = [".mp4", ".webm", ".mov", ".avi", ".mkv"];
         const processedMessages = messages.map((msg) => {
             const { media_keys, sender_data, reply_to_data, reply_to_sender, ...rest } = msg;
+
+            // Process shared post media keys → URLs
+            let sharedPost = msg.shared_post;
+            if (sharedPost && !sharedPost.is_deleted) {
+                sharedPost = {
+                    ...sharedPost,
+                    media_urls: (sharedPost.media_keys || []).map((key: string) =>
+                        convertImageKeyToImageUrl(key)
+                    ),
+                    author: {
+                        ...sharedPost.author,
+                        avatar_url: sharedPost.author?.avatar_key
+                            ? convertImageKeyToImageUrl(sharedPost.author.avatar_key)
+                            : null
+                    }
+                };
+            }
+
+            // Process shared reel keys → URLs
+            let sharedReel = msg.shared_reel;
+            if (sharedReel && !sharedReel.is_deleted) {
+                sharedReel = {
+                    ...sharedReel,
+                    thumbnail_url: sharedReel.thumbnail_key
+                        ? convertThumbnailKeytoThumbnailUrl(sharedReel.thumbnail_key)
+                        : null,
+                    video_url: sharedReel.media_key
+                        ? convertVideoKeyToVideoUrl(sharedReel.media_key)
+                        : null,
+                    author: {
+                        ...sharedReel.author,
+                        avatar_url: sharedReel.author?.avatar_key
+                            ? convertImageKeyToImageUrl(sharedReel.author.avatar_key)
+                            : null
+                    }
+                };
+            }
+
             return {
                 ...rest,
+                shared_post: sharedPost,
+                shared_reel: sharedReel,
                 media_urls:
                     media_keys && media_keys.length > 0
-                        ? media_keys.map((key: string) =>
-                              convertImageKeyToImageUrl(key)
-                          )
+                        ? media_keys.map((key: string) => {
+                              const isVideo = videoExtensions.some((ext) =>
+                                  key.toLowerCase().endsWith(ext)
+                              );
+                              return isVideo
+                                  ? convertVideoKeyToVideoUrl(key)
+                                  : convertImageKeyToImageUrl(key);
+                          })
                         : msg.media_urls || [], // fallback for old messages with hardcoded URLs
                 sender: {
                     ...msg.sender,

@@ -128,7 +128,8 @@ class FileServiceClient {
                 "x-internal-api-key": this.internalApiKey
             },
             maxBodyLength: Infinity,
-            maxContentLength: Infinity
+            maxContentLength: Infinity,
+            timeout: 120_000 // 2 minutes for video processing
         });
 
         return res.data;

@@ -61,6 +61,8 @@ function getLastMessagePreview(conv: ChatConversation): string {
     if (conv.last_message.message_type === "image") return "📷 Photo";
     if (conv.last_message.message_type === "video") return "🎥 Video";
     if (conv.last_message.message_type === "mixed") return "📎 Media";
+    if (conv.last_message.message_type === "shared_post") return "📌 Shared a post";
+    if (conv.last_message.message_type === "shared_reel") return "🎬 Shared a reel";
     return conv.last_message.content || "No messages yet";
 }
 

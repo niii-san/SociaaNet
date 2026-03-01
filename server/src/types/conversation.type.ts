@@ -26,9 +26,11 @@ export interface MessageEntity {
     conversation_id: mongoose.Types.ObjectId;
     sender_id: mongoose.Types.ObjectId;
     content?: string;
-    message_type: "text" | "image" | "video" | "mixed";
+    message_type: "text" | "image" | "video" | "mixed" | "shared_post" | "shared_reel";
     media_urls?: string[];
     media_keys?: string[];
+    shared_post_id?: mongoose.Types.ObjectId;
+    shared_reel_id?: mongoose.Types.ObjectId;
     reply_to?: mongoose.Types.ObjectId;
     reactions: MessageReaction[];
     read_by: MessageReadReceipt[];

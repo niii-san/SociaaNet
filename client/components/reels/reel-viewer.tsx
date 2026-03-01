@@ -26,6 +26,8 @@ import {
     viewReel
 } from "@/features/posts/posts.api";
 
+import { ShareToChatDialog } from "@/components/chat/share-to-chat-dialog";
+
 interface ReelViewerProps {
     reel: FeedReel;
     isActive: boolean;
@@ -48,6 +50,7 @@ export function ReelViewer({
     const [showHeart, setShowHeart] = useState(false);
     const [progress, setProgress] = useState(0);
     const [viewed, setViewed] = useState(false);
+    const [showShareDialog, setShowShareDialog] = useState(false);
     const videoRef = useRef<HTMLVideoElement>(null);
     const heartTimeout = useRef<NodeJS.Timeout | null>(null);
     const progressInterval = useRef<NodeJS.Timeout | null>(null);
@@ -282,6 +285,16 @@ export function ReelViewer({
                     </div>
                 </button>
 
+                {/* Share to Chat */}
+                <button
+                    onClick={() => setShowShareDialog(true)}
+                    className="flex flex-col items-center gap-1 active:scale-90 transition-transform"
+                >
+                    <div className="w-11 h-11 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center">
+                        <Share2 className="w-6 h-6 text-white" />
+                    </div>
+                </button>
+
                 {/* Mute */}
                 <button
                     onClick={onToggleMute}
@@ -347,6 +360,12 @@ export function ReelViewer({
                     {formatCount(reel.views_count)} views
                 </p>
             </div>
+
+            <ShareToChatDialog
+                open={showShareDialog}
+                onOpenChange={setShowShareDialog}
+                reelId={reel.reel_id}
+            />
         </div>
     );
 }

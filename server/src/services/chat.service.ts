@@ -203,8 +203,10 @@ class ChatService {
         conversationId: string;
         senderId: string;
         content?: string;
-        messageType: "text" | "image" | "video" | "mixed";
+        messageType: "text" | "image" | "video" | "mixed" | "shared_post" | "shared_reel";
         mediaKeys?: string[];
+        sharedPostId?: string;
+        sharedReelId?: string;
         replyTo?: string;
     }) {
         // Verify sender is in conversation
@@ -250,6 +252,8 @@ class ChatService {
             content: data.content?.trim(),
             message_type: data.messageType,
             media_keys: data.mediaKeys,
+            shared_post_id: data.sharedPostId,
+            shared_reel_id: data.sharedReelId,
             reply_to: data.replyTo
         });
     }

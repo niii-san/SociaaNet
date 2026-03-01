@@ -9,7 +9,8 @@ import {
     Bookmark,
     MoreHorizontal,
     ChevronLeft,
-    ChevronRight
+    ChevronRight,
+    Send
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -25,6 +26,7 @@ import {
     viewPost
 } from "@/features/posts/posts.api";
 import { useKeyboardShortcut } from "@/hooks/useKeyboardShortcut";
+import { ShareToChatDialog } from "@/components/chat/share-to-chat-dialog";
 function timeAgoShort(dateStr: string): string {
     const now = Date.now();
     const then = new Date(dateStr).getTime();
@@ -59,6 +61,7 @@ export function PostCard({ post, isActive = false }: PostCardProps) {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
     const [showHeart, setShowHeart] = useState(false);
     const [viewed, setViewed] = useState(post.is_seen);
+    const [showShareDialog, setShowShareDialog] = useState(false);
     const cardRef = useRef<HTMLDivElement>(null);
     const heartTimeout = useRef<NodeJS.Timeout | null>(null);
 
@@ -366,9 +369,25 @@ export function PostCard({ post, isActive = false }: PostCardProps) {
                                 />
                             </div>
                         </button>
+
+                        {/* Share to Chat */}
+                        <button
+                            onClick={() => setShowShareDialog(true)}
+                            className="flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors group active:scale-95"
+                        >
+                            <div className="p-2 rounded-full group-hover:bg-primary/10 transition-colors">
+                                <Send className="w-4 h-4" />
+                            </div>
+                        </button>
                     </div>
                 </div>
             </div>
+
+            <ShareToChatDialog
+                open={showShareDialog}
+                onOpenChange={setShowShareDialog}
+                postId={post.post_id}
+            />
         </article>
     );
 }

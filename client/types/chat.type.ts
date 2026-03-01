@@ -18,7 +18,7 @@ export interface ChatConversation {
     last_message: {
         _id: string;
         content: string;
-        message_type: "text" | "image" | "video" | "mixed";
+        message_type: "text" | "image" | "video" | "mixed" | "shared_post" | "shared_reel";
         is_deleted: boolean;
         created_at: string;
         sender: {
@@ -45,13 +45,49 @@ export interface MessageReadReceipt {
     read_at: string;
 }
 
+export interface SharedPostData {
+    post_id: string;
+    caption: string;
+    media_urls: string[];
+    likes_count: number;
+    comments_count: number;
+    is_deleted: boolean;
+    created_at: string;
+    author: {
+        user_id: string;
+        username: string;
+        full_name: string;
+        avatar_url: string | null;
+    };
+}
+
+export interface SharedReelData {
+    reel_id: string;
+    caption: string;
+    thumbnail_url: string | null;
+    video_url: string | null;
+    likes_count: number;
+    comments_count: number;
+    views_count: number;
+    is_deleted: boolean;
+    created_at: string;
+    author: {
+        user_id: string;
+        username: string;
+        full_name: string;
+        avatar_url: string | null;
+    };
+}
+
 export interface ChatMessage {
     _id: string;
     message_id: string;
     conversation_id: string;
     content: string;
-    message_type: "text" | "image" | "video" | "mixed";
+    message_type: "text" | "image" | "video" | "mixed" | "shared_post" | "shared_reel";
     media_urls: string[];
+    shared_post: SharedPostData | null;
+    shared_reel: SharedReelData | null;
     is_deleted: boolean;
     reactions: MessageReaction[];
     read_by: MessageReadReceipt[];

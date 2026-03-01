@@ -53,7 +53,7 @@ const messageSchema = new mongoose.Schema<MessageEntity>(
         },
         message_type: {
             type: String,
-            enum: ["text", "image", "video", "mixed"],
+            enum: ["text", "image", "video", "mixed", "shared_post", "shared_reel"],
             default: "text"
         },
         media_urls: {
@@ -63,6 +63,16 @@ const messageSchema = new mongoose.Schema<MessageEntity>(
         media_keys: {
             type: [String],
             default: []
+        },
+        shared_post_id: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Post",
+            default: null
+        },
+        shared_reel_id: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Reel",
+            default: null
         },
         reply_to: {
             type: mongoose.Schema.Types.ObjectId,

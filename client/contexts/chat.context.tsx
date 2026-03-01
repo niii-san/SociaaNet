@@ -33,8 +33,10 @@ interface ChatContextType {
     sendMessage: (data: {
         conversationId: string;
         content?: string;
-        messageType?: "text" | "image" | "video" | "mixed";
+        messageType?: "text" | "image" | "video" | "mixed" | "shared_post" | "shared_reel";
         mediaKeys?: string[];
+        sharedPostId?: string;
+        sharedReelId?: string;
         replyTo?: string;
         tempId?: string;
     }) => void;
@@ -303,8 +305,10 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
         (data: {
             conversationId: string;
             content?: string;
-            messageType?: "text" | "image" | "video" | "mixed";
+            messageType?: "text" | "image" | "video" | "mixed" | "shared_post" | "shared_reel";
             mediaKeys?: string[];
+            sharedPostId?: string;
+            sharedReelId?: string;
             replyTo?: string;
             tempId?: string;
         }) => {

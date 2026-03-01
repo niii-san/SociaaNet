@@ -123,8 +123,10 @@ export function setupSocketIO(httpServer: http.Server): SocketIOServer {
             async (data: {
                 conversationId: string;
                 content?: string;
-                messageType?: "text" | "image" | "video" | "mixed";
+                messageType?: "text" | "image" | "video" | "mixed" | "shared_post" | "shared_reel";
                 mediaKeys?: string[];
+                sharedPostId?: string;
+                sharedReelId?: string;
                 replyTo?: string;
                 tempId?: string;
             }) => {
@@ -135,6 +137,8 @@ export function setupSocketIO(httpServer: http.Server): SocketIOServer {
                         content: data.content,
                         messageType: data.messageType || "text",
                         mediaKeys: data.mediaKeys,
+                        sharedPostId: data.sharedPostId,
+                        sharedReelId: data.sharedReelId,
                         replyTo: data.replyTo
                     });
 

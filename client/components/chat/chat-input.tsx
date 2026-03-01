@@ -191,9 +191,13 @@ export function ChatInput({
                         <p className="text-xs text-muted-foreground truncate">
                             {replyTo.is_deleted
                                 ? "Message deleted"
-                                : replyTo.message_type !== "text"
-                                  ? "📷 Media"
-                                  : replyTo.content}
+                                : replyTo.message_type === "shared_post"
+                                  ? "📌 Shared a post"
+                                  : replyTo.message_type === "shared_reel"
+                                    ? "🎬 Shared a reel"
+                                    : replyTo.message_type !== "text"
+                                      ? "📷 Media"
+                                      : replyTo.content}
                         </p>
                     </div>
                     <Button
