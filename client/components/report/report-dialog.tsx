@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { submitReport } from "@/features/moderator/moderator.api";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -36,8 +37,13 @@ export function ReportDialog({
     const [loading, setLoading] = useState(false);
     const [submitted, setSubmitted] = useState(false);
     const [error, setError] = useState("");
+    const [mounted, setMounted] = useState(false);
 
-    if (!open) return null;
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    if (!open || !mounted) return null;
 
     const handleSubmit = async () => {
         if (!reason) return;
@@ -68,7 +74,7 @@ export function ReportDialog({
         onClose();
     };
 
-    return (
+    return createPortal(
         <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
             onClick={handleClose}
@@ -168,6 +174,7 @@ export function ReportDialog({
                     </>
                 )}
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }
