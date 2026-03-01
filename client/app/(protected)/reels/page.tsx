@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Plus, Clapperboard, Loader2, ChevronUp, ChevronDown, ArrowUp, ArrowDown } from "lucide-react";
+import { Plus, Clapperboard, Loader2, ChevronUp, ChevronDown, ArrowUp, ArrowDown, CheckCircle2 } from "lucide-react";
 import { ReelViewer } from "@/components/reels/reel-viewer";
 import { getReelsFeed, FeedReel } from "@/features/feed/feed.api";
 import { cn } from "@/lib/utils";
@@ -17,6 +17,7 @@ export default function ReelsPage() {
     const [loading, setLoading] = useState(true);
     const [hasMore, setHasMore] = useState(true);
     const [isMuted, setIsMuted] = useState(true);
+    const [allCaughtUp, setAllCaughtUp] = useState(false);
     const containerRef = useRef<HTMLDivElement>(null);
     const isScrollingRef = useRef(false);
 
@@ -28,6 +29,9 @@ export default function ReelsPage() {
 
             if (pageNum === 1) {
                 setReels(data.reels);
+                if (data.unseen_count === 0 && data.reels.length > 0) {
+                    setAllCaughtUp(true);
+                }
             } else {
                 setReels((prev) => {
                     const existingIds = new Set(prev.map((r) => r.reel_id));
@@ -60,7 +64,8 @@ export default function ReelsPage() {
 
     const scrollToReel = useCallback(
         (index: number) => {
-            if (index < 0 || index >= reels.length) return;
+            const totalItems = allCaughtUp ? reels.length + 1 : reels.length;
+            if (index < 0 || index >= totalItems) return;
             if (isScrollingRef.current) return;
 
             isScrollingRef.current = true;
@@ -78,7 +83,7 @@ export default function ReelsPage() {
                 isScrollingRef.current = false;
             }, 500);
         },
-        [reels.length]
+        [reels.length, allCaughtUp]
     );
 
     // Keyboard navigation
@@ -109,6 +114,7 @@ export default function ReelsPage() {
         if (!container) return;
 
         let scrollTimeout: NodeJS.Timeout;
+        const totalItems = allCaughtUp ? reels.length + 1 : reels.length;
 
         const handleScroll = () => {
             clearTimeout(scrollTimeout);
@@ -116,7 +122,7 @@ export default function ReelsPage() {
                 const scrollTop = container.scrollTop;
                 const itemHeight = container.clientHeight;
                 const newIndex = Math.round(scrollTop / itemHeight);
-                if (newIndex !== activeIndex && newIndex >= 0 && newIndex < reels.length) {
+                if (newIndex !== activeIndex && newIndex >= 0 && newIndex < totalItems) {
                     setActiveIndex(newIndex);
                 }
             }, 100);
@@ -127,7 +133,7 @@ export default function ReelsPage() {
             container.removeEventListener("scroll", handleScroll);
             clearTimeout(scrollTimeout);
         };
-    }, [activeIndex, reels.length]);
+    }, [activeIndex, reels.length, allCaughtUp]);
 
     if (loading) {
         return (
@@ -179,7 +185,7 @@ export default function ReelsPage() {
     }
 
     return (
-        <div className="relative h-screen bg-black">
+        <div className="relative h-screen bg-black flex items-center justify-center">
             {/* Header overlay */}
             <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-4 py-3 bg-linear-to-b from-black/60 to-transparent">
                 <div className="flex items-center gap-2">
@@ -220,8 +226,52 @@ export default function ReelsPage() {
                 )}
             </div>
 
-            {/* Desktop navigation arrows (right side, Instagram-style) */}
-            <div className="hidden lg:flex absolute right-6 top-1/2 -translate-y-1/2 z-30 flex-col items-center gap-3">
+            {/* Reels container — centered with max width on desktop */}
+            <div
+                ref={containerRef}
+                className="h-full w-full lg:max-w-120 overflow-y-scroll snap-y snap-mandatory scrollbar-none"
+                style={{ scrollbarWidth: "none" }}
+            >
+                {/* All caught up banner */}
+                {allCaughtUp && (
+                    <div className="h-full w-full snap-start snap-always flex flex-col items-center justify-center text-center px-6">
+                        <CheckCircle2 className="w-16 h-16 text-green-400 mb-4" />
+                        <h2 className="text-xl font-bold text-white mb-2">
+                            You&apos;re All Caught Up
+                        </h2>
+                        <p className="text-white/60 text-sm max-w-xs">
+                            You&apos;ve seen all new reels from people you follow.
+                            Keep scrolling for older or suggested reels.
+                        </p>
+                        <button
+                            onClick={() => scrollToReel(1)}
+                            className="mt-6 px-5 py-2.5 bg-white/10 hover:bg-white/20 text-white rounded-full text-sm font-medium backdrop-blur-sm border border-white/20 transition-colors"
+                        >
+                            Continue Watching
+                        </button>
+                    </div>
+                )}
+
+                {reels.map((reel, index) => {
+                    const adjustedIndex = allCaughtUp ? index + 1 : index;
+                    return (
+                        <div
+                            key={reel.reel_id}
+                            className="h-full w-full snap-start snap-always"
+                        >
+                            <ReelViewer
+                                reel={reel}
+                                isActive={adjustedIndex === activeIndex}
+                                isMuted={isMuted}
+                                onToggleMute={() => setIsMuted((p) => !p)}
+                            />
+                        </div>
+                    );
+                })}
+            </div>
+
+            {/* Desktop navigation arrows — positioned to the far right, outside the video */}
+            <div className="hidden lg:flex absolute right-8 top-1/2 -translate-y-1/2 z-30 flex-col items-center gap-3">
                 <button
                     onClick={() => scrollToReel(activeIndex - 1)}
                     disabled={activeIndex === 0}
@@ -237,12 +287,12 @@ export default function ReelsPage() {
                 </button>
                 <button
                     onClick={() => scrollToReel(activeIndex + 1)}
-                    disabled={activeIndex >= reels.length - 1}
+                    disabled={activeIndex >= (allCaughtUp ? reels.length : reels.length - 1)}
                     className={cn(
                         "w-12 h-12 rounded-full flex items-center justify-center transition-all",
                         "bg-white/10 backdrop-blur-md border border-white/20",
                         "hover:bg-white/25 hover:scale-105 active:scale-95",
-                        activeIndex >= reels.length - 1 && "opacity-0 pointer-events-none"
+                        activeIndex >= (allCaughtUp ? reels.length : reels.length - 1) && "opacity-0 pointer-events-none"
                     )}
                     aria-label="Next reel"
                 >
@@ -250,30 +300,14 @@ export default function ReelsPage() {
                 </button>
             </div>
 
-            {/* Reels container — vertical snap scroll */}
-            <div
-                ref={containerRef}
-                className="h-full overflow-y-scroll snap-y snap-mandatory scrollbar-none"
-                style={{ scrollbarWidth: "none" }}
-            >
-                {reels.map((reel, index) => (
-                    <div
-                        key={reel.reel_id}
-                        className="h-full w-full snap-start snap-always"
-                    >
-                        <ReelViewer
-                            reel={reel}
-                            isActive={index === activeIndex}
-                            isMuted={isMuted}
-                            onToggleMute={() => setIsMuted((p) => !p)}
-                        />
-                    </div>
-                ))}
-            </div>
-
             {/* Reel counter */}
-            <div className="absolute bottom-4 right-3 z-20 bg-black/50 text-white text-xs px-2 py-1 rounded-full backdrop-blur-sm">
-                {activeIndex + 1} / {reels.length}
+            <div className="absolute bottom-4 lg:bottom-8 right-3 lg:right-8 z-20 bg-black/50 text-white text-xs px-2 py-1 rounded-full backdrop-blur-sm">
+                {allCaughtUp
+                    ? activeIndex === 0
+                        ? "✓ All caught up"
+                        : `${activeIndex} / ${reels.length}`
+                    : `${activeIndex + 1} / ${reels.length}`
+                }
             </div>
         </div>
     );

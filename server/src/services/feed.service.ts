@@ -131,24 +131,26 @@ class FeedService {
 
     /**
      * Explore page: trending public posts + reels from users you DON'T follow.
+     * Falls back to ALL public content if no non-followed content is available.
      */
     async getExplore(userId: string, page: number = 1, limit: number = 20) {
         const followingIds = await feedRepo.getFollowingIds(userId);
 
-        const [postsResult, reelsResult] = await Promise.all([
-            feedRepo.getExplorePosts(
-                userId,
-                followingIds,
-                page,
-                Math.ceil(limit * 0.6) // 60% posts
-            ),
-            feedRepo.getExploreReels(
-                userId,
-                followingIds,
-                page,
-                Math.floor(limit * 0.4) // 40% reels
-            )
+        const postsLimit = Math.ceil(limit * 0.6);
+        const reelsLimit = Math.floor(limit * 0.4);
+
+        let [postsResult, reelsResult] = await Promise.all([
+            feedRepo.getExplorePosts(userId, followingIds, page, postsLimit),
+            feedRepo.getExploreReels(userId, followingIds, page, reelsLimit)
         ]);
+
+        // Fallback: if no content from non-followed users, include ALL public content
+        if (postsResult.total === 0 && reelsResult.total === 0) {
+            [postsResult, reelsResult] = await Promise.all([
+                feedRepo.getExplorePosts(userId, [], page, postsLimit),
+                feedRepo.getExploreReels(userId, [], page, reelsLimit)
+            ]);
+        }
 
         const posts = await Promise.all(
             postsResult.posts.map((post) =>
@@ -178,8 +180,8 @@ class FeedService {
             limit,
             total: postsResult.total + reelsResult.total,
             has_more:
-                page * Math.ceil(limit * 0.6) < postsResult.total ||
-                page * Math.floor(limit * 0.4) < reelsResult.total
+                page * postsLimit < postsResult.total ||
+                page * reelsLimit < reelsResult.total
         };
     }
 
