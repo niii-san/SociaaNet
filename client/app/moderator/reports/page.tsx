@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import {
     getModReports,
     updateReportStatus,
@@ -23,7 +24,8 @@ import {
     FileText,
     Film,
     MessageSquare,
-    User
+    User,
+    ExternalLink
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -68,6 +70,17 @@ const reasonLabels: Record<string, string> = {
     self_harm: "Self Harm",
     other: "Other"
 };
+
+function getTargetLink(targetType: string, targetId: string): string | null {
+    switch (targetType) {
+        case "post":
+            return `/posts/${targetId}`;
+        case "reel":
+            return `/reels/${targetId}`;
+        default:
+            return null;
+    }
+}
 
 export default function ModeratorReportsPage() {
     const [reports, setReports] = useState<ModReport[]>([]);
@@ -212,10 +225,30 @@ export default function ModeratorReportsPage() {
 
                                               <p className="text-sm">
                                                   Reported by{" "}
-                                                  <span className="font-medium">
+                                                  <Link
+                                                      href={`/u/${report.reporter?.username || ""}`}
+                                                      target="_blank"
+                                                      className="font-medium hover:underline inline-flex items-center gap-1"
+                                                  >
                                                       @{report.reporter?.username || "Unknown"}
-                                                  </span>
+                                                      <ExternalLink className="w-3 h-3 text-muted-foreground" />
+                                                  </Link>
                                               </p>
+
+                                              {/* View reported content link */}
+                                              {(() => {
+                                                  const link = getTargetLink(report.target_type, report.target_id);
+                                                  return link ? (
+                                                      <Link
+                                                          href={link}
+                                                          target="_blank"
+                                                          className="inline-flex items-center gap-1 text-xs text-primary hover:underline mt-0.5"
+                                                      >
+                                                          <ExternalLink className="w-3 h-3" />
+                                                          View reported {report.target_type}
+                                                      </Link>
+                                                  ) : null;
+                                              })()}
 
                                               {report.description && (
                                                   <p className="text-xs text-muted-foreground mt-1 line-clamp-2">

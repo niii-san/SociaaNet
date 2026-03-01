@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import {
     getModPosts,
     removePost,
@@ -21,7 +22,8 @@ import {
     Filter,
     Heart,
     MessageSquare,
-    Users
+    Users,
+    ExternalLink
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -159,15 +161,24 @@ export default function ModeratorPostsPage() {
                                       {/* Post Info */}
                                       <div className="flex-1 min-w-0">
                                           <div className="flex items-center gap-2 flex-wrap mb-1">
-                                              <span className="font-semibold text-sm">
+                                              <Link
+                                                  href={`/u/${post.author?.username || ""}`}
+                                                  target="_blank"
+                                                  className="font-semibold text-sm hover:underline inline-flex items-center gap-1"
+                                              >
                                                   {post.author?.full_name ||
                                                       "Unknown"}
-                                              </span>
-                                              <span className="text-xs text-muted-foreground">
+                                                  <ExternalLink className="w-3 h-3 text-muted-foreground" />
+                                              </Link>
+                                              <Link
+                                                  href={`/u/${post.author?.username || ""}`}
+                                                  target="_blank"
+                                                  className="text-xs text-muted-foreground hover:underline"
+                                              >
                                                   @
                                                   {post.author?.username ||
                                                       "unknown"}
-                                              </span>
+                                              </Link>
                                               {post.is_removed_by_moderator && (
                                                   <Badge
                                                       variant="destructive"
@@ -221,7 +232,19 @@ export default function ModeratorPostsPage() {
                                       </div>
 
                                       {/* Actions */}
-                                      <div className="shrink-0">
+                                      <div className="shrink-0 flex gap-1.5">
+                                          <Link
+                                              href={`/posts/${post.post_id}`}
+                                              target="_blank"
+                                          >
+                                              <Button
+                                                  variant="outline"
+                                                  size="sm"
+                                              >
+                                                  <ExternalLink className="w-4 h-4 mr-1" />
+                                                  <span className="hidden sm:inline">View</span>
+                                              </Button>
+                                          </Link>
                                           {post.is_removed_by_moderator ? (
                                               <Button
                                                   variant="outline"

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useCallback, useEffect, useState } from "react";
+import Link from "next/link";
 import {
     getModReels,
     removeReel,
@@ -23,7 +24,8 @@ import {
     MessageSquare,
     Eye,
     Users,
-    Clock
+    Clock,
+    ExternalLink
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -186,14 +188,25 @@ export default function ModeratorReelsPage() {
                                                   )}
                                               </div>
                                               <span className="font-semibold text-sm">
-                                                  {reel.author?.full_name ||
-                                                      "Unknown"}
+                                                  <Link
+                                                      href={`/u/${reel.author?.username || ""}`}
+                                                      target="_blank"
+                                                      className="hover:underline inline-flex items-center gap-1"
+                                                  >
+                                                      {reel.author?.full_name ||
+                                                          "Unknown"}
+                                                      <ExternalLink className="w-3 h-3 text-muted-foreground" />
+                                                  </Link>
                                               </span>
-                                              <span className="text-xs text-muted-foreground">
+                                              <Link
+                                                  href={`/u/${reel.author?.username || ""}`}
+                                                  target="_blank"
+                                                  className="text-xs text-muted-foreground hover:underline"
+                                              >
                                                   @
                                                   {reel.author?.username ||
                                                       "unknown"}
-                                              </span>
+                                              </Link>
                                               {reel.is_removed_by_moderator && (
                                                   <Badge
                                                       variant="destructive"
@@ -257,7 +270,19 @@ export default function ModeratorReelsPage() {
                                       </div>
 
                                       {/* Actions */}
-                                      <div className="shrink-0">
+                                      <div className="shrink-0 flex gap-1.5">
+                                          <Link
+                                              href={`/reels/${reel.reel_id}`}
+                                              target="_blank"
+                                          >
+                                              <Button
+                                                  variant="outline"
+                                                  size="sm"
+                                              >
+                                                  <ExternalLink className="w-4 h-4 mr-1" />
+                                                  <span className="hidden sm:inline">View</span>
+                                              </Button>
+                                          </Link>
                                           {reel.is_removed_by_moderator ? (
                                               <Button
                                                   variant="outline"

@@ -50,7 +50,20 @@ export function PostCard({ post, isActive = false }: PostCardProps) {
     const [showMenu, setShowMenu] = useState(false);
     const [showReportDialog, setShowReportDialog] = useState(false);
     const cardRef = useRef<HTMLDivElement>(null);
+    const menuRef = useRef<HTMLDivElement>(null);
     const heartTimeout = useRef<NodeJS.Timeout | null>(null);
+
+    // Close dropdown menu when clicking outside
+    useEffect(() => {
+        if (!showMenu) return;
+        const handleClickOutside = (e: MouseEvent) => {
+            if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+                setShowMenu(false);
+            }
+        };
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, [showMenu]);
 
     // Track view when card becomes visible
     useEffect(() => {
@@ -208,9 +221,12 @@ export function PostCard({ post, isActive = false }: PostCardProps) {
                         </Link>
                         <span className="text-muted-foreground text-sm">·</span>
                         <TimeAgo date={post.created_at} />
-                        <div className="ml-auto relative">
+                        <div className="ml-auto relative" ref={menuRef}>
                             <button
-                                onClick={() => setShowMenu(!showMenu)}
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setShowMenu(!showMenu);
+                                }}
                                 className="p-1 rounded-full hover:bg-muted transition-colors"
                             >
                                 <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
@@ -218,7 +234,8 @@ export function PostCard({ post, isActive = false }: PostCardProps) {
                             {showMenu && (
                                 <div className="absolute right-0 top-8 z-50 bg-background border border-border rounded-lg shadow-lg py-1 min-w-35">
                                     <button
-                                        onClick={() => {
+                                        onClick={(e) => {
+                                            e.stopPropagation();
                                             setShowMenu(false);
                                             setShowReportDialog(true);
                                         }}

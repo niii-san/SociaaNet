@@ -33,8 +33,11 @@ class FeedService {
      * Returns posts with engagement data and an "all caught up" boundary index.
      */
     async getHomeFeed(userId: string, page: number = 1, limit: number = 10) {
-        const followingIds = await feedRepo.getFollowingIds(userId);
-        const seenPostIds = await feedRepo.getSeenTargetIds(userId, "post");
+        const [followingIds, seenPostIds, modAdminIds] = await Promise.all([
+            feedRepo.getFollowingIds(userId),
+            feedRepo.getSeenTargetIds(userId, "post"),
+            feedRepo.getModeratorAndAdminIds()
+        ]);
 
         const {
             unseen,
@@ -48,7 +51,8 @@ class FeedService {
             followingIds,
             seenPostIds,
             page,
-            limit
+            limit,
+            modAdminIds
         );
 
         // ─── Also fetch reels and suggested posts for page 1 ───
@@ -58,8 +62,8 @@ class FeedService {
         if (page <= 2) {
             const seenReelIds = await feedRepo.getSeenTargetIds(userId, "reel");
             const [reelsRaw, suggestedRaw] = await Promise.all([
-                feedRepo.getHomeFeedReels(userId, followingIds, seenReelIds, page === 1 ? 3 : 2),
-                feedRepo.getSuggestedPosts(userId, followingIds, page === 1 ? 3 : 2)
+                feedRepo.getHomeFeedReels(userId, followingIds, seenReelIds, page === 1 ? 3 : 2, modAdminIds),
+                feedRepo.getSuggestedPosts(userId, followingIds, page === 1 ? 3 : 2, modAdminIds)
             ]);
 
             feedReels = await Promise.all(
@@ -186,21 +190,24 @@ class FeedService {
      * Falls back to ALL public content if no non-followed content is available.
      */
     async getExplore(userId: string, page: number = 1, limit: number = 20) {
-        const followingIds = await feedRepo.getFollowingIds(userId);
+        const [followingIds, modAdminIds] = await Promise.all([
+            feedRepo.getFollowingIds(userId),
+            feedRepo.getModeratorAndAdminIds()
+        ]);
 
         const postsLimit = Math.ceil(limit * 0.6);
         const reelsLimit = Math.floor(limit * 0.4);
 
         let [postsResult, reelsResult] = await Promise.all([
-            feedRepo.getExplorePosts(userId, followingIds, page, postsLimit),
-            feedRepo.getExploreReels(userId, followingIds, page, reelsLimit)
+            feedRepo.getExplorePosts(userId, followingIds, page, postsLimit, modAdminIds),
+            feedRepo.getExploreReels(userId, followingIds, page, reelsLimit, modAdminIds)
         ]);
 
         // Fallback: if no content from non-followed users, include ALL public content
         if (postsResult.total === 0 && reelsResult.total === 0) {
             [postsResult, reelsResult] = await Promise.all([
-                feedRepo.getExplorePosts(userId, [], page, postsLimit),
-                feedRepo.getExploreReels(userId, [], page, reelsLimit)
+                feedRepo.getExplorePosts(userId, [], page, postsLimit, modAdminIds),
+                feedRepo.getExploreReels(userId, [], page, reelsLimit, modAdminIds)
             ]);
         }
 
@@ -241,15 +248,19 @@ class FeedService {
      * Reels feed: unseen reels first, then popular, for vertical scroll.
      */
     async getReelsFeed(userId: string, page: number = 1, limit: number = 10) {
-        const followingIds = await feedRepo.getFollowingIds(userId);
-        const seenReelIds = await feedRepo.getSeenTargetIds(userId, "reel");
+        const [followingIds, seenReelIds, modAdminIds] = await Promise.all([
+            feedRepo.getFollowingIds(userId),
+            feedRepo.getSeenTargetIds(userId, "reel"),
+            feedRepo.getModeratorAndAdminIds()
+        ]);
 
         const { reels, total, unseen_count } = await feedRepo.getReelsFeed(
             userId,
             followingIds,
             seenReelIds,
             page,
-            limit
+            limit,
+            modAdminIds
         );
 
         const items = await Promise.all(
@@ -270,11 +281,15 @@ class FeedService {
      * Suggested users for the sidebar widget.
      */
     async getSuggestedUsers(userId: string, limit: number = 5) {
-        const allFollowTargetIds = await feedRepo.getAllFollowTargetIds(userId);
+        const [allFollowTargetIds, modAdminIds] = await Promise.all([
+            feedRepo.getAllFollowTargetIds(userId),
+            feedRepo.getModeratorAndAdminIds()
+        ]);
         const users = await feedRepo.getSuggestedUsers(
             userId,
             allFollowTargetIds,
-            limit
+            limit,
+            modAdminIds
         );
 
         return users.map((u: any) => ({

@@ -7,6 +7,20 @@ import { WatchHistory } from "../models/watch-history.model";
 
 class FeedRepository {
     /**
+     * Get IDs of users with moderator or system_admin role.
+     * Used to exclude their content from public feeds.
+     */
+    async getModeratorAndAdminIds(): Promise<mongoose.Types.ObjectId[]> {
+        const users = await User.find({
+            role: { $in: ["moderator", "system_admin"] }
+        })
+            .select("_id")
+            .lean();
+
+        return users.map((u) => u._id as mongoose.Types.ObjectId);
+    }
+
+    /**
      * Get IDs of users that the current user follows (accepted follows only).
      */
     async getFollowingIds(userId: string): Promise<string[]> {
@@ -58,7 +72,8 @@ class FeedRepository {
         followingIds: string[],
         seenPostIds: string[],
         page: number,
-        limit: number
+        limit: number,
+        modAdminIds: mongoose.Types.ObjectId[] = []
     ): Promise<{
         unseen: PostDocument[];
         seen: PostDocument[];
@@ -134,9 +149,9 @@ class FeedRepository {
 
         // If user follows people, show their content
         if (followingIds.length > 0) {
-            const authorFilter = followingIds.map(
-                (id) => new mongoose.Types.ObjectId(id)
-            );
+            const authorFilter = followingIds
+                .map((id) => new mongoose.Types.ObjectId(id))
+                .filter((id) => !modAdminIds.some((mid) => mid.equals(id)));
             const allAuthorIds = [userObjectId, ...authorFilter];
 
             const baseMatch = {
@@ -212,8 +227,9 @@ class FeedRepository {
         }
 
         // ─── Fallback: user follows nobody → show trending public posts ───
+        const fallbackExcludeIds = [userObjectId, ...modAdminIds];
         const fallbackMatch = {
-            author: { $ne: userObjectId },
+            author: { $nin: fallbackExcludeIds },
             is_deleted: false,
             is_removed_by_moderator: false,
             visibility: "public",
@@ -251,7 +267,8 @@ class FeedRepository {
         userId: string,
         followingIds: string[],
         seenReelIds: string[],
-        limit: number = 3
+        limit: number = 3,
+        modAdminIds: mongoose.Types.ObjectId[] = []
     ): Promise<ReelDocument[]> {
         const followingObjectIds = followingIds.map(
             (id) => new mongoose.Types.ObjectId(id)
@@ -260,12 +277,13 @@ class FeedRepository {
             (id) => new mongoose.Types.ObjectId(id)
         );
         const userObjectId = new mongoose.Types.ObjectId(userId);
+        const excludeAuthors = [userObjectId, ...modAdminIds];
 
         const baseMatch = {
             is_deleted: false,
             is_removed_by_moderator: false,
             is_sensitive_content: { $ne: true },
-            author: { $ne: userObjectId },
+            author: { $nin: excludeAuthors },
             $or: [
                 { visibility: "public" },
                 {
@@ -339,11 +357,13 @@ class FeedRepository {
     async getSuggestedPosts(
         userId: string,
         followingIds: string[],
-        limit: number = 3
+        limit: number = 3,
+        modAdminIds: mongoose.Types.ObjectId[] = []
     ): Promise<PostDocument[]> {
         const excludeAuthorIds = [
             new mongoose.Types.ObjectId(userId),
-            ...followingIds.map((id) => new mongoose.Types.ObjectId(id))
+            ...followingIds.map((id) => new mongoose.Types.ObjectId(id)),
+            ...modAdminIds
         ];
 
         const match = {
@@ -427,11 +447,13 @@ class FeedRepository {
         userId: string,
         followingIds: string[],
         page: number,
-        limit: number
+        limit: number,
+        modAdminIds: mongoose.Types.ObjectId[] = []
     ): Promise<{ posts: PostDocument[]; total: number }> {
         const excludeAuthorIds = [
             new mongoose.Types.ObjectId(userId),
-            ...followingIds.map((id) => new mongoose.Types.ObjectId(id))
+            ...followingIds.map((id) => new mongoose.Types.ObjectId(id)),
+            ...modAdminIds
         ];
 
         const match = {
@@ -530,11 +552,13 @@ class FeedRepository {
         userId: string,
         followingIds: string[],
         page: number,
-        limit: number
+        limit: number,
+        modAdminIds: mongoose.Types.ObjectId[] = []
     ): Promise<{ reels: ReelDocument[]; total: number }> {
         const excludeAuthorIds = [
             new mongoose.Types.ObjectId(userId),
-            ...followingIds.map((id) => new mongoose.Types.ObjectId(id))
+            ...followingIds.map((id) => new mongoose.Types.ObjectId(id)),
+            ...modAdminIds
         ];
 
         const match = {
@@ -636,7 +660,8 @@ class FeedRepository {
         followingIds: string[],
         seenReelIds: string[],
         page: number,
-        limit: number
+        limit: number,
+        modAdminIds: mongoose.Types.ObjectId[] = []
     ): Promise<{
         reels: ReelDocument[];
         total: number;
@@ -649,13 +674,14 @@ class FeedRepository {
             (id) => new mongoose.Types.ObjectId(id)
         );
         const userObjectId = new mongoose.Types.ObjectId(userId);
+        const excludeAuthors = [userObjectId, ...modAdminIds];
 
         // Reels from followed users (followers visibility) + public reels from anyone
         const baseMatch = {
             is_deleted: false,
             is_removed_by_moderator: false,
             is_sensitive_content: { $ne: true },
-            author: { $ne: userObjectId },
+            author: { $nin: excludeAuthors },
             $or: [
                 { visibility: "public" },
                 {
@@ -785,16 +811,19 @@ class FeedRepository {
     async getSuggestedUsers(
         userId: string,
         allFollowTargetIds: string[],
-        limit: number = 5
+        limit: number = 5,
+        modAdminIds: mongoose.Types.ObjectId[] = []
     ) {
         const excludeIds = [
             new mongoose.Types.ObjectId(userId),
-            ...allFollowTargetIds.map((id) => new mongoose.Types.ObjectId(id))
+            ...allFollowTargetIds.map((id) => new mongoose.Types.ObjectId(id)),
+            ...modAdminIds
         ];
 
         const users = await User.find({
             _id: { $nin: excludeIds },
-            is_disabled: { $ne: true }
+            is_disabled: { $ne: true },
+            role: { $nin: ["moderator", "system_admin"] }
         })
             .sort({ followers_count: -1, created_at: -1 })
             .limit(limit)
