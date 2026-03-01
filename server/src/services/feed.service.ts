@@ -81,20 +81,44 @@ class FeedService {
             seen.map((post) => this.mapPostToFeedItem(post, userId, true))
         );
 
-        // The boundary: if unseen items exist and this page also has seen items,
-        // we need to show the "all caught up" divider
-        const show_caught_up_divider =
-            unseenItems.length > 0 && seenItems.length > 0;
+        const allItems = [...unseenItems, ...seenItems];
 
-        // Also show if this is the page that ran out of unseen (i.e. page boundary)
-        const all_unseen_loaded =
-            (page - 1) * limit + unseenItems.length >= total_unseen &&
-            total_unseen > 0;
+        // Determine caught-up divider position
+        // Strategy 1: Show between unseen and seen posts (view-based)
+        // Strategy 2: If no seen posts exist, show after posts newer than 24 hours (time-based)
+        let caught_up_at_index: number | null = null;
+        let show_caught_up_divider = false;
+
+        if (unseenItems.length > 0 && seenItems.length > 0) {
+            // View-based: divider between unseen and seen
+            caught_up_at_index = unseenItems.length;
+            show_caught_up_divider = true;
+        } else if (total_seen === 0 && allItems.length > 0) {
+            // Time-based fallback: no posts have been viewed yet,
+            // show divider after posts from last 24 hours
+            const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+            const recentCount = allItems.filter(
+                (item) => new Date(item.created_at) > oneDayAgo
+            ).length;
+            if (recentCount > 0 && recentCount < allItems.length) {
+                caught_up_at_index = recentCount;
+                show_caught_up_divider = true;
+            }
+        } else {
+            // All unseen loaded and there are seen posts on later pages
+            const all_unseen_loaded =
+                (page - 1) * limit + unseenItems.length >= total_unseen &&
+                total_unseen > 0;
+            if (all_unseen_loaded && total_seen > 0) {
+                caught_up_at_index = unseenItems.length > 0 ? unseenItems.length : null;
+                show_caught_up_divider = caught_up_at_index !== null;
+            }
+        }
 
         return {
-            posts: [...unseenItems, ...seenItems],
-            caught_up_at_index: unseenItems.length > 0 ? unseenItems.length : null,
-            show_caught_up_divider: show_caught_up_divider || (all_unseen_loaded && seenItems.length > 0),
+            posts: allItems,
+            caught_up_at_index,
+            show_caught_up_divider,
             is_fallback: false,
             page,
             limit,
