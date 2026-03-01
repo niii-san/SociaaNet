@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Plus, Clapperboard, Loader2, ChevronUp, ChevronDown, ArrowUp, ArrowDown, CheckCircle2 } from "lucide-react";
+import { Plus, Clapperboard, Loader2, ChevronUp, ChevronDown, ArrowUp, ArrowDown, ArrowLeft, CheckCircle2 } from "lucide-react";
 import { ReelViewer } from "@/components/reels/reel-viewer";
 import { ReelViewerSkeleton } from "@/components/reels/reel-skeleton";
 import { getReelsFeed, FeedReel } from "@/features/feed/feed.api";
@@ -12,6 +13,7 @@ import { usePageTitle } from "@/hooks/usePageTitle";
 import { useKeyboardShortcut } from "@/hooks/useKeyboardShortcut";
 
 export default function ReelsPage() {
+    const router = useRouter();
     const [reels, setReels] = useState<FeedReel[]>([]);
     const [activeIndex, setActiveIndex] = useState(0);
     const [page, setPage] = useState(1);
@@ -142,12 +144,18 @@ export default function ReelsPage() {
 
     if (reels.length === 0) {
         return (
-            <div className="min-h-screen bg-background pb-12">
-                <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border px-4 py-4">
+            <div className="min-h-screen bg-background pb-16 lg:pb-12">
+                <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border px-4 py-3">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
+                            <button
+                                onClick={() => router.back()}
+                                className="lg:hidden shrink-0"
+                            >
+                                <ArrowLeft className="w-5 h-5" />
+                            </button>
                             <Clapperboard className="w-6 h-6 text-primary" />
-                            <h1 className="text-2xl font-bold">Reels</h1>
+                            <h1 className="text-xl font-bold">Reels</h1>
                         </div>
                         <Link href="/create-reel">
                             <Button size="sm" className="gap-2">
@@ -183,6 +191,12 @@ export default function ReelsPage() {
             {/* Header overlay */}
             <div className="absolute top-0 left-0 right-0 z-20 flex items-center justify-between px-4 py-3 bg-linear-to-b from-black/60 to-transparent">
                 <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => router.back()}
+                        className="lg:hidden w-9 h-9 rounded-full flex items-center justify-center bg-black/30 backdrop-blur-sm text-white hover:bg-black/50 transition-colors"
+                    >
+                        <ArrowLeft className="w-5 h-5" />
+                    </button>
                     <Clapperboard className="w-5 h-5 text-white" />
                     <h1 className="text-lg font-bold text-white">Reels</h1>
                 </div>
@@ -198,26 +212,14 @@ export default function ReelsPage() {
                 </Link>
             </div>
 
-            {/* Mobile navigation hints (center, small) */}
-            <div className="lg:hidden absolute left-1/2 -translate-x-1/2 top-16 z-20 flex flex-col items-center gap-1 opacity-60">
-                {activeIndex > 0 && (
-                    <button
-                        onClick={() => scrollToReel(activeIndex - 1)}
-                        className="text-white hover:opacity-100 transition-opacity"
-                    >
-                        <ChevronUp className="w-6 h-6" />
-                    </button>
-                )}
-            </div>
-            <div className="lg:hidden absolute left-1/2 -translate-x-1/2 bottom-4 z-20 flex flex-col items-center gap-1 opacity-60">
-                {activeIndex < reels.length - 1 && (
-                    <button
-                        onClick={() => scrollToReel(activeIndex + 1)}
-                        className="text-white hover:opacity-100 transition-opacity"
-                    >
-                        <ChevronDown className="w-6 h-6" />
-                    </button>
-                )}
+            {/* Reel counter */}
+            <div className="absolute bottom-4 lg:bottom-8 right-3 lg:right-8 z-20 bg-black/50 text-white text-xs px-2 py-1 rounded-full backdrop-blur-sm">
+                {allCaughtUp
+                    ? activeIndex === 0
+                        ? "✓ All caught up"
+                        : `${activeIndex} / ${reels.length}`
+                    : `${activeIndex + 1} / ${reels.length}`
+                }
             </div>
 
             {/* Reels container — centered with max width on desktop */}
@@ -292,16 +294,6 @@ export default function ReelsPage() {
                 >
                     <ArrowDown className="w-5 h-5 text-white" />
                 </button>
-            </div>
-
-            {/* Reel counter */}
-            <div className="absolute bottom-4 lg:bottom-8 right-3 lg:right-8 z-20 bg-black/50 text-white text-xs px-2 py-1 rounded-full backdrop-blur-sm">
-                {allCaughtUp
-                    ? activeIndex === 0
-                        ? "✓ All caught up"
-                        : `${activeIndex} / ${reels.length}`
-                    : `${activeIndex + 1} / ${reels.length}`
-                }
             </div>
         </div>
     );
