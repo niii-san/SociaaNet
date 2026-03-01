@@ -15,6 +15,7 @@ import { ChatHeader } from "@/components/chat/chat-header";
 import { ChatInput } from "@/components/chat/chat-input";
 import { MessageBubble } from "@/components/chat/message-bubble";
 import { GroupInfoDialog } from "@/components/chat/group-info-dialog";
+import { TypingIndicator } from "@/components/chat/typing-indicator";
 import { Loader2, MessageCircle, Check, X, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -541,6 +542,22 @@ export default function Page() {
                             />
                         </div>
                     ))
+                )}
+                {/* Typing indicator bubble */}
+                {conversation && typingUsers.size > 0 && (
+                    <TypingIndicator
+                        typingUsers={conversation.participants
+                            .filter(
+                                (p) =>
+                                    typingUsers.has(p.user_id) &&
+                                    p.user_id !== currentUser?.user_id
+                            )
+                            .map((p) => ({
+                                user_id: p.user_id,
+                                full_name: p.full_name,
+                                avatar_url: p.avatar_url,
+                            }))}
+                    />
                 )}
                 <div ref={messagesEndRef} />
             </div>
