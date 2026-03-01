@@ -6,9 +6,7 @@ import { ErrorCodes } from "../constants/error-code";
 // this middleware can only be used after using authenticate middleware
 export const moderatorAuthenticate = asyncHandler(
     async (req: RequestWithUserContext, _: Response, next: NextFunction) => {
-        console.log("moderatorAuthenticate middleware called");
-
-        if (req.user.role !== "moderator") {
+        if (req.user.role !== "moderator" && req.user.role !== "system_admin") {
             throw new HttpError(
                 403,
                 false,

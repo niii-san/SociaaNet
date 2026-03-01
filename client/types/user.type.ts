@@ -6,6 +6,7 @@ export interface IUser {
     is_email_verified: boolean;
     email_address?: string;
     avatar_url: string | null;
+    role: "user" | "moderator" | "system_admin";
     created_at: string;
 }
 

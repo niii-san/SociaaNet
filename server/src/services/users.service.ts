@@ -50,6 +50,7 @@ class UsersService {
             following_count: user.following_count,
             email_address: user.email_address,
             avatar_url: avatar_url,
+            role: user.role,
             created_at: user.created_at
         };
     }
