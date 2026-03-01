@@ -380,7 +380,6 @@ class ChatRepository {
         sender_id: string;
         content?: string;
         message_type: "text" | "image" | "video" | "mixed";
-        media_urls?: string[];
         media_keys?: string[];
         reply_to?: string;
     }): Promise<MessageDocument> {
@@ -389,7 +388,7 @@ class ChatRepository {
             sender_id: new mongoose.Types.ObjectId(data.sender_id),
             content: data.content || "",
             message_type: data.message_type,
-            media_urls: data.media_urls || [],
+            media_urls: [], // deprecated — kept empty for backward compat
             media_keys: data.media_keys || [],
             reply_to: data.reply_to
                 ? new mongoose.Types.ObjectId(data.reply_to)
@@ -487,7 +486,8 @@ class ChatRepository {
                         conversation_id: 1,
                         content: 1,
                         message_type: 1,
-                        media_urls: 1,
+                        media_keys: 1,
+                        media_urls: 1, // backward compat for old messages
                         is_deleted: 1,
                         reactions: 1,
                         read_by: 1,
@@ -524,9 +524,15 @@ class ChatRepository {
             Message.countDocuments(matchFilter)
         ]);
 
-        // Convert sender avatar keys
+        // Convert sender avatar keys and media keys to URLs
         const processedMessages = messages.map((msg) => ({
             ...msg,
+            media_urls:
+                msg.media_keys && msg.media_keys.length > 0
+                    ? msg.media_keys.map((key: string) =>
+                          convertImageKeyToImageUrl(key)
+                      )
+                    : msg.media_urls || [], // fallback for old messages with hardcoded URLs
             sender: {
                 ...msg.sender,
                 avatar_url: msg.sender.avatar_key

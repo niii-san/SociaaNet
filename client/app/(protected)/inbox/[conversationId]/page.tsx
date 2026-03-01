@@ -391,7 +391,6 @@ export default function Page() {
     const handleSend = (data: {
         content?: string;
         messageType?: "text" | "image" | "video" | "mixed";
-        mediaUrls?: string[];
         mediaKeys?: string[];
         replyTo?: string;
     }) => {

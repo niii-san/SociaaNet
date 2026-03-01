@@ -34,7 +34,6 @@ interface ChatContextType {
         conversationId: string;
         content?: string;
         messageType?: "text" | "image" | "video" | "mixed";
-        mediaUrls?: string[];
         mediaKeys?: string[];
         replyTo?: string;
         tempId?: string;
@@ -305,7 +304,6 @@ export function ChatProvider({ children }: { children: React.ReactNode }) {
             conversationId: string;
             content?: string;
             messageType?: "text" | "image" | "video" | "mixed";
-            mediaUrls?: string[];
             mediaKeys?: string[];
             replyTo?: string;
             tempId?: string;

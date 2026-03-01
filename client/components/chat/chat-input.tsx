@@ -11,7 +11,6 @@ interface ChatInputProps {
     onSend: (data: {
         content?: string;
         messageType?: "text" | "image" | "video" | "mixed";
-        mediaUrls?: string[];
         mediaKeys?: string[];
         replyTo?: string;
     }) => void;
@@ -75,7 +74,6 @@ export function ChatInput({
         }
         if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
 
-        let mediaUrls: string[] | undefined;
         let mediaKeys: string[] | undefined;
         let messageType: "text" | "image" | "video" | "mixed" = "text";
 
@@ -83,7 +81,6 @@ export function ChatInput({
             setUploading(true);
             try {
                 const result = await uploadChatMedia(mediaFiles);
-                mediaUrls = result.urls;
                 mediaKeys = result.keys;
 
                 const hasImages = mediaFiles.some((f) =>
@@ -106,7 +103,6 @@ export function ChatInput({
         onSend({
             content: content || undefined,
             messageType,
-            mediaUrls,
             mediaKeys,
             replyTo: replyTo?._id
         });

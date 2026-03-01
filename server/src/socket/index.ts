@@ -124,7 +124,6 @@ export function setupSocketIO(httpServer: http.Server): SocketIOServer {
                 conversationId: string;
                 content?: string;
                 messageType?: "text" | "image" | "video" | "mixed";
-                mediaUrls?: string[];
                 mediaKeys?: string[];
                 replyTo?: string;
                 tempId?: string;
@@ -135,7 +134,6 @@ export function setupSocketIO(httpServer: http.Server): SocketIOServer {
                         senderId: userId,
                         content: data.content,
                         messageType: data.messageType || "text",
-                        mediaUrls: data.mediaUrls,
                         mediaKeys: data.mediaKeys,
                         replyTo: data.replyTo
                     });

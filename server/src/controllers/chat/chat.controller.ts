@@ -120,7 +120,7 @@ export const getMessagesController = asyncHandler(
 export const sendMessageController = asyncHandler(
     async (req: RequestWithUserContext, res: Response) => {
         const { conversationId } = req.params;
-        const { content, message_type, media_urls, media_keys, reply_to } =
+        const { content, message_type, media_keys, reply_to } =
             req.body;
 
         const message = await chatService.sendMessage({
@@ -128,7 +128,6 @@ export const sendMessageController = asyncHandler(
             senderId: req.user._id.toString(),
             content,
             messageType: message_type || "text",
-            mediaUrls: media_urls,
             mediaKeys: media_keys,
             replyTo: reply_to
         });

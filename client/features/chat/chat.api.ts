@@ -81,7 +81,6 @@ export async function sendMessageREST(
     data: {
         content?: string;
         message_type?: string;
-        media_urls?: string[];
         media_keys?: string[];
         reply_to?: string;
     }

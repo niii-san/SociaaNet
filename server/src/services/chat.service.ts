@@ -204,7 +204,6 @@ class ChatService {
         senderId: string;
         content?: string;
         messageType: "text" | "image" | "video" | "mixed";
-        mediaUrls?: string[];
         mediaKeys?: string[];
         replyTo?: string;
     }) {
@@ -250,7 +249,6 @@ class ChatService {
             sender_id: data.senderId,
             content: data.content?.trim(),
             message_type: data.messageType,
-            media_urls: data.mediaUrls,
             media_keys: data.mediaKeys,
             reply_to: data.replyTo
         });
