@@ -193,7 +193,7 @@ export function MessageBubble({
                                     href={`/posts/${message.shared_post.post_id}`}
                                     className="block"
                                 >
-                                    <div className="m-2 rounded-xl border border-border overflow-hidden bg-background/50">
+                                    <div className="overflow-hidden">
                                         {message.shared_post.is_deleted ? (
                                             <div className="p-4 text-center text-sm text-muted-foreground italic">
                                                 This post has been deleted
@@ -224,7 +224,7 @@ export function MessageBubble({
                                                                     ?.full_name
                                                             }
                                                         </span>
-                                                        <span className="text-[10px] text-muted-foreground">
+                                                        <span className={`text-[10px] ${isMine ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
                                                             @
                                                             {
                                                                 message
@@ -236,7 +236,7 @@ export function MessageBubble({
                                                     </div>
                                                     {message.shared_post
                                                         .caption && (
-                                                        <p className="text-xs line-clamp-2 text-muted-foreground">
+                                                        <p className={`text-xs line-clamp-2 ${isMine ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
                                                             {
                                                                 message
                                                                     .shared_post
@@ -258,7 +258,7 @@ export function MessageBubble({
                                     href={`/reels?id=${message.shared_reel.reel_id}`}
                                     className="block"
                                 >
-                                    <div className="m-2 rounded-xl border border-border overflow-hidden bg-background/50">
+                                    <div className="overflow-hidden">
                                         {message.shared_reel.is_deleted ? (
                                             <div className="p-4 text-center text-sm text-muted-foreground italic">
                                                 This reel has been deleted
@@ -301,7 +301,7 @@ export function MessageBubble({
                                                                     ?.full_name
                                                             }
                                                         </span>
-                                                        <span className="text-[10px] text-muted-foreground">
+                                                        <span className={`text-[10px] ${isMine ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
                                                             @
                                                             {
                                                                 message
@@ -313,7 +313,7 @@ export function MessageBubble({
                                                     </div>
                                                     {message.shared_reel
                                                         .caption && (
-                                                        <p className="text-xs line-clamp-2 text-muted-foreground">
+                                                        <p className={`text-xs line-clamp-2 ${isMine ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
                                                             {
                                                                 message
                                                                     .shared_reel
