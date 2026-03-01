@@ -56,6 +56,7 @@ class AuthService {
                 "Invalid email or password"
             );
         }
+
         const hash = user.password;
         const isPasswordCorrect = await bcrypt.compare(password, hash);
 
@@ -67,6 +68,16 @@ class AuthService {
                 "Invalid email or password"
             );
         }
+
+        if (user.is_disabled) {
+            throw new HttpError(
+                403,
+                false,
+                ErrorCodes.FORBIDDEN,
+                "User account has been disabled, please contact support for more information"
+            );
+        }
+
         const sessionId = crypto.randomUUID();
 
         const sessionExpiryTime = new Date(
