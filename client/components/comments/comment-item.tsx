@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { TimeAgo } from "@/components/ui/time-ago";
 import { Heart, MessageCircle, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import {
     CommentData,
@@ -148,24 +149,6 @@ export default function CommentItem({
         setRepliesCount((prev) => Math.max(0, prev - 1));
     };
 
-    const formatTimeAgo = (dateString: string) => {
-        const date = new Date(dateString);
-        const now = new Date();
-        const diffInMs = now.getTime() - date.getTime();
-        const diffInSeconds = Math.floor(diffInMs / 1000);
-        const diffInMinutes = Math.floor(diffInSeconds / 60);
-        const diffInHours = Math.floor(diffInMinutes / 60);
-        const diffInDays = Math.floor(diffInHours / 24);
-        const diffInWeeks = Math.floor(diffInDays / 7);
-
-        if (diffInSeconds < 60) return "just now";
-        if (diffInMinutes < 60) return `${diffInMinutes}m`;
-        if (diffInHours < 24) return `${diffInHours}h`;
-        if (diffInDays < 7) return `${diffInDays}d`;
-        if (diffInWeeks < 52) return `${diffInWeeks}w`;
-        return date.toLocaleDateString("en-US", { month: "short", day: "numeric" });
-    };
-
     // Cap visual indentation but still allow nesting
     const indentClass = depth > 0 && depth <= MAX_INDENT_DEPTH ? "ml-10" : depth > MAX_INDENT_DEPTH ? "ml-4" : "";
 
@@ -196,9 +179,7 @@ export default function CommentItem({
                                 Author
                             </Badge>
                         )}
-                        <span className="text-xs text-muted-foreground">
-                            {formatTimeAgo(comment.created_at)}
-                        </span>
+                        <TimeAgo date={comment.created_at} className="text-xs" />
                     </div>
 
                     {/* Comment text */}

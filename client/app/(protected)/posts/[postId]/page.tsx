@@ -34,6 +34,7 @@ import CommentSection from "@/components/comments/comment-section";
 import { ShareToChatDialog } from "@/components/chat/share-to-chat-dialog";
 import Link from "next/link";
 import { useKeyboardShortcut } from "@/hooks/useKeyboardShortcut";
+import { TimeAgo } from "@/components/ui/time-ago";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
 export default function PostDetailPage() {
@@ -235,29 +236,6 @@ export default function PostDetailPage() {
         }
     };
 
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        const now = new Date();
-        const diffInMs = now.getTime() - date.getTime();
-        const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
-        const diffInDays = Math.floor(diffInHours / 24);
-
-        if (diffInHours < 1) {
-            const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
-            return `${diffInMinutes}m ago`;
-        } else if (diffInHours < 24) {
-            return `${diffInHours}h ago`;
-        } else if (diffInDays < 7) {
-            return `${diffInDays}d ago`;
-        } else {
-            return date.toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-                year: date.getFullYear() !== now.getFullYear() ? "numeric" : undefined,
-            });
-        }
-    };
-
     if (loading) {
         return (
             <div className="min-h-screen bg-background flex items-center justify-center">
@@ -319,7 +297,7 @@ export default function PostDetailPage() {
                                         {post.author.username}
                                     </Link>
                                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                        <span>{formatDate(post.created_at)}</span>
+                                        <TimeAgo date={post.created_at} className="text-xs" />
                                         <span>•</span>
                                         <div className="flex items-center gap-1">
                                             {getVisibilityIcon(post.visibility)}

@@ -1,6 +1,7 @@
 "use client";
 
 import { Activity } from "@/types";
+import { TimeAgo } from "@/components/ui/time-ago";
 import {
     LogIn,
     User,
@@ -70,29 +71,6 @@ const formatText = (text: string) => {
         )
         .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
         .join(" ");
-};
-
-const formatDate = (date: string) => {
-    const activityDate = new Date(date);
-    const now = new Date();
-    const diffMs = now.getTime() - activityDate.getTime();
-    const diffMins = Math.floor(diffMs / 60000);
-    const diffHours = Math.floor(diffMs / 3600000);
-    const diffDays = Math.floor(diffMs / 86400000);
-
-    if (diffMins < 1) return "Just now";
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
-
-    return activityDate.toLocaleDateString("en-US", {
-        month: "short",
-        day: "numeric",
-        year:
-            activityDate.getFullYear() !== now.getFullYear()
-                ? "numeric"
-                : undefined
-    });
 };
 
 const getMetadataDisplay = (verb: string, metadata: Record<string, any>) => {
@@ -216,9 +194,7 @@ export function ActivityItem({ activity }: ActivityItemProps) {
                     <h3 className="font-semibold">
                         {formatVerb(activity.verb)}
                     </h3>
-                    <span className="text-sm text-muted-foreground whitespace-nowrap">
-                        {formatDate(activity.created_at)}
-                    </span>
+                    <TimeAgo date={activity.created_at} className="text-sm whitespace-nowrap" />
                 </div>
                 {getMetadataDisplay(activity.verb, activity.metadata)}
             </div>

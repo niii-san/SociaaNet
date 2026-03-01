@@ -8,24 +8,7 @@ import { Card } from "@/components/ui/card";
 import { History, Image, Film, Heart, MessageCircle, Eye, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
-
-function formatTimeAgo(dateString: string) {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diffInMs = now.getTime() - date.getTime();
-    const diffInSeconds = Math.floor(diffInMs / 1000);
-    const diffInMinutes = Math.floor(diffInSeconds / 60);
-    const diffInHours = Math.floor(diffInMinutes / 60);
-    const diffInDays = Math.floor(diffInHours / 24);
-    const diffInWeeks = Math.floor(diffInDays / 7);
-
-    if (diffInSeconds < 60) return "just now";
-    if (diffInMinutes < 60) return `${diffInMinutes}m ago`;
-    if (diffInHours < 24) return `${diffInHours}h ago`;
-    if (diffInDays < 7) return `${diffInDays}d ago`;
-    if (diffInWeeks < 52) return `${diffInWeeks}w ago`;
-    return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-}
+import { getRelativeTime } from "@/components/ui/time-ago";
 
 export default function WatchHistoryPage() {
     const [data, setData] = useState<PaginatedResponse<WatchHistoryItem> | null>(null);
@@ -194,7 +177,7 @@ function WatchHistoryCard({ item }: { item: WatchHistoryItem }) {
                             )}
                         </div>
                         <p className="text-xs text-muted-foreground/70 mt-1">
-                            Viewed {formatTimeAgo(item.viewed_at)}
+                            Viewed {getRelativeTime(item.viewed_at)}
                         </p>
                     </div>
 

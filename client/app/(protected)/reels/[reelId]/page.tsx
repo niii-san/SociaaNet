@@ -35,6 +35,7 @@ import { toast } from "sonner";
 import CommentSection from "@/components/comments/comment-section";
 import { ShareToChatDialog } from "@/components/chat/share-to-chat-dialog";
 import Link from "next/link";
+import { TimeAgo } from "@/components/ui/time-ago";
 
 export default function ReelDetailPage() {
     const { reelId } = useParams<{ reelId: string }>();
@@ -242,29 +243,6 @@ export default function ReelDetailPage() {
         }
     };
 
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString);
-        const now = new Date();
-        const diffInMs = now.getTime() - date.getTime();
-        const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
-        const diffInDays = Math.floor(diffInHours / 24);
-
-        if (diffInHours < 1) {
-            const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
-            return `${diffInMinutes}m ago`;
-        } else if (diffInHours < 24) {
-            return `${diffInHours}h ago`;
-        } else if (diffInDays < 7) {
-            return `${diffInDays}d ago`;
-        } else {
-            return date.toLocaleDateString("en-US", {
-                month: "short",
-                day: "numeric",
-                year: date.getFullYear() !== now.getFullYear() ? "numeric" : undefined,
-            });
-        }
-    };
-
     const formatViews = (views: number): string => {
         if (views >= 1000000) {
             return `${(views / 1000000).toFixed(1)}M`;
@@ -320,7 +298,7 @@ export default function ReelDetailPage() {
                                         {reel.author.username}
                                     </Link>
                                     <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                        <span>{formatDate(reel.created_at)}</span>
+                                        <TimeAgo date={reel.created_at} className="text-xs" />
                                         <span>•</span>
                                         <div className="flex items-center gap-1">
                                             {getVisibilityIcon(reel.visibility)}
