@@ -62,6 +62,7 @@ export function PostCard({ post, isActive = false }: PostCardProps) {
     const [showHeart, setShowHeart] = useState(false);
     const [viewed, setViewed] = useState(post.is_seen);
     const [showShareDialog, setShowShareDialog] = useState(false);
+    const [showFullCaption, setShowFullCaption] = useState(false);
     const cardRef = useRef<HTMLDivElement>(null);
     const heartTimeout = useRef<NodeJS.Timeout | null>(null);
 
@@ -217,9 +218,24 @@ export function PostCard({ post, isActive = false }: PostCardProps) {
 
                     {/* Caption */}
                     {post.caption && (
-                        <p className="mt-1.5 text-sm whitespace-pre-wrap leading-relaxed">
-                            {post.caption}
-                        </p>
+                        <div className="mt-1.5">
+                            {post.caption.length > 150 && !showFullCaption ? (
+                                <p className="text-sm whitespace-pre-wrap leading-relaxed">
+                                    {post.caption.slice(0, 150).trimEnd()}
+                                    <span>... </span>
+                                    <button
+                                        onClick={() => setShowFullCaption(true)}
+                                        className="text-muted-foreground hover:text-foreground font-medium transition-colors"
+                                    >
+                                        more
+                                    </button>
+                                </p>
+                            ) : (
+                                <p className="text-sm whitespace-pre-wrap leading-relaxed">
+                                    {post.caption}
+                                </p>
+                            )}
+                        </div>
                     )}
 
                     {/* Hashtags */}

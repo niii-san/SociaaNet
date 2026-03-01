@@ -68,6 +68,7 @@ export function FeedReelCard({ reel }: FeedReelCardProps) {
     const [showHeart, setShowHeart] = useState(false);
     const [viewed, setViewed] = useState(false);
     const [showShareDialog, setShowShareDialog] = useState(false);
+    const [showFullCaption, setShowFullCaption] = useState(false);
     const videoRef = useRef<HTMLVideoElement>(null);
     const cardRef = useRef<HTMLDivElement>(null);
     const heartTimeout = useRef<NodeJS.Timeout | null>(null);
@@ -212,8 +213,21 @@ export function FeedReelCard({ reel }: FeedReelCardProps) {
 
                         {/* Caption */}
                         {reel.caption && (
-                            <p className="mt-1.5 text-sm whitespace-pre-wrap leading-relaxed line-clamp-2">
-                                {reel.caption}
+                            <p className="mt-1.5 text-sm whitespace-pre-wrap leading-relaxed">
+                                {!showFullCaption && reel.caption.length > 120 ? (
+                                    <>
+                                        {reel.caption.slice(0, 120).trimEnd()}
+                                        {"... "}
+                                        <button
+                                            onClick={() => setShowFullCaption(true)}
+                                            className="text-muted-foreground hover:text-foreground font-medium"
+                                        >
+                                            more
+                                        </button>
+                                    </>
+                                ) : (
+                                    reel.caption
+                                )}
                             </p>
                         )}
 
