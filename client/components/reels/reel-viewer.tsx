@@ -193,7 +193,22 @@ export function ReelViewer({
             {/* Double-click heart animation */}
             {showHeart && (
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-20">
-                    <Heart className="w-24 h-24 text-white fill-white drop-shadow-lg animate-ping" />
+                    <Heart
+                        className="w-24 h-24 text-red-500 fill-red-500 drop-shadow-lg"
+                        style={{
+                            animation: "heartBounce 0.8s ease-out forwards",
+                        }}
+                    />
+                    <style>{`
+                        @keyframes heartBounce {
+                            0% { transform: scale(0); opacity: 1; }
+                            15% { transform: scale(1.3); }
+                            30% { transform: scale(0.95); }
+                            45% { transform: scale(1.1); opacity: 1; }
+                            70% { transform: scale(1); opacity: 1; }
+                            100% { transform: scale(1); opacity: 0; }
+                        }
+                    `}</style>
                 </div>
             )}
 
