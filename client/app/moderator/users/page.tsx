@@ -5,6 +5,7 @@ import {
     getModUsers,
     disableUser,
     enableUser,
+    warnUser,
     ModUser,
     Pagination
 } from "@/features/moderator/moderator.api";
@@ -13,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
 import {
     Search,
     UserX,
@@ -20,7 +22,8 @@ import {
     ChevronLeft,
     ChevronRight,
     Users,
-    Filter
+    Filter,
+    AlertTriangle
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -39,6 +42,8 @@ export default function ModeratorUsersPage() {
     const [filter, setFilter] = useState("");
     const [page, setPage] = useState(1);
     const [actionLoading, setActionLoading] = useState<string | null>(null);
+    const [warnTarget, setWarnTarget] = useState<ModUser | null>(null);
+    const [warnMessage, setWarnMessage] = useState("");
 
     const fetchUsers = useCallback(async () => {
         setLoading(true);
@@ -84,6 +89,20 @@ export default function ModeratorUsersPage() {
         e.preventDefault();
         setPage(1);
         fetchUsers();
+    };
+
+    const handleWarnUser = async () => {
+        if (!warnTarget || !warnMessage.trim()) return;
+        setActionLoading(warnTarget.user_id);
+        try {
+            await warnUser(warnTarget.user_id, warnMessage.trim());
+            setWarnTarget(null);
+            setWarnMessage("");
+        } catch (err: any) {
+            alert(err?.response?.data?.message || "Failed to send warning");
+        } finally {
+            setActionLoading(null);
+        }
     };
 
     return (
@@ -213,39 +232,54 @@ export default function ModeratorUsersPage() {
 
                                   {/* Actions */}
                                   {user.role === "user" && (
-                                      <Button
-                                          variant={
-                                              user.is_disabled
-                                                  ? "outline"
-                                                  : "destructive"
-                                          }
-                                          size="sm"
-                                          onClick={() =>
-                                              handleToggleDisable(user)
-                                          }
-                                          disabled={
-                                              actionLoading === user.user_id
-                                          }
-                                          className="shrink-0"
-                                      >
-                                          {actionLoading === user.user_id ? (
-                                              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current" />
-                                          ) : user.is_disabled ? (
-                                              <>
-                                                  <UserCheck className="w-4 h-4 mr-1" />
-                                                  <span className="hidden sm:inline">
-                                                      Enable
-                                                  </span>
-                                              </>
-                                          ) : (
-                                              <>
-                                                  <UserX className="w-4 h-4 mr-1" />
-                                                  <span className="hidden sm:inline">
-                                                      Disable
-                                                  </span>
-                                              </>
-                                          )}
-                                      </Button>
+                                      <div className="flex gap-1.5 shrink-0">
+                                          <Button
+                                              variant="outline"
+                                              size="sm"
+                                              onClick={() => {
+                                                  setWarnTarget(user);
+                                                  setWarnMessage("");
+                                              }}
+                                              disabled={actionLoading === user.user_id}
+                                              className="shrink-0"
+                                              title="Send Warning"
+                                          >
+                                              <AlertTriangle className="w-4 h-4" />
+                                          </Button>
+                                          <Button
+                                              variant={
+                                                  user.is_disabled
+                                                      ? "outline"
+                                                      : "destructive"
+                                              }
+                                              size="sm"
+                                              onClick={() =>
+                                                  handleToggleDisable(user)
+                                              }
+                                              disabled={
+                                                  actionLoading === user.user_id
+                                              }
+                                              className="shrink-0"
+                                          >
+                                              {actionLoading === user.user_id ? (
+                                                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current" />
+                                              ) : user.is_disabled ? (
+                                                  <>
+                                                      <UserCheck className="w-4 h-4 mr-1" />
+                                                      <span className="hidden sm:inline">
+                                                          Enable
+                                                      </span>
+                                                  </>
+                                              ) : (
+                                                  <>
+                                                      <UserX className="w-4 h-4 mr-1" />
+                                                      <span className="hidden sm:inline">
+                                                          Disable
+                                                      </span>
+                                                  </>
+                                              )}
+                                          </Button>
+                                      </div>
                                   )}
                               </CardContent>
                           </Card>
@@ -284,6 +318,53 @@ export default function ModeratorUsersPage() {
                         >
                             <ChevronRight className="w-4 h-4" />
                         </Button>
+                    </div>
+                </div>
+            )}
+
+            {/* Warn User Modal */}
+            {warnTarget && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+                    <div className="bg-background rounded-xl border border-border p-6 w-full max-w-md space-y-4">
+                        <div className="flex items-center gap-2">
+                            <AlertTriangle className="w-5 h-5 text-amber-500" />
+                            <h3 className="font-semibold text-lg">Warn User</h3>
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                            Send a warning to <span className="font-medium">@{warnTarget.username}</span>.
+                            This will appear as a notification.
+                        </p>
+                        <Textarea
+                            placeholder="Enter warning message..."
+                            value={warnMessage}
+                            onChange={(e) => setWarnMessage(e.target.value)}
+                            rows={3}
+                        />
+                        <div className="flex gap-2 justify-end">
+                            <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => {
+                                    setWarnTarget(null);
+                                    setWarnMessage("");
+                                }}
+                            >
+                                Cancel
+                            </Button>
+                            <Button
+                                variant="default"
+                                size="sm"
+                                onClick={handleWarnUser}
+                                disabled={!warnMessage.trim() || actionLoading === warnTarget.user_id}
+                            >
+                                {actionLoading === warnTarget.user_id ? (
+                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-current mr-1" />
+                                ) : (
+                                    <AlertTriangle className="w-4 h-4 mr-1" />
+                                )}
+                                Send Warning
+                            </Button>
+                        </div>
                     </div>
                 </div>
             )}

@@ -10,6 +10,7 @@ import { commentsRouter } from "./comments.router";
 import { chatRouter } from "./chat.route";
 import { notificationsRouter } from "./notifications.route";
 import { feedRouter } from "./feed.route";
+import { reportsRouter } from "./reports.route";
 
 export {
     authRouter,
@@ -23,5 +24,6 @@ export {
     commentsRouter,
     chatRouter,
     notificationsRouter,
-    feedRouter
+    feedRouter,
+    reportsRouter
 };

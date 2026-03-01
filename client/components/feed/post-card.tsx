@@ -10,7 +10,8 @@ import {
     MoreHorizontal,
     ChevronLeft,
     ChevronRight,
-    Send
+    Send,
+    Flag
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -28,6 +29,7 @@ import {
 import { useKeyboardShortcut } from "@/hooks/useKeyboardShortcut";
 import { ShareToChatDialog } from "@/components/chat/share-to-chat-dialog";
 import { TimeAgo } from "@/components/ui/time-ago";
+import { ReportDialog } from "@/components/report/report-dialog";
 
 interface PostCardProps {
     post: FeedPost;
@@ -45,6 +47,8 @@ export function PostCard({ post, isActive = false }: PostCardProps) {
     const [viewed, setViewed] = useState(post.is_seen);
     const [showShareDialog, setShowShareDialog] = useState(false);
     const [showFullCaption, setShowFullCaption] = useState(false);
+    const [showMenu, setShowMenu] = useState(false);
+    const [showReportDialog, setShowReportDialog] = useState(false);
     const cardRef = useRef<HTMLDivElement>(null);
     const heartTimeout = useRef<NodeJS.Timeout | null>(null);
 
@@ -204,9 +208,28 @@ export function PostCard({ post, isActive = false }: PostCardProps) {
                         </Link>
                         <span className="text-muted-foreground text-sm">·</span>
                         <TimeAgo date={post.created_at} />
-                        <button className="ml-auto p-1 rounded-full hover:bg-muted transition-colors">
-                            <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
-                        </button>
+                        <div className="ml-auto relative">
+                            <button
+                                onClick={() => setShowMenu(!showMenu)}
+                                className="p-1 rounded-full hover:bg-muted transition-colors"
+                            >
+                                <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
+                            </button>
+                            {showMenu && (
+                                <div className="absolute right-0 top-8 z-50 bg-background border border-border rounded-lg shadow-lg py-1 min-w-35">
+                                    <button
+                                        onClick={() => {
+                                            setShowMenu(false);
+                                            setShowReportDialog(true);
+                                        }}
+                                        className="flex items-center gap-2 w-full px-3 py-2 text-sm hover:bg-muted text-left text-red-500"
+                                    >
+                                        <Flag className="w-4 h-4" />
+                                        Report
+                                    </button>
+                                </div>
+                            )}
+                        </div>
                     </div>
 
                     {/* Caption */}
@@ -416,6 +439,13 @@ export function PostCard({ post, isActive = false }: PostCardProps) {
                 open={showShareDialog}
                 onOpenChange={setShowShareDialog}
                 postId={post.post_id}
+            />
+
+            <ReportDialog
+                targetId={post.post_id}
+                targetType="post"
+                open={showReportDialog}
+                onClose={() => setShowReportDialog(false)}
             />
         </article>
     );

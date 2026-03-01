@@ -11,7 +11,8 @@ import {
     Volume2,
     VolumeX,
     Play,
-    Pause
+    Pause,
+    Flag
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
@@ -29,6 +30,7 @@ import {
 import { ShareToChatDialog } from "@/components/chat/share-to-chat-dialog";
 import { CommentsBottomSheet } from "@/components/comments/comments-bottom-sheet";
 import { useAuth } from "@/contexts";
+import { ReportDialog } from "@/components/report/report-dialog";
 
 interface ReelViewerProps {
     reel: FeedReel;
@@ -56,6 +58,7 @@ export function ReelViewer({
     const [viewed, setViewed] = useState(false);
     const [showShareDialog, setShowShareDialog] = useState(false);
     const [showComments, setShowComments] = useState(false);
+    const [showReportDialog, setShowReportDialog] = useState(false);
     const videoRef = useRef<HTMLVideoElement>(null);
     const heartTimeout = useRef<NodeJS.Timeout | null>(null);
     const progressInterval = useRef<NodeJS.Timeout | null>(null);
@@ -315,6 +318,16 @@ export function ReelViewer({
                     </div>
                 </button>
 
+                {/* Report */}
+                <button
+                    onClick={() => setShowReportDialog(true)}
+                    className="flex flex-col items-center gap-1 active:scale-90 transition-transform"
+                >
+                    <div className="w-11 h-11 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center">
+                        <Flag className="w-5 h-5 text-white" />
+                    </div>
+                </button>
+
                 {/* Mute */}
                 <button
                     onClick={onToggleMute}
@@ -398,6 +411,13 @@ export function ReelViewer({
                 } : null}
                 onCommentsCountChange={setCommentsCount}
                 contained
+            />
+
+            <ReportDialog
+                targetId={reel.reel_id}
+                targetType="reel"
+                open={showReportDialog}
+                onClose={() => setShowReportDialog(false)}
             />
         </div>
     );

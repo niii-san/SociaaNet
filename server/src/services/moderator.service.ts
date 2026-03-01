@@ -9,12 +9,18 @@ import { ErrorCodes } from "../constants/error-code";
 import { notificationService } from "./notification.service";
 import { Post } from "../models/post.model";
 import { Reel } from "../models/reel.model";
+import { auditLogRepo } from "../repositories/audit-log.repository";
+import { reportRepo } from "../repositories/report.repository";
 
 class ModeratorService {
     // ─── Dashboard ─────────────────────────────────────────────
 
     async getDashboardStats() {
-        return moderatorRepo.getDashboardStats();
+        const [stats, reportCounts] = await Promise.all([
+            moderatorRepo.getDashboardStats(),
+            reportRepo.getReportCounts()
+        ]);
+        return { ...stats, pending_reports: reportCounts.pending, total_reports: reportCounts.total };
     }
 
     // ─── User Management ───────────────────────────────────────
@@ -61,6 +67,15 @@ class ModeratorService {
             content: "Your account has been disabled by a moderator for violating community guidelines."
         });
 
+        // Audit log
+        await auditLogRepo.log({
+            moderatorId,
+            action: "user_disabled",
+            targetId: userId,
+            targetType: "user",
+            details: `Disabled user @${user.username}`
+        });
+
         return { message: "User account disabled successfully" };
     }
 
@@ -82,6 +97,15 @@ class ModeratorService {
             type: "mod_account_enabled",
             targetType: "user",
             content: "Your account has been re-enabled."
+        });
+
+        // Audit log
+        await auditLogRepo.log({
+            moderatorId,
+            action: "user_enabled",
+            targetId: userId,
+            targetType: "user",
+            details: `Enabled user @${user.username}`
         });
 
         return { message: "User account enabled successfully" };
@@ -157,14 +181,32 @@ class ModeratorService {
             content: "Your post has been removed by a moderator for violating community guidelines."
         });
 
+        // Audit log
+        await auditLogRepo.log({
+            moderatorId,
+            action: "post_removed",
+            targetId: postId,
+            targetType: "post",
+            details: `Removed post by user ${postDoc.author.toString()}`
+        });
+
         return { message: "Post removed successfully" };
     }
 
-    async restorePost(postId: string) {
+    async restorePost(postId: string, moderatorId: string) {
         const post = await moderatorRepo.restorePost(postId);
         if (!post) {
             throw new HttpError(404, false, ErrorCodes.NOT_FOUND, "Post not found");
         }
+
+        // Audit log
+        await auditLogRepo.log({
+            moderatorId,
+            action: "post_restored",
+            targetId: postId,
+            targetType: "post"
+        });
+
         return { message: "Post restored successfully" };
     }
 
@@ -227,22 +269,49 @@ class ModeratorService {
             content: "Your reel has been removed by a moderator for violating community guidelines."
         });
 
+        // Audit log
+        await auditLogRepo.log({
+            moderatorId,
+            action: "reel_removed",
+            targetId: reelId,
+            targetType: "reel",
+            details: `Removed reel by user ${reelDoc.author.toString()}`
+        });
+
         return { message: "Reel removed successfully" };
     }
 
-    async restoreReel(reelId: string) {
+    async restoreReel(reelId: string, moderatorId: string) {
         const reel = await moderatorRepo.restoreReel(reelId);
         if (!reel) {
             throw new HttpError(404, false, ErrorCodes.NOT_FOUND, "Reel not found");
         }
+
+        // Audit log
+        await auditLogRepo.log({
+            moderatorId,
+            action: "reel_restored",
+            targetId: reelId,
+            targetType: "reel"
+        });
+
         return { message: "Reel restored successfully" };
     }
 
-    async removeComment(commentId: string) {
+    async removeComment(commentId: string, moderatorId: string) {
         const comment = await moderatorRepo.removeComment(commentId);
         if (!comment) {
             throw new HttpError(404, false, ErrorCodes.NOT_FOUND, "Comment not found");
         }
+
+        // Audit log
+        await auditLogRepo.log({
+            moderatorId,
+            action: "comment_removed",
+            targetId: commentId,
+            targetType: "comment"
+        });
+
         return { message: "Comment removed successfully" };
     }
 }

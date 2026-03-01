@@ -42,7 +42,8 @@ import {
     commentsRouter,
     chatRouter,
     notificationsRouter,
-    feedRouter
+    feedRouter,
+    reportsRouter
 } from "./routes";
 
 // Auth Routes
@@ -80,6 +81,9 @@ app.use("/api/v1/feed", feedRouter);
 
 // Moderators Routes
 app.use("/api/v1/moderators", moderatorsRouter);
+
+// Reports Routes
+app.use("/api/v1/reports", reportsRouter);
 
 // Error handling middleware
 import { errorMiddleware } from "./utils";

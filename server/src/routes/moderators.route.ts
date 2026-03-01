@@ -12,6 +12,11 @@ import { getModReelsController } from "../controllers/moderators/get-reels.contr
 import { removeReelController } from "../controllers/moderators/remove-reel.controller";
 import { restoreReelController } from "../controllers/moderators/restore-reel.controller";
 import { removeCommentController } from "../controllers/moderators/remove-comment.controller";
+import { getReportsController } from "../controllers/moderators/get-reports.controller";
+import { updateReportStatusController } from "../controllers/moderators/update-report-status.controller";
+import { getReportCountsController } from "../controllers/moderators/get-report-counts.controller";
+import { warnUserController } from "../controllers/moderators/warn-user.controller";
+import { getAuditLogController } from "../controllers/moderators/get-audit-log.controller";
 
 export const moderatorsRouter = express.Router();
 
@@ -40,3 +45,14 @@ moderatorsRouter.patch("/reels/:reelId/restore", restoreReelController);
 
 // Comments moderation
 moderatorsRouter.delete("/comments/:commentId", removeCommentController);
+
+// Reports management
+moderatorsRouter.get("/reports", getReportsController);
+moderatorsRouter.get("/reports/counts", getReportCountsController);
+moderatorsRouter.patch("/reports/:reportId/status", updateReportStatusController);
+
+// User warnings
+moderatorsRouter.post("/users/:userId/warn", warnUserController);
+
+// Audit log
+moderatorsRouter.get("/audit-log", getAuditLogController);

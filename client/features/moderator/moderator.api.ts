@@ -10,6 +10,8 @@ export interface ModDashboardStats {
     total_reels: number;
     removed_reels: number;
     total_comments: number;
+    pending_reports: number;
+    total_reports: number;
 }
 
 export interface ModUser {
@@ -65,6 +67,53 @@ export interface ModReel {
     } | null;
 }
 
+export interface ModReport {
+    report_id: string;
+    _id: string;
+    reporter: {
+        user_id: string;
+        username: string;
+        full_name: string;
+        avatar_url: string | null;
+    } | null;
+    target_id: string;
+    target_type: "post" | "reel" | "comment" | "user";
+    reason: string;
+    description: string;
+    status: "pending" | "reviewed" | "resolved" | "dismissed";
+    reviewed_by?: {
+        username: string;
+        full_name: string;
+    } | null;
+    reviewed_at?: string;
+    moderator_note?: string;
+    created_at: string;
+}
+
+export interface ReportCounts {
+    pending: number;
+    reviewed: number;
+    resolved: number;
+    dismissed: number;
+    total: number;
+}
+
+export interface AuditLogEntry {
+    log_id: string;
+    _id: string;
+    moderator: {
+        user_id: string;
+        username: string;
+        full_name: string;
+        avatar_url: string | null;
+    } | null;
+    action: string;
+    target_id: string;
+    target_type: string;
+    details: string;
+    created_at: string;
+}
+
 export interface Pagination {
     current_page: number;
     total_pages: number;
@@ -101,6 +150,10 @@ export async function disableUser(userId: string): Promise<void> {
 
 export async function enableUser(userId: string): Promise<void> {
     await api.patch(`/moderators/users/${userId}/enable`);
+}
+
+export async function warnUser(userId: string, message: string): Promise<void> {
+    await api.post(`/moderators/users/${userId}/warn`, { message });
 }
 
 // Posts
@@ -152,4 +205,62 @@ export async function restoreReel(reelId: string): Promise<void> {
 // Comments
 export async function removeComment(commentId: string): Promise<void> {
     await api.delete(`/moderators/comments/${commentId}`);
+}
+
+// Reports
+export async function getModReports(
+    page: number = 1,
+    limit: number = 20,
+    status?: string,
+    targetType?: string
+): Promise<{ reports: ModReport[]; pagination: Pagination }> {
+    const params = new URLSearchParams();
+    params.set("page", String(page));
+    params.set("limit", String(limit));
+    if (status) params.set("status", status);
+    if (targetType) params.set("target_type", targetType);
+
+    const res = await api.get(`/moderators/reports?${params.toString()}`);
+    return { reports: res.data.data, pagination: res.data.pagination };
+}
+
+export async function updateReportStatus(
+    reportId: string,
+    status: string,
+    moderatorNote?: string
+): Promise<void> {
+    await api.patch(`/moderators/reports/${reportId}/status`, {
+        status,
+        moderator_note: moderatorNote
+    });
+}
+
+export async function getReportCounts(): Promise<ReportCounts> {
+    const res = await api.get("/moderators/reports/counts");
+    return res.data.data;
+}
+
+// Audit Log
+export async function getAuditLog(
+    page: number = 1,
+    limit: number = 30,
+    action?: string
+): Promise<{ logs: AuditLogEntry[]; pagination: Pagination }> {
+    const params = new URLSearchParams();
+    params.set("page", String(page));
+    params.set("limit", String(limit));
+    if (action) params.set("action", action);
+
+    const res = await api.get(`/moderators/audit-log?${params.toString()}`);
+    return { logs: res.data.data, pagination: res.data.pagination };
+}
+
+// User-facing report submission
+export async function submitReport(data: {
+    target_id: string;
+    target_type: "post" | "reel" | "comment" | "user";
+    reason: string;
+    description?: string;
+}): Promise<void> {
+    await api.post("/reports", data);
 }

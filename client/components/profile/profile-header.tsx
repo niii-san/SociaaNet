@@ -6,9 +6,9 @@ import {
     Camera,
     Loader2,
     MessageCircle,
-    MoreHorizontal,
     User,
-    UserPlus
+    UserPlus,
+    Flag
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
@@ -24,6 +24,7 @@ import { FollowersDialog } from "@/components/follow/followers-dialog";
 import { FollowingDialog } from "@/components/follow/following-dialog";
 import Link from "next/link";
 import { getOrCreateDirectConversation } from "@/features/chat/chat.api";
+import { ReportDialog } from "@/components/report/report-dialog";
 
 interface ProfileHeaderProps {
     user: IUserProfile;
@@ -62,6 +63,7 @@ export function ProfileHeader({
     const currentUserData = useAuth();
     const router = useRouter();
     const [startingChat, setStartingChat] = useState(false);
+    const [showReportDialog, setShowReportDialog] = useState(false);
 
     const handleAvatarClick = () => {
         if (!isOwner) return;
@@ -248,8 +250,10 @@ export function ProfileHeader({
                                             variant="ghost"
                                             size="icon"
                                             className="rounded-full"
+                                            onClick={() => setShowReportDialog(true)}
+                                            title="Report User"
                                         >
-                                            <MoreHorizontal className="w-5 h-5" />
+                                            <Flag className="w-5 h-5" />
                                         </Button>
                                     </>
                                 )}
@@ -338,6 +342,14 @@ export function ProfileHeader({
                 username={user.username}
                 onDataChange={onProfileUpdate}
             />
+            {!isOwner && (
+                <ReportDialog
+                    targetId={user.user_id}
+                    targetType="user"
+                    open={showReportDialog}
+                    onClose={() => setShowReportDialog(false)}
+                />
+            )}
         </>
     );
 }

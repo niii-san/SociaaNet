@@ -6,7 +6,8 @@ import { moderatorService } from "../../services/moderator.service";
 export const removeCommentController = asyncHandler(
     async (req: RequestWithUserContext, res: Response) => {
         const { commentId } = req.params;
-        const result = await moderatorService.removeComment(commentId);
+        const moderatorId = req.user._id.toString();
+        const result = await moderatorService.removeComment(commentId, moderatorId);
         return res
             .status(200)
             .json(new HttpSuccess(200, true, result.message, null));
