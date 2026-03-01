@@ -23,6 +23,8 @@ interface CommentsBottomSheetProps {
         full_name?: string;
     } | null;
     onCommentsCountChange?: (count: number) => void;
+    /** When true, positions within the parent container (absolute). When false, uses full-screen overlay (fixed). */
+    contained?: boolean;
 }
 
 export function CommentsBottomSheet({
@@ -32,6 +34,7 @@ export function CommentsBottomSheet({
     commentsCount: initialCount,
     currentUser,
     onCommentsCountChange,
+    contained = false,
 }: CommentsBottomSheetProps) {
     const [comments, setComments] = useState<CommentData[]>([]);
     const [loading, setLoading] = useState(false);
@@ -52,8 +55,10 @@ export function CommentsBottomSheet({
     // Animate in/out
     useEffect(() => {
         if (open) {
-            // Prevent body scroll
-            document.body.style.overflow = "hidden";
+            // Only prevent body scroll in fixed (full-page) mode
+            if (!contained) {
+                document.body.style.overflow = "hidden";
+            }
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => setVisible(true));
             });
@@ -63,12 +68,16 @@ export function CommentsBottomSheet({
             setPage(1);
         } else {
             setVisible(false);
-            document.body.style.overflow = "";
+            if (!contained) {
+                document.body.style.overflow = "";
+            }
         }
         return () => {
-            document.body.style.overflow = "";
+            if (!contained) {
+                document.body.style.overflow = "";
+            }
         };
-    }, [open]);
+    }, [open, contained]);
 
     // Fetch comments
     const fetchComments = useCallback(
@@ -165,12 +174,16 @@ export function CommentsBottomSheet({
 
     if (!open) return null;
 
+    const positionClass = contained ? "absolute" : "fixed";
+
     return (
         <>
             {/* Backdrop */}
             <div
                 className={cn(
-                    "fixed inset-0 z-50 bg-black/60 transition-opacity duration-300",
+                    "inset-0 bg-black/60 transition-opacity duration-300",
+                    positionClass,
+                    contained ? "z-40" : "z-50",
                     visible ? "opacity-100" : "opacity-0"
                 )}
                 onClick={onClose}
@@ -180,11 +193,13 @@ export function CommentsBottomSheet({
             <div
                 ref={sheetRef}
                 className={cn(
-                    "fixed inset-x-0 bottom-0 z-50 flex flex-col bg-background rounded-t-2xl transition-transform duration-300 ease-out",
+                    "inset-x-0 bottom-0 flex flex-col bg-background rounded-t-2xl transition-transform duration-300 ease-out",
+                    positionClass,
+                    contained ? "z-50" : "z-50",
                     visible ? "translate-y-0" : "translate-y-full"
                 )}
                 style={{
-                    maxHeight: "75vh",
+                    maxHeight: contained ? "65%" : "75vh",
                     transform: visible
                         ? `translateY(${dragOffset}px)`
                         : "translateY(100%)",

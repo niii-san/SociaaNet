@@ -170,7 +170,7 @@ export function ReelViewer({
     }, [liked, handleLike]);
 
     return (
-        <div className="relative w-full h-full bg-black flex items-center justify-center snap-start snap-always">
+        <div className="relative w-full h-full bg-black flex items-center justify-center snap-start snap-always overflow-hidden">
             {/* Video */}
             <video
                 ref={videoRef}
@@ -397,6 +397,7 @@ export function ReelViewer({
                     full_name: currentUser.full_name,
                 } : null}
                 onCommentsCountChange={setCommentsCount}
+                contained
             />
         </div>
     );
