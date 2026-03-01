@@ -51,6 +51,32 @@ class FeedService {
             limit
         );
 
+        // ─── Also fetch reels and suggested posts for page 1 ───
+        let feedReels: any[] = [];
+        let suggestedPosts: any[] = [];
+
+        if (page <= 2) {
+            const seenReelIds = await feedRepo.getSeenTargetIds(userId, "reel");
+            const [reelsRaw, suggestedRaw] = await Promise.all([
+                feedRepo.getHomeFeedReels(userId, followingIds, seenReelIds, page === 1 ? 3 : 2),
+                feedRepo.getSuggestedPosts(userId, followingIds, page === 1 ? 3 : 2)
+            ]);
+
+            feedReels = await Promise.all(
+                reelsRaw.map((reel) => this.mapReelToFeedItem(reel, userId))
+            );
+
+            suggestedPosts = await Promise.all(
+                suggestedRaw.map((post) =>
+                    this.mapPostToFeedItem(post, userId, false)
+                )
+            );
+
+            // Mark suggested items
+            suggestedPosts = suggestedPosts.map((p) => ({ ...p, is_suggested: true }));
+            feedReels = feedReels.map((r) => ({ ...r, is_suggested: !followingIds.includes(r.author.user_id) }));
+        }
+
         // ─── Fallback mode: user follows nobody ───
         if (followingIds.length === 0 && fallback.length > 0) {
             const fallbackItems = await Promise.all(
@@ -59,8 +85,15 @@ class FeedService {
                 )
             );
 
+            // Mix reels into fallback feed
+            const mixedFeed = this.interleaveFeedItems(
+                fallbackItems.map((p) => ({ ...p, is_suggested: false })),
+                feedReels,
+                []
+            );
+
             return {
-                posts: fallbackItems,
+                items: mixedFeed,
                 caught_up_at_index: null,
                 show_caught_up_divider: false,
                 is_fallback: true,
@@ -81,31 +114,50 @@ class FeedService {
             seen.map((post) => this.mapPostToFeedItem(post, userId, true))
         );
 
-        const allItems = [...unseenItems, ...seenItems];
+        const allPostItems = [...unseenItems, ...seenItems].map((p) => ({
+            ...p,
+            is_suggested: false
+        }));
+
+        // Interleave reels and suggested posts into the feed
+        const mixedFeed = this.interleaveFeedItems(allPostItems, feedReels, suggestedPosts);
 
         // Determine caught-up divider position
-        // Strategy 1: Show between unseen and seen posts (view-based)
-        // Strategy 2: If no seen posts exist, show after posts newer than 24 hours (time-based)
         let caught_up_at_index: number | null = null;
         let show_caught_up_divider = false;
 
         if (unseenItems.length > 0 && seenItems.length > 0) {
-            // View-based: divider between unseen and seen
-            caught_up_at_index = unseenItems.length;
-            show_caught_up_divider = true;
-        } else if (total_seen === 0 && allItems.length > 0) {
-            // Time-based fallback: no posts have been viewed yet,
-            // show divider after posts from last 24 hours
+            // Find where the first seen post ends up in the mixed feed
+            const firstSeenPostId = seenItems[0]?.post_id;
+            if (firstSeenPostId) {
+                const idx = mixedFeed.findIndex(
+                    (item: any) => item.type === "post" && item.post_id === firstSeenPostId
+                );
+                if (idx > 0) {
+                    caught_up_at_index = idx;
+                    show_caught_up_divider = true;
+                }
+            }
+        } else if (total_seen === 0 && allPostItems.length > 0) {
             const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
-            const recentCount = allItems.filter(
+            const recentCount = allPostItems.filter(
                 (item) => new Date(item.created_at) > oneDayAgo
             ).length;
-            if (recentCount > 0 && recentCount < allItems.length) {
-                caught_up_at_index = recentCount;
-                show_caught_up_divider = true;
+            if (recentCount > 0 && recentCount < allPostItems.length) {
+                // Find position in mixed feed
+                let postCounter = 0;
+                for (let i = 0; i < mixedFeed.length; i++) {
+                    if (mixedFeed[i].type === "post" && !mixedFeed[i].is_suggested) {
+                        postCounter++;
+                        if (postCounter === recentCount) {
+                            caught_up_at_index = i + 1;
+                            show_caught_up_divider = true;
+                            break;
+                        }
+                    }
+                }
             }
         } else {
-            // All unseen loaded and there are seen posts on later pages
             const all_unseen_loaded =
                 (page - 1) * limit + unseenItems.length >= total_unseen &&
                 total_unseen > 0;
@@ -116,7 +168,7 @@ class FeedService {
         }
 
         return {
-            posts: allItems,
+            items: mixedFeed,
             caught_up_at_index,
             show_caught_up_divider,
             is_fallback: false,
@@ -235,6 +287,46 @@ class FeedService {
             bio: u.bio || "",
             followers_count: u.followers_count
         }));
+    }
+
+    // ─── Private helpers ─────────────────────────────────
+
+    /**
+     * Interleave reels and suggested posts into the main feed.
+     * Pattern: after every ~3 posts, insert a reel or suggested post.
+     */
+    private interleaveFeedItems(
+        posts: any[],
+        reels: any[],
+        suggested: any[]
+    ): any[] {
+        const result: any[] = [];
+        let postIdx = 0;
+        let reelIdx = 0;
+        let sugIdx = 0;
+        let insertCounter = 0;
+
+        for (let i = 0; postIdx < posts.length; i++) {
+            result.push(posts[postIdx++]);
+
+            // After every 3 posts, insert a reel or suggested post
+            if (postIdx % 3 === 0) {
+                if (insertCounter % 2 === 0 && reelIdx < reels.length) {
+                    result.push(reels[reelIdx++]);
+                } else if (sugIdx < suggested.length) {
+                    result.push(suggested[sugIdx++]);
+                } else if (reelIdx < reels.length) {
+                    result.push(reels[reelIdx++]);
+                }
+                insertCounter++;
+            }
+        }
+
+        // Append remaining reels and suggested
+        while (reelIdx < reels.length) result.push(reels[reelIdx++]);
+        while (sugIdx < suggested.length) result.push(suggested[sugIdx++]);
+
+        return result;
     }
 
     // ─── Private mappers ──────────────────────────────────

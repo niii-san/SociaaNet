@@ -2,13 +2,14 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Loader2, TrendingUp } from "lucide-react";
-import { getHomeFeed, FeedPost } from "@/features/feed/feed.api";
+import { getHomeFeed, FeedItem } from "@/features/feed/feed.api";
 import { PostCard } from "@/components/feed/post-card";
+import { FeedReelCard } from "@/components/feed/feed-reel-card";
 import { CaughtUpDivider } from "@/components/feed/caught-up-divider";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
 export function AuthHome() {
-    const [posts, setPosts] = useState<FeedPost[]>([]);
+    const [items, setItems] = useState<FeedItem[]>([]);
     const [page, setPage] = useState(1);
     const [loading, setLoading] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
@@ -26,19 +27,27 @@ export function AuthHome() {
                 const data = await getHomeFeed(pageNum, 10);
 
                 if (pageNum === 1) {
-                    setPosts(data.posts);
+                    setItems(data.items);
                     setCaughtUpIndex(data.caught_up_at_index);
                     setShowCaughtUp(data.show_caught_up_divider);
                     setIsFallback(data.is_fallback);
                 } else {
-                    setPosts((prev) => {
+                    setItems((prev) => {
                         const existingIds = new Set(
-                            prev.map((p) => p.post_id)
+                            prev.map((item) =>
+                                item.type === "post"
+                                    ? item.post_id
+                                    : item.reel_id
+                            )
                         );
-                        const newPosts = data.posts.filter(
-                            (p) => !existingIds.has(p.post_id)
-                        );
-                        return [...prev, ...newPosts];
+                        const newItems = data.items.filter((item) => {
+                            const id =
+                                item.type === "post"
+                                    ? item.post_id
+                                    : item.reel_id;
+                            return !existingIds.has(id);
+                        });
+                        return [...prev, ...newItems];
                     });
 
                     if (
@@ -47,7 +56,7 @@ export function AuthHome() {
                         !showCaughtUp
                     ) {
                         setCaughtUpIndex(
-                            posts.length + (data.caught_up_at_index ?? 0)
+                            items.length + (data.caught_up_at_index ?? 0)
                         );
                         setShowCaughtUp(true);
                     }
@@ -58,7 +67,7 @@ export function AuthHome() {
                 console.error("Failed to fetch feed:", err);
             }
         },
-        [posts.length, showCaughtUp]
+        [items.length, showCaughtUp]
     );
 
     // Initial load
@@ -107,7 +116,7 @@ export function AuthHome() {
                             Loading your feed...
                         </p>
                     </div>
-                ) : posts.length === 0 ? (
+                ) : items.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-20 px-4">
                         <div className="text-6xl mb-4">📭</div>
                         <h3 className="text-lg font-semibold mb-2">
@@ -135,23 +144,45 @@ export function AuthHome() {
                             </div>
                         )}
 
-                        {posts.map((post, index) => (
-                            <div key={post.post_id}>
-                                <PostCard post={post} />
-                                {showCaughtUp &&
-                                    caughtUpIndex !== null &&
-                                    index === caughtUpIndex - 1 && (
-                                        <CaughtUpDivider />
+                        {items.map((item, index) => {
+                            const key =
+                                item.type === "post"
+                                    ? item.post_id
+                                    : item.reel_id;
+
+                            return (
+                                <div key={key}>
+                                    {/* Suggested label for suggested posts */}
+                                    {item.type === "post" &&
+                                        item.is_suggested && (
+                                            <div className="px-4 pt-3 pb-1">
+                                                <p className="text-xs font-medium text-muted-foreground">
+                                                    Suggested for you
+                                                </p>
+                                            </div>
+                                        )}
+
+                                    {item.type === "post" ? (
+                                        <PostCard post={item} />
+                                    ) : (
+                                        <FeedReelCard reel={item} />
                                     )}
-                            </div>
-                        ))}
+
+                                    {showCaughtUp &&
+                                        caughtUpIndex !== null &&
+                                        index === caughtUpIndex - 1 && (
+                                            <CaughtUpDivider />
+                                        )}
+                                </div>
+                            );
+                        })}
 
                         {/* Infinite scroll trigger */}
                         <div ref={loaderRef} className="py-6 flex justify-center">
                             {loadingMore && (
                                 <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
                             )}
-                            {!hasMore && posts.length > 0 && (
+                            {!hasMore && items.length > 0 && (
                                 <p className="text-muted-foreground text-sm">
                                     No more posts to show
                                 </p>

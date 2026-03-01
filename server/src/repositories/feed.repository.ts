@@ -244,6 +244,182 @@ class FeedRepository {
     }
 
     /**
+     * Get reels for the home feed — mix of followed + public, prioritizing unseen.
+     * Used to intersperse reels into the home feed like Instagram.
+     */
+    async getHomeFeedReels(
+        userId: string,
+        followingIds: string[],
+        seenReelIds: string[],
+        limit: number = 3
+    ): Promise<ReelDocument[]> {
+        const followingObjectIds = followingIds.map(
+            (id) => new mongoose.Types.ObjectId(id)
+        );
+        const seenObjectIds = seenReelIds.map(
+            (id) => new mongoose.Types.ObjectId(id)
+        );
+        const userObjectId = new mongoose.Types.ObjectId(userId);
+
+        const baseMatch = {
+            is_deleted: false,
+            is_removed_by_moderator: false,
+            is_sensitive_content: { $ne: true },
+            author: { $ne: userObjectId },
+            $or: [
+                { visibility: "public" },
+                {
+                    visibility: "followers",
+                    author: { $in: followingObjectIds }
+                }
+            ]
+        };
+
+        const reels = await Reel.aggregate([
+            { $match: baseMatch },
+            {
+                $addFields: {
+                    is_unseen: {
+                        $cond: [{ $in: ["$_id", seenObjectIds] }, 0, 1]
+                    },
+                    is_from_following: {
+                        $cond: [{ $in: ["$author", followingObjectIds] }, 1, 0]
+                    },
+                    engagement_score: {
+                        $add: [
+                            { $multiply: ["$likes_count", 3] },
+                            { $multiply: ["$comments_count", 5] },
+                            { $multiply: ["$reposts_count", 4] },
+                            "$views_count"
+                        ]
+                    }
+                }
+            },
+            {
+                $addFields: {
+                    reel_score: {
+                        $add: [
+                            { $multiply: ["$is_unseen", 10000] },
+                            { $multiply: ["$is_from_following", 500] },
+                            "$engagement_score"
+                        ]
+                    }
+                }
+            },
+            { $sort: { reel_score: -1, created_at: -1 } },
+            { $limit: limit },
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "author",
+                    foreignField: "_id",
+                    as: "author",
+                    pipeline: [
+                        {
+                            $project: {
+                                username: 1,
+                                full_name: 1,
+                                avatar_key: 1,
+                                is_online: 1
+                            }
+                        }
+                    ]
+                }
+            },
+            { $unwind: "$author" }
+        ]);
+
+        return reels as ReelDocument[];
+    }
+
+    /**
+     * Get suggested (non-followed) public posts for the home feed.
+     * Shows trending content from users the current user doesn't follow.
+     */
+    async getSuggestedPosts(
+        userId: string,
+        followingIds: string[],
+        limit: number = 3
+    ): Promise<PostDocument[]> {
+        const excludeAuthorIds = [
+            new mongoose.Types.ObjectId(userId),
+            ...followingIds.map((id) => new mongoose.Types.ObjectId(id))
+        ];
+
+        const match = {
+            author: { $nin: excludeAuthorIds },
+            is_deleted: false,
+            is_removed_by_moderator: false,
+            visibility: "public",
+            is_sensitive_content: { $ne: true }
+        };
+
+        const posts = await Post.aggregate([
+            { $match: match },
+            {
+                $addFields: {
+                    engagement_score: {
+                        $add: [
+                            { $multiply: ["$likes_count", 3] },
+                            { $multiply: ["$comments_count", 5] },
+                            { $multiply: ["$reposts_count", 4] }
+                        ]
+                    },
+                    recency_score: {
+                        $divide: [
+                            1,
+                            {
+                                $add: [
+                                    1,
+                                    {
+                                        $divide: [
+                                            { $subtract: [new Date(), "$created_at"] },
+                                            1000 * 60 * 60
+                                        ]
+                                    }
+                                ]
+                            }
+                        ]
+                    }
+                }
+            },
+            {
+                $addFields: {
+                    trending_score: {
+                        $add: [
+                            "$engagement_score",
+                            { $multiply: ["$recency_score", 100] }
+                        ]
+                    }
+                }
+            },
+            { $sort: { trending_score: -1, created_at: -1 } },
+            { $limit: limit },
+            {
+                $lookup: {
+                    from: "users",
+                    localField: "author",
+                    foreignField: "_id",
+                    as: "author",
+                    pipeline: [
+                        {
+                            $project: {
+                                username: 1,
+                                full_name: 1,
+                                avatar_key: 1,
+                                is_online: 1
+                            }
+                        }
+                    ]
+                }
+            },
+            { $unwind: "$author" }
+        ]);
+
+        return posts as PostDocument[];
+    }
+
+    /**
      * Get trending/explore posts: public posts with highest engagement, recent first.
      * Excludes posts from users the current user already follows (discover new content).
      */

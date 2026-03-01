@@ -25,6 +25,7 @@ export interface FeedPost {
     is_saved: boolean;
     is_seen: boolean;
     is_own_post: boolean;
+    is_suggested?: boolean;
     visibility: string;
     created_at: string;
 }
@@ -46,9 +47,12 @@ export interface FeedReel {
     is_reposted: boolean;
     is_saved: boolean;
     is_own_reel: boolean;
+    is_suggested?: boolean;
     visibility: string;
     created_at: string;
 }
+
+export type FeedItem = FeedPost | FeedReel;
 
 export interface ExplorePost {
     type: "post";
@@ -98,7 +102,7 @@ export interface SuggestedUser {
 // ─── Response types ───────────────────────────────────────
 
 export interface HomeFeedResponse {
-    posts: FeedPost[];
+    items: FeedItem[];
     caught_up_at_index: number | null;
     show_caught_up_divider: boolean;
     is_fallback: boolean;
