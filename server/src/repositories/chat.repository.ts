@@ -525,21 +525,24 @@ class ChatRepository {
         ]);
 
         // Convert sender avatar keys and media keys to URLs
-        const processedMessages = messages.map((msg) => ({
-            ...msg,
-            media_urls:
-                msg.media_keys && msg.media_keys.length > 0
-                    ? msg.media_keys.map((key: string) =>
-                          convertImageKeyToImageUrl(key)
-                      )
-                    : msg.media_urls || [], // fallback for old messages with hardcoded URLs
-            sender: {
-                ...msg.sender,
-                avatar_url: msg.sender.avatar_key
-                    ? convertImageKeyToImageUrl(msg.sender.avatar_key)
-                    : null
-            }
-        }));
+        const processedMessages = messages.map((msg) => {
+            const { media_keys, sender_data, reply_to_data, reply_to_sender, ...rest } = msg;
+            return {
+                ...rest,
+                media_urls:
+                    media_keys && media_keys.length > 0
+                        ? media_keys.map((key: string) =>
+                              convertImageKeyToImageUrl(key)
+                          )
+                        : msg.media_urls || [], // fallback for old messages with hardcoded URLs
+                sender: {
+                    ...msg.sender,
+                    avatar_url: msg.sender.avatar_key
+                        ? convertImageKeyToImageUrl(msg.sender.avatar_key)
+                        : null
+                }
+            };
+        });
 
         return {
             messages: processedMessages.reverse(), // return chronological order

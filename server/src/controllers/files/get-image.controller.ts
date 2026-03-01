@@ -16,7 +16,6 @@ export const getImageController = asyncHandler(
         const dto = new GetImageDto(imageKey);
 
         const image = await filesService.getImage(dto);
-        console.log("Image metadata retrieved:", image);
 
         const response = await fileServiceClient.getImageStream(
             image.image_key
