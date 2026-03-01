@@ -1,6 +1,7 @@
 import { AppSidebar } from "@/components/app-sidebar";
 import { SuggestedUsersSidebar } from "@/components/feed/suggested-users-sidebar";
 import { MobileBottomNav } from "@/components/mobile-bottom-nav";
+import { MobileTopHeader } from "@/components/mobile-top-header";
 import { AuthProvider, FollowProvider, ChatProvider, NotificationProvider } from "@/contexts";
 import { ProtectedShell } from "@/components/protected-shell";
 import { validateSessionServer } from "@/lib/auth.server";
@@ -26,6 +27,7 @@ export default async function Layout({
                             <div className="max-w-7xl mx-auto flex">
                                 <AppSidebar />
                                 <main className="flex-1 min-h-screen border-r border-border max-w-2xl pb-16 lg:pb-0">
+                                    <MobileTopHeader />
                                     {children}
                                 </main>
                                 <aside className="hidden xl:block w-80 h-screen sticky top-0 p-4 space-y-4 overflow-y-auto">

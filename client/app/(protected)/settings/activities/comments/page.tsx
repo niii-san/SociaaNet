@@ -62,7 +62,7 @@ export default function CommentHistoryPage() {
     const hasMore = data ? page < data.total_pages : false;
 
     return (
-        <div className="min-h-screen bg-background pb-12">
+        <div className="min-h-screen bg-background pb-16 lg:pb-12">
             {/* Header */}
             <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border px-4 py-4">
                 <div className="flex items-center gap-3">

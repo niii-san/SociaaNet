@@ -142,6 +142,7 @@ export function PostCard({ post, isActive = false }: PostCardProps) {
     );
 
     const hasMultipleImages = post.media_urls.length > 1;
+    const touchStart = useRef<number | null>(null);
 
     const prevImage = () =>
         setCurrentImageIndex((i) => Math.max(0, i - 1));
@@ -149,6 +150,20 @@ export function PostCard({ post, isActive = false }: PostCardProps) {
         setCurrentImageIndex((i) =>
             Math.min(post.media_urls.length - 1, i + 1)
         );
+
+    const handleTouchStart = useCallback((e: React.TouchEvent) => {
+        touchStart.current = e.touches[0].clientX;
+    }, []);
+
+    const handleTouchEnd = useCallback((e: React.TouchEvent) => {
+        if (touchStart.current === null) return;
+        const diff = touchStart.current - e.changedTouches[0].clientX;
+        if (Math.abs(diff) > 50) {
+            if (diff > 0) nextImage();
+            else prevImage();
+        }
+        touchStart.current = null;
+    }, []);
 
     return (
         <article
@@ -235,6 +250,8 @@ export function PostCard({ post, isActive = false }: PostCardProps) {
                         <div
                             className="mt-3 rounded-xl overflow-hidden border border-border relative group"
                             onDoubleClick={handleDoubleClick}
+                            onTouchStart={hasMultipleImages ? handleTouchStart : undefined}
+                            onTouchEnd={hasMultipleImages ? handleTouchEnd : undefined}
                         >
                             <img
                                 src={post.media_urls[currentImageIndex]}
@@ -271,7 +288,7 @@ export function PostCard({ post, isActive = false }: PostCardProps) {
                                     {currentImageIndex > 0 && (
                                         <button
                                             onClick={prevImage}
-                                            className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                                            className="absolute left-2 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full p-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                                         >
                                             <ChevronLeft className="w-4 h-4" />
                                         </button>
@@ -280,7 +297,7 @@ export function PostCard({ post, isActive = false }: PostCardProps) {
                                         post.media_urls.length - 1 && (
                                         <button
                                             onClick={nextImage}
-                                            className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                                            className="absolute right-2 top-1/2 -translate-y-1/2 bg-black/50 text-white rounded-full p-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity"
                                         >
                                             <ChevronRight className="w-4 h-4" />
                                         </button>

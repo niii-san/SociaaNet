@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@/contexts";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { getUserProfileByUsername } from "@/features/users/users.api";
 import { IUserProfile } from "@/types";
@@ -12,13 +12,14 @@ import { RepostsGrid } from "@/components/profile/reposts-grid";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { MiniLoader } from "@/components/ui/mini-loader";
-import { UserX, Lock } from "lucide-react";
+import { UserX, Lock, ArrowLeft } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { ProfilePageSkeleton } from "@/components/profile/profile-skeleton";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
 export default function ProfilePage() {
     const { username } = useParams<{ username: string }>();
+    const router = useRouter();
 
     const [profileData, setProfileData] = useState<IUserProfile | null>(null);
     const { data: currentUserData } = useAuth();
@@ -73,7 +74,23 @@ export default function ProfilePage() {
     };
 
     return (
-        <div className="min-h-screen bg-background pb-12">
+        <div className="min-h-screen bg-background pb-16 lg:pb-12">
+            {/* Mobile header with back button */}
+            <header className="lg:hidden sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border px-4 py-3">
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => router.back()}
+                        className="p-1 -ml-1 rounded-full hover:bg-muted transition-colors"
+                        aria-label="Go back"
+                    >
+                        <ArrowLeft className="w-5 h-5" />
+                    </button>
+                    <h1 className="text-lg font-semibold truncate">
+                        {profileData ? `@${profileData.username}` : `@${username}`}
+                    </h1>
+                </div>
+            </header>
+
             <div className="container max-w-5xl mx-auto px-4">
                 {profileData ? (
                     <>

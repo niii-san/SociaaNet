@@ -10,9 +10,12 @@ export function MobileBottomNav() {
     const pathname = usePathname();
     const { data: user } = useAuth();
 
-    // Don't show on certain pages
-    const hideOnPages = ["/inbox/", "/reels"];
-    const shouldHide = hideOnPages.some((p) => pathname.startsWith(p));
+    // Hide on full-screen experiences
+    // /reels exactly (the full-screen reels feed) but NOT /reels/[id] (detail page)
+    // /inbox/ (conversation detail pages have their own UI)
+    const shouldHide =
+        pathname === "/reels" ||
+        pathname.startsWith("/inbox/");
     if (shouldHide) return null;
 
     const navItems = [

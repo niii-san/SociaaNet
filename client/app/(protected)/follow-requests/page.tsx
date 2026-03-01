@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { getFollowRequests, acceptFollowRequest, rejectFollowRequest } from "@/features/follow/follow.api";
 import { FollowRequest } from "@/types";
 import { MiniLoader } from "@/components/ui/mini-loader";
 import { Button } from "@/components/ui/button";
-import { UserPlus, X, Check } from "lucide-react";
+import { UserPlus, X, Check, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import Link from "next/link";
 import { usePageTitle } from "@/hooks/usePageTitle";
@@ -14,6 +15,7 @@ export default function FollowRequestsPage() {
     const [requests, setRequests] = useState<FollowRequest[]>([]);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState<string | null>(null);
+    const router = useRouter();
 
     usePageTitle("Follow Requests");
 
@@ -69,10 +71,17 @@ export default function FollowRequestsPage() {
     }
 
     return (
-        <div className="min-h-screen bg-background pb-12">
+        <div className="min-h-screen bg-background pb-16 lg:pb-12">
             {/* Header */}
             <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border px-4 py-4">
                 <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => router.back()}
+                        className="lg:hidden p-1 -ml-1 rounded-full hover:bg-muted transition-colors"
+                        aria-label="Go back"
+                    >
+                        <ArrowLeft className="w-5 h-5" />
+                    </button>
                     <UserPlus className="w-6 h-6 text-primary" />
                     <h1 className="text-2xl font-bold">Follow Requests</h1>
                 </div>

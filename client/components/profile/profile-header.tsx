@@ -131,10 +131,10 @@ export function ProfileHeader({
     return (
         <>
             <div className="relative mb-8 px-4">
-                <div className="flex flex-col md:flex-row gap-6 items-start">
+                <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 items-center sm:items-start">
                     <div className="relative group shrink-0">
                         <div
-                            className={`w-36 h-36 rounded-full border-4 border-background bg-muted flex items-center justify-center overflow-hidden ${isOwner ? "cursor-pointer" : ""}`}
+                            className={`w-24 h-24 sm:w-36 sm:h-36 rounded-full border-4 border-background bg-muted flex items-center justify-center overflow-hidden ${isOwner ? "cursor-pointer" : ""}`}
                             onClick={handleAvatarClick}
                         >
                             {user.avatar_url ? (
@@ -145,22 +145,22 @@ export function ProfileHeader({
                                 />
                             ) : (
                                 <div className="w-full h-full bg-primary/20 flex items-center justify-center">
-                                    <User className="w-20 h-20 text-primary" />
+                                    <User className="w-12 h-12 sm:w-20 sm:h-20 text-primary" />
                                 </div>
                             )}
                             {isOwner && (
                                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
-                                    <Camera className="w-10 h-10 text-white" />
+                                    <Camera className="w-8 h-8 sm:w-10 sm:h-10 text-white" />
                                 </div>
                             )}
                         </div>
                     </div>
 
-                    <div className="flex-1 space-y-4 pt-2">
-                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div className="flex-1 space-y-4 pt-2 text-center sm:text-left">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                             <div>
-                                <div className="flex items-center gap-2 group/name">
-                                    <h1 className="text-3xl font-bold leading-tight">
+                                <div className="flex items-center justify-center sm:justify-start gap-2 group/name">
+                                    <h1 className="text-2xl sm:text-3xl font-bold leading-tight">
                                         {user.full_name}
                                     </h1>
                                     {isOwner && (
@@ -181,7 +181,7 @@ export function ProfileHeader({
                                         </Button>
                                     )}
                                 </div>
-                                <div className="flex items-center gap-2 group/username mt-1">
+                                <div className="flex items-center justify-center sm:justify-start gap-2 group/username mt-1">
                                     <p className="text-lg text-muted-foreground">
                                         @{user.username}
                                     </p>
@@ -205,7 +205,7 @@ export function ProfileHeader({
                                 </div>
                             </div>
 
-                            <div className="flex gap-3">
+                            <div className="flex gap-3 justify-center sm:justify-start">
                                 {isOwner &&
                                     currentUserData.data
                                         ?.is_private_account && (
@@ -282,7 +282,7 @@ export function ProfileHeader({
                             )}
                         </div>
 
-                        <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground pt-2">
+                        <div className="flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground pt-2 justify-center sm:justify-start">
                             <div className="flex items-center gap-1">
                                 <CalendarDays className="w-4 h-4" />
                                 <span>Joined {joined}</span>

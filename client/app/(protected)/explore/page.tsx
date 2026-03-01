@@ -92,7 +92,7 @@ export default function ExplorePage() {
     }, [fetchExplore]);
 
     return (
-        <div className="min-h-screen bg-background pb-12">
+        <div className="min-h-screen bg-background pb-16 lg:pb-12">
             {/* Header */}
             <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border px-4 py-4">
                 <div className="flex items-center gap-3 mb-3">
@@ -118,7 +118,7 @@ export default function ExplorePage() {
             </header>
 
             <PullToRefresh onRefresh={handleRefresh}>
-                <div className="px-4 py-4">
+                <div className="px-1 sm:px-4 py-2 sm:py-4">
                     {loading ? (
                         <ExploreGridSkeleton />
                     ) : items.length === 0 ? (
@@ -134,7 +134,7 @@ export default function ExplorePage() {
                     ) : (
                         <>
                             {/* Masonry Grid */}
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-2 auto-rows-auto">
+                            <div className="grid grid-cols-3 gap-0.5 sm:gap-2 auto-rows-auto">
                                 {items.map((item, index) => (
                                     <ExploreCard
                                         key={

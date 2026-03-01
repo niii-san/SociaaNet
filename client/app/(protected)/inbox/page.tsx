@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts";
 import { useChat } from "@/contexts/chat.context";
+import { useRouter } from "next/navigation";
 import { ChatConversation } from "@/types";
-import { Mail, Plus, Users, Search, MessageCircle, Trash2, Loader2, MailQuestion, Check, X } from "lucide-react";
+import { Mail, Plus, Users, Search, MessageCircle, Trash2, Loader2, MailQuestion, Check, X, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -76,6 +77,7 @@ export default function Page() {
         refreshConversations,
         refreshMessageRequests
     } = useChat();
+    const router = useRouter();
     const myActivityOff =
         userSettings?.privacy?.show_activity_status === false;
     const [searchQuery, setSearchQuery] = useState("");
@@ -192,11 +194,18 @@ export default function Page() {
     });
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-background pb-16 lg:pb-12">
             {/* Header */}
             <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border px-4 py-4">
                 <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => router.back()}
+                            className="lg:hidden p-1 -ml-1 rounded-full hover:bg-muted transition-colors"
+                            aria-label="Go back"
+                        >
+                            <ArrowLeft className="w-5 h-5" />
+                        </button>
                         <Mail className="w-6 h-6 text-primary" />
                         <h1 className="text-2xl font-bold">Inbox</h1>
                     </div>

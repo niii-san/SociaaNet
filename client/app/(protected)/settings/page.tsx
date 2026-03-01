@@ -32,7 +32,8 @@ import {
     ChevronRight,
     History,
     Clock,
-    LogOut
+    LogOut,
+    ArrowLeft
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -227,10 +228,17 @@ export default function SettingsPage() {
         "sign out".includes(searchLower);
 
     return (
-        <div className="min-h-screen bg-background pb-12">
+        <div className="min-h-screen bg-background pb-16 lg:pb-12">
             {/* Header */}
             <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border px-4 py-4">
                 <div className="flex items-center gap-3 mb-4">
+                    <button
+                        onClick={() => router.back()}
+                        className="lg:hidden p-1 -ml-1 rounded-full hover:bg-muted transition-colors"
+                        aria-label="Go back"
+                    >
+                        <ArrowLeft className="w-5 h-5" />
+                    </button>
                     <SettingsIcon className="w-6 h-6 text-primary" />
                     <h1 className="text-2xl font-bold">Settings</h1>
                 </div>

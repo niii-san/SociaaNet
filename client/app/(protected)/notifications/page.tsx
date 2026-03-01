@@ -14,7 +14,8 @@ import {
     AtSign,
     Loader2,
     CheckCheck,
-    Trash2
+    Trash2,
+    ArrowLeft
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -242,11 +243,18 @@ export default function NotificationsPage() {
     };
 
     return (
-        <div className="min-h-screen bg-background pb-12">
+        <div className="min-h-screen bg-background pb-16 lg:pb-12">
             {/* Header */}
             <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border px-4 py-3">
                 <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => router.back()}
+                            className="lg:hidden p-1 -ml-1 rounded-full hover:bg-muted transition-colors"
+                            aria-label="Go back"
+                        >
+                            <ArrowLeft className="w-5 h-5" />
+                        </button>
                         <Bell className="w-6 h-6 text-primary" />
                         <h1 className="text-xl font-bold">Notifications</h1>
                     </div>

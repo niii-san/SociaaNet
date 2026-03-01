@@ -86,7 +86,7 @@ export default function ChangePasswordPage() {
     };
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-background pb-16 lg:pb-0">
             {/* Header */}
             <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border px-4 py-4">
                 <div className="container max-w-2xl mx-auto">

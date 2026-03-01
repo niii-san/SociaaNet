@@ -57,6 +57,7 @@ export default function PostDetailPage() {
     const [savingInProgress, setSavingInProgress] = useState(false);
     const [showLikeHeart, setShowLikeHeart] = useState(false);
     const [showShareDialog, setShowShareDialog] = useState(false);
+    const touchStartX = useRef<number | null>(null);
 
     usePageTitle(post ? `${post.author.username}'s post` : "Post");
 
@@ -261,7 +262,7 @@ export default function PostDetailPage() {
         : ["public", "private"];
 
     return (
-        <div className="min-h-screen bg-background pb-12">
+        <div className="min-h-screen bg-background pb-16 lg:pb-12">
             {/* Back button */}
             <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border px-4 py-3">
                 <div className="flex items-center gap-3">
@@ -343,6 +344,20 @@ export default function PostDetailPage() {
                                 if (!isLiked) handleLikeToggle();
                                 setShowLikeHeart(true);
                                 setTimeout(() => setShowLikeHeart(false), 800);
+                            }}
+                            onTouchStart={(e) => {
+                                if (post && post.media_urls.length > 1) {
+                                    touchStartX.current = e.touches[0].clientX;
+                                }
+                            }}
+                            onTouchEnd={(e) => {
+                                if (touchStartX.current === null || !post || post.media_urls.length <= 1) return;
+                                const diff = touchStartX.current - e.changedTouches[0].clientX;
+                                if (Math.abs(diff) > 50) {
+                                    if (diff > 0) handleNextImage();
+                                    else handlePreviousImage();
+                                }
+                                touchStartX.current = null;
                             }}
                         >
                             <img
