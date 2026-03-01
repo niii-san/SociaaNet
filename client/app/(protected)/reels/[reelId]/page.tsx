@@ -33,6 +33,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import CommentSection from "@/components/comments/comment-section";
+import { ShareToChatDialog } from "@/components/chat/share-to-chat-dialog";
 import Link from "next/link";
 
 export default function ReelDetailPage() {
@@ -56,6 +57,7 @@ export default function ReelDetailPage() {
     const [repostingInProgress, setRepostingInProgress] = useState(false);
     const [isSaved, setIsSaved] = useState(false);
     const [savingInProgress, setSavingInProgress] = useState(false);
+    const [showShareDialog, setShowShareDialog] = useState(false);
 
     useEffect(() => {
         const fetchReel = async () => {
@@ -419,7 +421,10 @@ export default function ReelDetailPage() {
                                     <Button variant="ghost" size="icon">
                                         <MessageCircle className="w-7 h-7" />
                                     </Button>
-                                    <Button variant="ghost" size="icon">
+                                    <Button variant="ghost" size="icon"
+                                        onClick={() => setShowShareDialog(true)}
+                                        title="Share to chat"
+                                    >
                                         <Send className="w-7 h-7" />
                                     </Button>
                                     <Button
@@ -512,6 +517,12 @@ export default function ReelDetailPage() {
                     onCommentsCountChange={setCommentsCount}
                 />
             </div>
+
+            <ShareToChatDialog
+                open={showShareDialog}
+                onOpenChange={setShowShareDialog}
+                reelId={reel.reel_id}
+            />
         </div>
     );
 }

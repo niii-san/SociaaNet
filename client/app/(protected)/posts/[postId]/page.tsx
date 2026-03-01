@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import CommentSection from "@/components/comments/comment-section";
+import { ShareToChatDialog } from "@/components/chat/share-to-chat-dialog";
 import Link from "next/link";
 import { useKeyboardShortcut } from "@/hooks/useKeyboardShortcut";
 import { usePageTitle } from "@/hooks/usePageTitle";
@@ -54,6 +55,7 @@ export default function PostDetailPage() {
     const [isSaved, setIsSaved] = useState(false);
     const [savingInProgress, setSavingInProgress] = useState(false);
     const [showLikeHeart, setShowLikeHeart] = useState(false);
+    const [showShareDialog, setShowShareDialog] = useState(false);
 
     usePageTitle(post ? `${post.author.username}'s post` : "Post");
 
@@ -438,7 +440,10 @@ export default function PostDetailPage() {
                                     <Button variant="ghost" size="icon" className="active:scale-90 transition-transform">
                                         <MessageCircle className="w-7 h-7" />
                                     </Button>
-                                    <Button variant="ghost" size="icon" className="active:scale-90 transition-transform">
+                                    <Button variant="ghost" size="icon" className="active:scale-90 transition-transform"
+                                        onClick={() => setShowShareDialog(true)}
+                                        title="Share to chat"
+                                    >
                                         <Send className="w-7 h-7" />
                                     </Button>
                                     <Button
@@ -527,6 +532,12 @@ export default function PostDetailPage() {
                     onCommentsCountChange={setCommentsCount}
                 />
             </div>
+
+            <ShareToChatDialog
+                open={showShareDialog}
+                onOpenChange={setShowShareDialog}
+                postId={post.post_id}
+            />
         </div>
     );
 }
