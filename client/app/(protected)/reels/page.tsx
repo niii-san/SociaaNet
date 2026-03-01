@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Plus, Clapperboard, Loader2, ChevronUp, ChevronDown, ArrowUp, ArrowDown, CheckCircle2 } from "lucide-react";
 import { ReelViewer } from "@/components/reels/reel-viewer";
+import { ReelViewerSkeleton } from "@/components/reels/reel-skeleton";
 import { getReelsFeed, FeedReel } from "@/features/feed/feed.api";
 import { cn } from "@/lib/utils";
 import { usePageTitle } from "@/hooks/usePageTitle";
@@ -136,14 +137,7 @@ export default function ReelsPage() {
     }, [activeIndex, reels.length, allCaughtUp]);
 
     if (loading) {
-        return (
-            <div className="min-h-screen bg-black flex flex-col items-center justify-center">
-                <Loader2 className="w-10 h-10 animate-spin text-white" />
-                <p className="text-white/60 text-sm mt-4">
-                    Loading reels...
-                </p>
-            </div>
-        );
+        return <ReelViewerSkeleton />;
     }
 
     if (reels.length === 0) {

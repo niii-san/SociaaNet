@@ -7,6 +7,7 @@ import { PostCard } from "@/components/feed/post-card";
 import { FeedReelCard } from "@/components/feed/feed-reel-card";
 import { CaughtUpDivider } from "@/components/feed/caught-up-divider";
 import { SuggestedUsersBar } from "@/components/feed/suggested-users-bar";
+import { FeedSkeleton } from "@/components/feed/feed-skeletons";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
 export function AuthHome() {
@@ -114,12 +115,7 @@ export function AuthHome() {
             {/* Feed */}
             <div className="min-h-screen">
                 {loading ? (
-                    <div className="flex flex-col items-center justify-center py-20">
-                        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                        <p className="text-muted-foreground text-sm mt-3">
-                            Loading your feed...
-                        </p>
-                    </div>
+                    <FeedSkeleton />
                 ) : items.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-20 px-4">
                         <div className="text-6xl mb-4">📭</div>

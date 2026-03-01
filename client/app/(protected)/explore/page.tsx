@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { SearchDialog } from "@/components/explore/search-dialog";
 import { ExploreCard } from "@/components/explore/explore-card";
 import { getExplore, ExploreItem } from "@/features/feed/feed.api";
+import { ExploreGridSkeleton } from "@/components/explore/explore-skeleton";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useKeyboardShortcut } from "@/hooks/useKeyboardShortcut";
 
@@ -112,12 +113,7 @@ export default function ExplorePage() {
 
             <div className="px-4 py-4">
                 {loading ? (
-                    <div className="flex flex-col items-center justify-center py-20">
-                        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                        <p className="text-muted-foreground text-sm mt-3">
-                            Discovering content...
-                        </p>
-                    </div>
+                    <ExploreGridSkeleton />
                 ) : items.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-20">
                         <Compass className="w-16 h-16 text-muted-foreground/40 mb-4" />
