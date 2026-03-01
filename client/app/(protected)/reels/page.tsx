@@ -3,9 +3,10 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Plus, Clapperboard, Loader2, ChevronUp, ChevronDown } from "lucide-react";
+import { Plus, Clapperboard, Loader2, ChevronUp, ChevronDown, ArrowUp, ArrowDown } from "lucide-react";
 import { ReelViewer } from "@/components/reels/reel-viewer";
 import { getReelsFeed, FeedReel } from "@/features/feed/feed.api";
+import { cn } from "@/lib/utils";
 import { usePageTitle } from "@/hooks/usePageTitle";
 import { useKeyboardShortcut } from "@/hooks/useKeyboardShortcut";
 
@@ -197,8 +198,8 @@ export default function ReelsPage() {
                 </Link>
             </div>
 
-            {/* Navigation hints */}
-            <div className="absolute left-1/2 -translate-x-1/2 top-16 z-20 flex flex-col items-center gap-1 opacity-60">
+            {/* Mobile navigation hints (center, small) */}
+            <div className="lg:hidden absolute left-1/2 -translate-x-1/2 top-16 z-20 flex flex-col items-center gap-1 opacity-60">
                 {activeIndex > 0 && (
                     <button
                         onClick={() => scrollToReel(activeIndex - 1)}
@@ -208,7 +209,7 @@ export default function ReelsPage() {
                     </button>
                 )}
             </div>
-            <div className="absolute left-1/2 -translate-x-1/2 bottom-4 z-20 flex flex-col items-center gap-1 opacity-60">
+            <div className="lg:hidden absolute left-1/2 -translate-x-1/2 bottom-4 z-20 flex flex-col items-center gap-1 opacity-60">
                 {activeIndex < reels.length - 1 && (
                     <button
                         onClick={() => scrollToReel(activeIndex + 1)}
@@ -217,6 +218,36 @@ export default function ReelsPage() {
                         <ChevronDown className="w-6 h-6" />
                     </button>
                 )}
+            </div>
+
+            {/* Desktop navigation arrows (right side, Instagram-style) */}
+            <div className="hidden lg:flex absolute right-6 top-1/2 -translate-y-1/2 z-30 flex-col items-center gap-3">
+                <button
+                    onClick={() => scrollToReel(activeIndex - 1)}
+                    disabled={activeIndex === 0}
+                    className={cn(
+                        "w-12 h-12 rounded-full flex items-center justify-center transition-all",
+                        "bg-white/10 backdrop-blur-md border border-white/20",
+                        "hover:bg-white/25 hover:scale-105 active:scale-95",
+                        activeIndex === 0 && "opacity-0 pointer-events-none"
+                    )}
+                    aria-label="Previous reel"
+                >
+                    <ArrowUp className="w-5 h-5 text-white" />
+                </button>
+                <button
+                    onClick={() => scrollToReel(activeIndex + 1)}
+                    disabled={activeIndex >= reels.length - 1}
+                    className={cn(
+                        "w-12 h-12 rounded-full flex items-center justify-center transition-all",
+                        "bg-white/10 backdrop-blur-md border border-white/20",
+                        "hover:bg-white/25 hover:scale-105 active:scale-95",
+                        activeIndex >= reels.length - 1 && "opacity-0 pointer-events-none"
+                    )}
+                    aria-label="Next reel"
+                >
+                    <ArrowDown className="w-5 h-5 text-white" />
+                </button>
             </div>
 
             {/* Reels container — vertical snap scroll */}
