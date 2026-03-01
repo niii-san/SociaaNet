@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { Post, PostDocument } from "../models/post.model";
 import { Reel, ReelDocument } from "../models/reel.model";
 import { Follow } from "../models";
+import { User } from "../models/user.model";
 import { WatchHistory } from "../models/watch-history.model";
 
 class FeedRepository {
@@ -610,7 +611,6 @@ class FeedRepository {
         allFollowTargetIds: string[],
         limit: number = 5
     ) {
-        const { User } = await import("../models");
         const excludeIds = [
             new mongoose.Types.ObjectId(userId),
             ...allFollowTargetIds.map((id) => new mongoose.Types.ObjectId(id))
@@ -618,7 +618,7 @@ class FeedRepository {
 
         const users = await User.find({
             _id: { $nin: excludeIds },
-            is_disabled: false
+            is_disabled: { $ne: true }
         })
             .sort({ followers_count: -1, created_at: -1 })
             .limit(limit)

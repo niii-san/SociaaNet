@@ -13,7 +13,7 @@ export function SuggestedUsersSidebar() {
     useEffect(() => {
         getSuggestedUsers(5)
             .then(setUsers)
-            .catch(() => {})
+            .catch((err) => console.error("Failed to fetch suggested users:", err))
             .finally(() => setLoading(false));
     }, []);
 
