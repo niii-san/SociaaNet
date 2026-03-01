@@ -6,6 +6,7 @@ import { getHomeFeed, FeedItem } from "@/features/feed/feed.api";
 import { PostCard } from "@/components/feed/post-card";
 import { FeedReelCard } from "@/components/feed/feed-reel-card";
 import { CaughtUpDivider } from "@/components/feed/caught-up-divider";
+import { SuggestedUsersBar } from "@/components/feed/suggested-users-bar";
 import { usePageTitle } from "@/hooks/usePageTitle";
 
 export function AuthHome() {
@@ -106,6 +107,9 @@ export function AuthHome() {
             <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border px-4 py-3">
                 <h1 className="text-xl font-bold">Home</h1>
             </header>
+
+            {/* Suggested Users */}
+            <SuggestedUsersBar />
 
             {/* Feed */}
             <div className="min-h-screen">
