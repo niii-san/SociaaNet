@@ -26,7 +26,9 @@ import {
     viewReel
 } from "@/features/posts/posts.api";
 import { ShareToChatDialog } from "@/components/chat/share-to-chat-dialog";
+import { CommentsBottomSheet } from "@/components/comments/comments-bottom-sheet";
 import { TimeAgo } from "@/components/ui/time-ago";
+import { useAuth } from "@/contexts";
 
 function formatCount(count: number): string {
     if (count >= 1_000_000) return `${(count / 1_000_000).toFixed(1)}M`;
@@ -39,16 +41,19 @@ interface FeedReelCardProps {
 }
 
 export function FeedReelCard({ reel }: FeedReelCardProps) {
+    const { data: currentUser } = useAuth();
     const [liked, setLiked] = useState(reel.is_liked);
     const [likesCount, setLikesCount] = useState(reel.likes_count);
     const [reposted, setReposted] = useState(reel.is_reposted);
     const [repostsCount, setRepostsCount] = useState(reel.reposts_count);
     const [saved, setSaved] = useState(reel.is_saved);
+    const [commentsCount, setCommentsCount] = useState(reel.comments_count);
     const [isPlaying, setIsPlaying] = useState(false);
     const [isMuted, setIsMuted] = useState(true);
     const [showHeart, setShowHeart] = useState(false);
     const [viewed, setViewed] = useState(false);
     const [showShareDialog, setShowShareDialog] = useState(false);
+    const [showComments, setShowComments] = useState(false);
     const [showFullCaption, setShowFullCaption] = useState(false);
     const videoRef = useRef<HTMLVideoElement>(null);
     const cardRef = useRef<HTMLDivElement>(null);
@@ -318,17 +323,17 @@ export function FeedReelCard({ reel }: FeedReelCardProps) {
                         {/* Actions */}
                         <div className="flex items-center justify-between mt-3 max-w-md">
                             {/* Comment */}
-                            <Link
-                                href={`/reels/${reel.reel_id}`}
+                            <button
+                                onClick={() => setShowComments(true)}
                                 className="flex items-center gap-1.5 text-muted-foreground hover:text-primary transition-colors group"
                             >
                                 <div className="p-2 rounded-full group-hover:bg-primary/10 transition-colors">
                                     <MessageSquare className="w-4 h-4" />
                                 </div>
                                 <span className="text-xs">
-                                    {reel.comments_count > 0 ? reel.comments_count : ""}
+                                    {commentsCount > 0 ? commentsCount : ""}
                                 </span>
-                            </Link>
+                            </button>
 
                             {/* Repost */}
                             <button
@@ -409,6 +414,18 @@ export function FeedReelCard({ reel }: FeedReelCardProps) {
                 open={showShareDialog}
                 onOpenChange={setShowShareDialog}
                 reelId={reel.reel_id}
+            />
+
+            <CommentsBottomSheet
+                open={showComments}
+                onClose={() => setShowComments(false)}
+                reelId={reel.reel_id}
+                commentsCount={commentsCount}
+                currentUser={currentUser ? {
+                    avatar_url: currentUser.avatar_url,
+                    full_name: currentUser.full_name,
+                } : null}
+                onCommentsCountChange={setCommentsCount}
             />
         </article>
     );

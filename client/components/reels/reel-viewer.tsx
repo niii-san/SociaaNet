@@ -27,6 +27,8 @@ import {
 } from "@/features/posts/posts.api";
 
 import { ShareToChatDialog } from "@/components/chat/share-to-chat-dialog";
+import { CommentsBottomSheet } from "@/components/comments/comments-bottom-sheet";
+import { useAuth } from "@/contexts";
 
 interface ReelViewerProps {
     reel: FeedReel;
@@ -41,16 +43,19 @@ export function ReelViewer({
     isMuted,
     onToggleMute
 }: ReelViewerProps) {
+    const { data: currentUser } = useAuth();
     const [liked, setLiked] = useState(reel.is_liked);
     const [likesCount, setLikesCount] = useState(reel.likes_count);
     const [reposted, setReposted] = useState(reel.is_reposted);
     const [repostsCount, setRepostsCount] = useState(reel.reposts_count);
     const [saved, setSaved] = useState(reel.is_saved);
+    const [commentsCount, setCommentsCount] = useState(reel.comments_count);
     const [paused, setPaused] = useState(false);
     const [showHeart, setShowHeart] = useState(false);
     const [progress, setProgress] = useState(0);
     const [viewed, setViewed] = useState(false);
     const [showShareDialog, setShowShareDialog] = useState(false);
+    const [showComments, setShowComments] = useState(false);
     const videoRef = useRef<HTMLVideoElement>(null);
     const heartTimeout = useRef<NodeJS.Timeout | null>(null);
     const progressInterval = useRef<NodeJS.Timeout | null>(null);
@@ -248,17 +253,17 @@ export function ReelViewer({
                 </button>
 
                 {/* Comment */}
-                <Link
-                    href={`/reels?id=${reel.reel_id}`}
-                    className="flex flex-col items-center gap-1"
+                <button
+                    onClick={() => setShowComments(true)}
+                    className="flex flex-col items-center gap-1 active:scale-90 transition-transform"
                 >
                     <div className="w-11 h-11 rounded-full bg-black/30 backdrop-blur-sm flex items-center justify-center">
                         <MessageSquare className="w-6 h-6 text-white" />
                     </div>
                     <span className="text-white text-xs font-medium">
-                        {formatCount(reel.comments_count)}
+                        {formatCount(commentsCount)}
                     </span>
-                </Link>
+                </button>
 
                 {/* Repost */}
                 <button
@@ -380,6 +385,18 @@ export function ReelViewer({
                 open={showShareDialog}
                 onOpenChange={setShowShareDialog}
                 reelId={reel.reel_id}
+            />
+
+            <CommentsBottomSheet
+                open={showComments}
+                onClose={() => setShowComments(false)}
+                reelId={reel.reel_id}
+                commentsCount={commentsCount}
+                currentUser={currentUser ? {
+                    avatar_url: currentUser.avatar_url,
+                    full_name: currentUser.full_name,
+                } : null}
+                onCommentsCountChange={setCommentsCount}
             />
         </div>
     );

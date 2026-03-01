@@ -24,6 +24,7 @@ import {
     VolumeX,
     Eye,
     Repeat2,
+    ArrowLeft,
 } from "lucide-react";
 import {
     DropdownMenu,
@@ -277,7 +278,21 @@ export default function ReelDetailPage() {
         : ["public", "private"];
 
     return (
-        <div className="min-h-screen bg-background pb-12">
+        <div className="min-h-screen bg-background pb-16 lg:pb-12">
+            {/* Back button header */}
+            <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-md border-b border-border px-4 py-3">
+                <div className="flex items-center gap-3">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="shrink-0"
+                        onClick={() => router.back()}
+                    >
+                        <ArrowLeft className="w-5 h-5" />
+                    </Button>
+                    <h1 className="text-lg font-semibold">Reel</h1>
+                </div>
+            </header>
             <div className="container max-w-4xl mx-auto px-4 py-8">
                 {/* Reel Card */}
                 <Card className="overflow-hidden">
