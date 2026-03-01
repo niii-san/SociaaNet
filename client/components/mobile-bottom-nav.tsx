@@ -15,7 +15,8 @@ export function MobileBottomNav() {
     // /inbox/ (conversation detail pages have their own UI)
     const shouldHide =
         pathname === "/reels" ||
-        pathname.startsWith("/inbox/");
+        pathname.startsWith("/inbox/") ||
+        pathname.startsWith("/moderator");
     if (shouldHide) return null;
 
     const navItems = [

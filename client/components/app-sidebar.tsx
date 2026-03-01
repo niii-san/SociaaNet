@@ -15,7 +15,8 @@ import {
     MoreHorizontal,
     Clapperboard,
     PlusSquare,
-    Film
+    Film,
+    Shield
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -81,7 +82,17 @@ export function AppSidebar() {
             label: "Settings",
             href: "/settings",
             active: pathname === "/settings"
-        }
+        },
+        ...(user?.role === "moderator" || user?.role === "system_admin"
+            ? [
+                  {
+                      icon: Shield,
+                      label: "Mod Panel",
+                      href: "/moderator",
+                      active: pathname.startsWith("/moderator")
+                  }
+              ]
+            : [])
     ];
 
     return (
