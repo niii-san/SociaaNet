@@ -176,7 +176,7 @@ export function FeedReelCard({ reel }: FeedReelCardProps) {
             <div className="p-4">
                 <div className="flex gap-3">
                     {/* Avatar */}
-                    <Link href={`/u/${reel.author.username}`} className="shrink-0">
+                    <Link href={`/u/${reel.author.username}`} className="shrink-0 relative">
                         <Avatar className="w-10 h-10">
                             <AvatarImage
                                 src={reel.author.avatar_url || undefined}
@@ -186,6 +186,9 @@ export function FeedReelCard({ reel }: FeedReelCardProps) {
                                 {reel.author.username[0]?.toUpperCase()}
                             </AvatarFallback>
                         </Avatar>
+                        {reel.author.is_online && (
+                            <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-background rounded-full" />
+                        )}
                     </Link>
 
                     <div className="flex-1 min-w-0">

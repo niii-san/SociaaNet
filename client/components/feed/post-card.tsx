@@ -176,7 +176,7 @@ export function PostCard({ post, isActive = false }: PostCardProps) {
         >
             <div className="flex gap-3">
                 {/* Avatar */}
-                <Link href={`/u/${post.author.username}`} className="shrink-0">
+                <Link href={`/u/${post.author.username}`} className="shrink-0 relative">
                     <Avatar size="default" className="w-10 h-10">
                         <AvatarImage
                             src={post.author.avatar_url || undefined}
@@ -186,6 +186,9 @@ export function PostCard({ post, isActive = false }: PostCardProps) {
                             {post.author.username[0]?.toUpperCase()}
                         </AvatarFallback>
                     </Avatar>
+                    {post.author.is_online && (
+                        <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-background rounded-full" />
+                    )}
                 </Link>
 
                 <div className="flex-1 min-w-0">
