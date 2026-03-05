@@ -148,8 +148,6 @@ GMAIL_APP_PASSWORD=your-gmail-app-password
 
 > ⚠️ **Important:** The `FILE_SERVICE_INTERNAL_API_KEY` value must match the `INTERNAL_API_KEY` in the file-service `.env`. This shared secret is used to authenticate internal API calls between the server and file-service.
 
-> ⚠️ **Important:** The `.env.sample` uses `SESSION_EXPIRY_MINUTES` but the code expects `SESSION_EXPIRY_IN_MINUTES`. Make sure to use `SESSION_EXPIRY_IN_MINUTES` in your `.env` file.
-
 ### Server Install Dependencies
 
 ```bash
